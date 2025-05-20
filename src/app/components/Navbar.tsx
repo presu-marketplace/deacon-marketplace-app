@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 
 // Props for Navbar component, including i18n strings and language toggling logic
 type NavbarProps = {
@@ -54,11 +55,13 @@ export default function Navbar({ locale, toggleLocale, t }: NavbarProps) {
           className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
           aria-label="Toggle Language"
         >
-          <img
-            src={locale === 'es' ? '/icons/argentina-flag.svg' : '/icons/us-flag.svg'}
-            alt={locale === 'es' ? 'Español - Argentina' : 'English - United States'}
-            className="w-5 h-5 rounded-sm shrink-0"
-          />
+        <Image
+          src={locale === 'es' ? '/icons/argentina-flag.svg' : '/icons/us-flag.svg'}
+          alt={locale === 'es' ? 'Español - Argentina' : 'English - United States'}
+          width={20}
+          height={20}
+          className="w-5 h-5 rounded-sm shrink-0"
+        />
           <span className="hidden sm:inline">{t.language}</span>
         </button>
 

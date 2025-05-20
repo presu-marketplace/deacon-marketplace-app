@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 
 // Array of hero background images that will rotate
 const heroImages = [
@@ -30,11 +31,12 @@ export default function HeroSection({ t }: HeroProps) {
       
       {/* Rotating background images */}
       {heroImages.map((src, index) => (
-        <img
+        <Image
           key={index}
           src={src}
           alt={`Hero ${index + 1}`}
-          className={`absolute inset-0 w-full h-full object-cover object-[center_20%] transition-opacity duration-1000 ease-in-out ${
+          fill
+          className={`absolute inset-0 object-cover object-[center_20%] transition-opacity duration-1000 ease-in-out ${
             index === currentImage ? 'opacity-100 z-10' : 'opacity-0 z-0'
           }`}
         />

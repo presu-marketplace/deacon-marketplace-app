@@ -3,9 +3,16 @@
 import { supabase } from '@/lib/supabaseClient'
 import { useEffect, useState } from 'react'
 
+type Profile = {
+  id: string
+  email: string
+  full_name?: string
+  updated_at?: string
+}
+
 export default function TestPage() {
-  const [data, setData] = useState<any>(null)
-  const [error, setError] = useState<any>(null)
+  const [data, setData] = useState<Profile[] | null>(null)
+  const [error, setError] = useState<{ message: string } | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {

@@ -1,11 +1,13 @@
 'use client'
+
+import type { User } from '@supabase/supabase-js'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<{ full_name: string } | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
 

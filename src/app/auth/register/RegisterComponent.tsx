@@ -35,7 +35,7 @@ const defaultT: RegisterProps['t'] = {
   login: 'Log in'
 }
 
-export default function RegisterComponent({ locale = 'en', t = defaultT }: RegisterProps) {
+export default function RegisterComponent({ t = defaultT }: RegisterProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
