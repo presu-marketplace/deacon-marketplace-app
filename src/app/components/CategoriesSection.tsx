@@ -1,17 +1,6 @@
 'use client'
 
-import { Wrench } from '@phosphor-icons/react/dist/icons/wrench'
-import { Tree } from '@phosphor-icons/react/dist/icons/tree'
-import { Toilet } from '@phosphor-icons/react/dist/icons/toilet'
-import { Lightning } from '@phosphor-icons/react/dist/icons/lightning'
-import { PaintBrush } from '@phosphor-icons/react/dist/icons/paintbrush'
-import { House } from '@phosphor-icons/react/dist/icons/house'
-import { Hammer } from '@phosphor-icons/react/dist/icons/hammer'
-import { Broom } from '@phosphor-icons/react/dist/icons/broom'
-import { Fan } from '@phosphor-icons/react/dist/icons/fan'
-import { WindowsLogo } from '@phosphor-icons/react/dist/icons/windowslogo'
-import { Wall } from '@phosphor-icons/react/dist/icons/wall'
-import { Devices } from '@phosphor-icons/react/dist/icons/devices'
+import { Wrench, Tree, Toilet, Lightning, PaintBrush, House, Hammer, Broom, Fan, WindowsLogo, Wall, Devices } from '@phosphor-icons/react'
 
 type CategoriesSectionProps = {
   t: Record<string, string>
