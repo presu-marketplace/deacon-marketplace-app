@@ -41,7 +41,8 @@ export default function HomePage() {
       hvac: 'HVAC',
       windows: 'Windows',
       concrete: 'Concrete',
-      applianceRepair: 'Appliance Repair'
+      applianceRepair: 'Appliance Repair',
+      joinAsPro: 'Join as a Pro'
     },
     es: {
       howItWorks: 'Cómo funciona',
@@ -67,7 +68,8 @@ export default function HomePage() {
       hvac: 'Climatización',
       windows: 'Ventanas',
       concrete: 'Hormigón',
-      applianceRepair: 'Reparación de electrodomésticos'
+      applianceRepair: 'Reparación de electrodomésticos',
+      joinAsPro: 'Unirse como profesional'
     }
   }[locale]
 

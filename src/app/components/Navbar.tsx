@@ -13,6 +13,7 @@ type NavbarProps = {
     signup: string
     searchPlaceholder: string
     language: string
+    joinAsPro: string
   }
 }
 
@@ -63,16 +64,16 @@ export default function Navbar({ locale, toggleLocale, t }: NavbarProps) {
 
         {/* Join as a Pro button */}
         <button
-          onClick={() => router.push('/auth/register?role=pro')}
+          onClick={() => router.push(`/auth/register?role=pro&lang=${locale}`)}
           className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-red-600"
-          aria-label="Join as a Pro"
+          aria-label={t.joinAsPro}
         >
-          Join as a Pro
+          {t.joinAsPro}
         </button>
 
         {/* Login button */}
         <button
-          onClick={() => router.push('/auth/login')}
+          onClick={() => router.push(`/auth/login?lang=${locale}`)}
           className="border border-gray-300 dark:border-gray-600 px-4 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium"
           aria-label={t.login}
         >
@@ -81,7 +82,7 @@ export default function Navbar({ locale, toggleLocale, t }: NavbarProps) {
 
         {/* Signup button */}
         <button
-          onClick={() => router.push('/auth/register')}
+          onClick={() => router.push(`/auth/register?lang=${locale}`)}
           className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded text-sm font-medium"
           aria-label={t.signup}
         >
