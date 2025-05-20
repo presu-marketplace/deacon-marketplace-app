@@ -21,7 +21,7 @@ export default function Page() {
 
   const t = {
     en: {
-      createAccount: 'Create your PRESU account',
+      createAccount: 'Create your account',
       continueWithGoogle: 'Sign up with Google',
       redirecting: 'Redirecting...',
       orSignupWithEmail: 'sign up with email',
@@ -33,7 +33,7 @@ export default function Page() {
       login: 'Log in'
     },
     es: {
-      createAccount: 'Crea tu cuenta en PRESU',
+      createAccount: 'Crea tu cuenta',
       continueWithGoogle: 'Registrarse con Google',
       redirecting: 'Redireccionando...',
       orSignupWithEmail: 'registrarte con tu correo',

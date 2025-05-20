@@ -21,7 +21,7 @@ export default function Page() {
 
   const t = {
     en: {
-      loginTo: 'Login to',
+      loginTo: 'Login',
       continueWithGoogle: 'Continue with Google',
       redirecting: 'Redirecting...',
       orLoginWithEmail: 'or login with email',
@@ -32,7 +32,7 @@ export default function Page() {
       login: 'Login'
     },
     es: {
-      loginTo: 'Iniciar sesión en',
+      loginTo: 'Iniciar sesión',
       continueWithGoogle: 'Continuar con Google',
       redirecting: 'Redireccionando...',
       orLoginWithEmail: 'o iniciar sesión con correo',
