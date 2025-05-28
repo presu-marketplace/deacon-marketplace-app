@@ -9,7 +9,7 @@ import { redirect } from 'next/navigation'
 
 export default function HomePage() {
   // Temporarily redirect homepage to under construction
-  // redirect('/under-construction') 
+  redirect('/under-construction') 
   
   const [locale, setLocale] = useState<'es' | 'en'>('en')
 
