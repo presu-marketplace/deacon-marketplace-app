@@ -21,7 +21,7 @@ export default function LoginPageClient() {
 
   const t = {
     en: {
-      loginTo: 'Log in to your PRESU account',
+      loginTo: 'Welcome back',
       continueWithGoogle: 'Log in with Google',
       redirecting: 'Redirecting...',
       orLoginWithEmail: 'or log in with email',
@@ -32,7 +32,7 @@ export default function LoginPageClient() {
       login: 'Log in'
     },
     es: {
-      loginTo: 'Inicia sesión en tu cuenta de PRESU',
+      loginTo: 'Bienvenido nuevamente',
       continueWithGoogle: 'Iniciar sesión con Google',
       redirecting: 'Redireccionando...',
       orLoginWithEmail: 'o inicia sesión con correo electrónico',

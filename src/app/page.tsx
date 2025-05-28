@@ -78,7 +78,7 @@ export default function HomePage() {
   }[locale]
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
+    <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white px-4 sm:px-6">
       <Navbar locale={locale} toggleLocale={toggleLocale} t={t} />
       <HeroSection t={t} />
       <CategoriesSection t={t} />

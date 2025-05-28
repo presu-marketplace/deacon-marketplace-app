@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
+import MobileMenu from './MobileMenu'
 
 // Props for Navbar component, including i18n strings and language toggling logic
 type NavbarProps = {
@@ -32,67 +33,47 @@ export default function Navbar({ locale, toggleLocale, t }: NavbarProps) {
 
   return (
     // Fixed/sticky navbar at the top with blur and shadow
-    <header className="sticky top-0 z-50 bg-white dark:bg-gray-950 backdrop-blur-sm shadow-sm border-b px-6 py-3 flex justify-between items-center">
-      
-      {/* Left side: Brand and navigation */}
-      <div className="flex items-center gap-8">
-        {/* Brand Logo */}
+    <header className="sticky top-0 z-50 bg-white dark:bg-gray-950 backdrop-blur-sm shadow-sm border-b px-4 sm:px-6 py-3 flex justify-between items-center">
+      {/* Left: Brand */}
+      <div className="flex items-center gap-3">
         <div className="text-2xl font-bold text-red-600">Presu</div>
-
-        {/* Navigation links (visible only on md+ screens) */}
-        <nav className="hidden md:flex gap-6 text-sm font-medium text-gray-800 dark:text-gray-200" role="navigation">
-          <a href="#how-it-works" className="hover:text-red-600 transition">
-            {t.howItWorks}
-          </a>
+        <nav className="hidden md:flex gap-6 text-sm font-medium text-gray-800 dark:text-gray-200">
+          <a href="#how-it-works" className="hover:text-red-600 transition">{t.howItWorks}</a>
         </nav>
       </div>
 
-      {/* Right side: auth buttons, language toggle, and Join as a Pro */}
-      <div className="flex items-center gap-4">
-        {/* Language toggle button */}
+      {/* Right: Desktop menu */}
+      <div className="hidden md:flex items-center gap-4">
+        {/* Language toggle */}
         <button
           onClick={toggleLocale}
           className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
           aria-label="Toggle Language"
         >
-        <Image
-          src={locale === 'es' ? '/icons/argentina-flag.svg' : '/icons/us-flag.svg'}
-          alt={locale === 'es' ? 'Español - Argentina' : 'English - United States'}
-          width={20}
-          height={20}
-          className="w-5 h-5 rounded-sm shrink-0"
-        />
+          <Image
+            src={locale === 'es' ? '/icons/argentina-flag.svg' : '/icons/us-flag.svg'}
+            alt={locale === 'es' ? 'Español - Argentina' : 'English - United States'}
+            width={20}
+            height={20}
+            className="w-5 h-5 rounded-sm"
+          />
           <span className="hidden sm:inline">{t.language}</span>
         </button>
 
-        {/* Join as a Pro button */}
-        <button
-          onClick={() => router.push(`/auth/register?role=pro&lang=${locale}`)}
-          className="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-red-600"
-          aria-label={t.joinAsPro}
-        >
+        <button onClick={() => router.push(`/auth/register?role=pro&lang=${locale}`)} className="text-sm font-medium hover:text-red-600">
           {t.joinAsPro}
         </button>
-
-        {/* Login button */}
-        <button
-          onClick={() => router.push(`/auth/login?lang=${locale}`)}
-          className="border border-gray-300 dark:border-gray-600 px-4 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium"
-          aria-label={t.login}
-        >
+        <button onClick={() => router.push(`/auth/login?lang=${locale}`)} className="border px-4 py-1 rounded text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800">
           {t.login}
         </button>
-
-        {/* Signup button */}
-        <button
-          onClick={() => router.push(`/auth/register?lang=${locale}`)}
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded text-sm font-medium"
-          aria-label={t.signup}
-        >
+        <button onClick={() => router.push(`/auth/register?lang=${locale}`)} className="bg-red-500 hover:bg-red-600 text-white px-4 py-1 rounded text-sm font-medium">
           {t.signup}
         </button>
       </div>
 
+      {/* Right: Mobile menu toggle */}
+      <MobileMenu t={t} locale={locale} toggleLocale={toggleLocale} router={router} />
     </header>
+
   )
 }
