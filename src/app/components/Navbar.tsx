@@ -72,7 +72,7 @@ export default function Navbar({ locale, toggleLocale, t }: NavbarProps) {
       </div>
 
       {/* Right: Mobile menu toggle */}
-      <MobileMenu t={t} locale={locale} toggleLocale={toggleLocale} router={router} />
+      <MobileMenu t={t} locale={locale} toggleLocale={toggleLocale} />
     </header>
 
   )
