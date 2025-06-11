@@ -5,11 +5,11 @@ import Navbar from './components/Navbar'
 import HeroSection from './components/HeroSection'
 import CategoriesSection from './components/CategoriesSection'
 import Footer from './components/Footer'
-import { redirect } from 'next/navigation'
+// import { redirect } from 'next/navigation'
 
 export default function HomePage() {
   // Temporarily redirect homepage to under construction
-  redirect('/under-construction') 
+  // redirect('/under-construction') 
   
   const [locale, setLocale] = useState<'es' | 'en'>('en')
 
