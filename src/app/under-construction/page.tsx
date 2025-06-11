@@ -26,16 +26,15 @@ export default function UnderConstructionPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-white text-center px-6 bg-gradient-to-br from-gray-900 via-[#1a1a2e] to-[#16213e] animate-fadeIn relative">
-      {/* Logo with subtle glow and shine on hover */}
-      <div className="mb-8 relative group">
+      {/* Logo with hover scale-up */}
+      <div className="mb-10 transition-transform duration-500 hover:scale-105">
         <Image
           src="/logo/presu-02.png"
           alt="Presu Logo"
-          width={240}
-          height={80}
-          className="opacity-100 drop-shadow-[0_0_10px_rgba(99,102,241,0.6)] transition-transform duration-500 group-hover:scale-105"
+          width={320}
+          height={100}
+          className="opacity-100"
         />
-        <div className="absolute inset-0 rounded animate-shimmer pointer-events-none opacity-0 group-hover:opacity-100" />
       </div>
 
       {/* Title & Subtitle */}
