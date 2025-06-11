@@ -48,7 +48,7 @@ export default function UnderConstructionPage() {
       {/* Footer */}
       <footer className="absolute bottom-4 text-sm text-gray-400">
         {t.contact}{" "}
-        <a href="mailto:hello@presu.com" className="underline hover:text-white">
+        <a href="mailto:info@presu.com.ar" className="underline hover:text-white">
           info@presu.com
         </a>
       </footer>
