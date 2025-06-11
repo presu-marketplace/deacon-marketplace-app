@@ -49,7 +49,7 @@ export default function UnderConstructionPage() {
       <footer className="absolute bottom-4 text-sm text-gray-400">
         {t.contact}{" "}
         <a href="mailto:info@presu.com.ar" className="underline hover:text-white">
-          info@presu.com
+          info@presu.com.ar
         </a>
       </footer>
     </div>
