@@ -22,6 +22,9 @@ type MobileMenuProps = {
 export default function MobileMenu({ isOpen, onClose, locale, toggleLocale, t }: MobileMenuProps) {
   const router = useRouter()
 
+  const providerLabel =
+    locale === 'es' ? 'Crear una cuenta de proveedor' : 'Create a provider account'
+
   return (
     <>
       {/* Overlay */}
@@ -49,7 +52,7 @@ export default function MobileMenu({ isOpen, onClose, locale, toggleLocale, t }:
             ✕
           </button>
 
-          {/* Buttons */}
+          {/* Main Actions: Sign Up / Log In */}
           <button
             onClick={() => {
               router.push(`/auth/register?lang=${locale}`)
@@ -69,7 +72,7 @@ export default function MobileMenu({ isOpen, onClose, locale, toggleLocale, t }:
             {t.login}
           </button>
 
-          {/* Links */}
+          {/* Additional Links */}
           <ul className="text-sm space-y-4 mt-2">
             <li>
               <button
@@ -79,22 +82,18 @@ export default function MobileMenu({ isOpen, onClose, locale, toggleLocale, t }:
                 }}
                 className="w-full text-left"
               >
-                Create a business account
+                {providerLabel}
               </button>
-            </li>
-            <li>
-              <button onClick={onClose} className="w-full text-left">Add your restaurant</button>
-            </li>
-            <li>
-              <button onClick={onClose} className="w-full text-left">Sign up to deliver</button>
             </li>
           </ul>
 
-          {/* App download area */}
+          {/* App download area
           <div className="mt-auto pt-12">
             <div className="flex items-center gap-4">
-              <Image src="/logo/presu-02.png" alt="Presu Logo" width={40} height={40} />
-              <p className="text-sm text-gray-700 dark:text-gray-300">There’s more to love in the app.</p>
+              <Image src="/logo/presu-logo.png" alt="Presu Logo" width={40} height={40} />
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                There’s more to love in the app.
+              </p>
             </div>
             <div className="flex gap-2 mt-4">
               <button className="bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2 text-sm">
@@ -104,7 +103,8 @@ export default function MobileMenu({ isOpen, onClose, locale, toggleLocale, t }:
                 <i className="fab fa-android" /> Android
               </button>
             </div>
-          </div>
+          </div> */}
+          
         </div>
       </div>
     </>

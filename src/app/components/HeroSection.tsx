@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 
 const heroImages = [
-  '/images/confident-young-brunette-caucasian-girl-holds-paint-brush-hammer-isolated-olive-green-background-with-copy-space.jpg',
-  '/images/professional-male-technician-wearing-goggles-head-protective-mask-gloves-tool-belt-holding-drilling-machine.jpg',
-  '/images/young-man-orange-t-shirt-wearing-rubber-gloves-holding-cleaning-spray-rug-looking-camera-with-smile-face-ready-clean-standing-purple-background.jpg'
+  '/images/hero-section/man-with-laptop-making-ok-sign.jpg',
+  // '/images/professional-male-technician-wearing-goggles-head-protective-mask-gloves-tool-belt-holding-drilling-machine.jpg',
+  // '/images/young-man-orange-t-shirt-wearing-rubber-gloves-holding-cleaning-spray-rug-looking-camera-with-smile-face-ready-clean-standing-purple-background.jpg'
 ]
 
 interface HeroProps {
