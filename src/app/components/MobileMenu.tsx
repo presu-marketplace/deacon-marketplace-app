@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 
 type MobileMenuProps = {
+  isOpen: boolean
+  onClose: () => void
   t: {
     howItWorks: string
     login: string
@@ -17,58 +19,93 @@ type MobileMenuProps = {
   toggleLocale: () => void
 }
 
-export default function MobileMenu({ t, locale, toggleLocale }: MobileMenuProps) {
-  const [isOpen, setIsOpen] = useState(false)
+export default function MobileMenu({ isOpen, onClose, locale, toggleLocale, t }: MobileMenuProps) {
   const router = useRouter()
 
   return (
     <>
-      <div className="md:hidden relative z-50">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="text-gray-600 dark:text-gray-300 text-2xl"
-          aria-label="Toggle Menu"
-        >
-          {isOpen ? '✖' : '☰'}
-        </button>
-      </div>
-
+      {/* Overlay */}
       {isOpen && (
         <div
-          onClick={() => setIsOpen(false)}
+          onClick={onClose}
           className="fixed inset-0 bg-black/50 z-40"
           aria-hidden="true"
         />
       )}
 
+      {/* Slide-out Drawer */}
       <div
-        className={`md:hidden fixed right-4 top-16 w-60 bg-white dark:bg-gray-900 shadow-lg rounded-md border dark:border-gray-700 p-4 z-50 space-y-3 text-sm transform transition-transform duration-300 ease-out ${
-          isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none'
+        className={`fixed inset-y-0 left-0 w-[85%] max-w-xs bg-white dark:bg-black z-50 transform transition-transform duration-300 ease-in-out ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <button
-          onClick={toggleLocale}
-          className="flex items-center gap-2 w-full text-left hover:text-red-500"
-        >
-          <Image
-            src={locale === 'es' ? '/icons/argentina-flag.svg' : '/icons/us-flag.svg'}
-            alt="Toggle Language"
-            width={20}
-            height={20}
-            className="w-5 h-5 rounded-sm"
-          />
-          {t.language}
-        </button>
+        <div className="flex flex-col h-full p-6 gap-6">
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="self-end text-2xl"
+            aria-label="Close Menu"
+          >
+            ✕
+          </button>
 
-        <button onClick={() => { router.push(`/auth/register?role=pro&lang=${locale}`); setIsOpen(false) }} className="w-full text-left hover:text-red-500">
-          {t.joinAsPro}
-        </button>
-        <button onClick={() => { router.push(`/auth/login?lang=${locale}`); setIsOpen(false) }} className="w-full text-left hover:text-red-500">
-          {t.login}
-        </button>
-        <button onClick={() => { router.push(`/auth/register?lang=${locale}`); setIsOpen(false) }} className="w-full text-left bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
-          {t.signup}
-        </button>
+          {/* Buttons */}
+          <button
+            onClick={() => {
+              router.push(`/auth/register?lang=${locale}`)
+              onClose()
+            }}
+            className="bg-black text-white font-semibold rounded-lg py-3"
+          >
+            {t.signup}
+          </button>
+          <button
+            onClick={() => {
+              router.push(`/auth/login?lang=${locale}`)
+              onClose()
+            }}
+            className="bg-gray-100 text-black font-semibold rounded-lg py-3"
+          >
+            {t.login}
+          </button>
+
+          {/* Links */}
+          <ul className="text-sm space-y-4 mt-2">
+            <li>
+              <button
+                onClick={() => {
+                  router.push(`/auth/register?role=pro&lang=${locale}`)
+                  onClose()
+                }}
+                className="w-full text-left"
+              >
+                Create a business account
+              </button>
+            </li>
+            <li>
+              <button onClick={onClose} className="w-full text-left">Add your restaurant</button>
+            </li>
+            <li>
+              <button onClick={onClose} className="w-full text-left">Sign up to deliver</button>
+            </li>
+          </ul>
+
+          {/* App download area */}
+          <div className="mt-auto pt-12">
+            <div className="flex items-center gap-4">
+              <Image src="/logo/presu-02.png" alt="Presu Logo" width={40} height={40} />
+              <p className="text-sm text-gray-700 dark:text-gray-300">There’s more to love in the app.</p>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button className="bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2 text-sm">
+                <i className="fab fa-apple" /> iPhone
+              </button>
+              <button className="bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full flex items-center gap-2 text-sm">
+                <i className="fab fa-android" /> Android
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   )
