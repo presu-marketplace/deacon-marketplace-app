@@ -1,8 +1,6 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 
 type MobileMenuProps = {
   isOpen: boolean
@@ -19,7 +17,7 @@ type MobileMenuProps = {
   toggleLocale: () => void
 }
 
-export default function MobileMenu({ isOpen, onClose, locale, toggleLocale, t }: MobileMenuProps) {
+export default function MobileMenu({ isOpen, onClose, locale, t }: MobileMenuProps) {
   const router = useRouter()
 
   const providerLabel =

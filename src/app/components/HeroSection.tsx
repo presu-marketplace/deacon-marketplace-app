@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 
 const heroImages = [
-  '/images/hero-section/man-with-laptop-making-ok-sign.jpg',
-  // '/images/professional-male-technician-wearing-goggles-head-protective-mask-gloves-tool-belt-holding-drilling-machine.jpg',
-  // '/images/young-man-orange-t-shirt-wearing-rubber-gloves-holding-cleaning-spray-rug-looking-camera-with-smile-face-ready-clean-standing-purple-background.jpg'
+  '/images/hero-section/card-01.jpg',
+  '/images/hero-section/card-02.jpg',
+  '/images/hero-section/card-03.jpg',
 ]
 
 interface HeroProps {
@@ -40,50 +40,52 @@ export default function HeroSection({ t }: HeroProps) {
 
       {/* Overlay content */}
       <div className="absolute bottom-[10%] sm:bottom-[15%] left-0 right-0 px-4 sm:px-6 flex justify-center text-white text-center z-20">
-        <div className="bg-black/40 rounded-xl px-6 py-8 max-w-2xl w-full shadow-lg">
+        <div className="bg-black/20 rounded-2xl px-8 py-10 w-full max-w-4xl shadow-lg">
           {/* Headline */}
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold leading-snug whitespace-pre-line drop-shadow-md">
+          <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-extrabold leading-snug drop-shadow-md select-none">
             {t.heroHeadline}
           </h1>
 
-      {/* Search box */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl w-full mt-6 shadow-md px-4 py-3 space-y-3 sm:space-y-0 sm:space-x-3 sm:flex sm:items-center">
-        {/* Main search input */}
-        <input
-          type="text"
-          placeholder={t.searchPlaceholder}
-          aria-label={t.searchPlaceholder}
-          className="flex-1 w-full px-4 py-2 text-gray-700 dark:text-white dark:bg-gray-800 placeholder-gray-500 focus:outline-none rounded-md sm:rounded-full text-sm"
-        />
+          {/* Search box group */}
+          <div className="w-full mt-8 flex flex-col sm:flex-row sm:justify-center items-center gap-3">
+            
+            {/* Service input */}
+            <div className="flex items-center bg-white rounded-full px-4 py-3 shadow w-full sm:max-w-md">
+              {/* Wrench icon (Phosphor-style) */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 text-gray-500 mr-3"
+                viewBox="0 0 256 256"
+                fill="currentColor"
+              >
+                <path d="M229.66 195.31l-59-59a64.07 64.07 0 0 0-83.83-83.83l34.06 34.07-27.71 27.7-34.07-34.06a64.07 64.07 0 0 0 83.83 83.83l59 59a8 8 0 0 0 11.32-11.32Z" />
+              </svg>
+              <input
+                type="text"
+                placeholder={t.searchPlaceholder}
+                aria-label={t.searchPlaceholder}
+                className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
+              />
+            </div>
 
-        {/* Postal code */}
-        <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 11.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM19.5 10.5C19.5 16 12 21 12 21S4.5 16 4.5 10.5a7.5 7.5 0 1115 0z" />
-          </svg>
-          <input
-            type="text"
-            defaultValue="1772"
-            aria-label="Postal Code"
-            className="bg-transparent w-16 text-sm focus:outline-none"
-          />
-        </div>
+            {/* Location button */}
+            <button className="bg-white rounded-full px-5 py-3 shadow text-sm flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4 text-gray-500"
+                viewBox="0 0 256 256"
+                fill="currentColor"
+              >
+                <path d="M128 16A88.1 88.1 0 0 0 40 104c0 66.14 80.18 131.39 83.6 134a8 8 0 0 0 8.8 0C135.82 235.39 216 170.14 216 104A88.1 88.1 0 0 0 128 16Zm0 112a24 24 0 1 1 24-24 24 24 0 0 1-24 24Z" />
+              </svg>
+              <span className="text-gray-700">{t.location}</span>
+            </button>
 
-        {/* Search button */}
-        <button
-          className="w-full sm:w-auto flex items-center justify-center bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md sm:rounded-full transition"
-          aria-label="Search"
-        >
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M12.9 14.32a8 8 0 111.414-1.414l4.387 4.387-1.414 1.414-4.387-4.387zM8 14a6 6 0 100-12 6 6 0 000 12z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-      </div>
-
+            {/* Search button */}
+            <button className="bg-black text-white rounded-full px-6 py-3 text-sm font-medium shadow hover:bg-gray-900 transition">
+              {t.searchHere}
+            </button>
+          </div>
         </div>
       </div>
     </section>

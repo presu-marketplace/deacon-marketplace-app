@@ -54,8 +54,8 @@ export default function Navbar({ locale, toggleLocale, t }: NavbarProps) {
                 strokeWidth={3}
                 stroke="currentColor"
                 className={`w-6 h-6 transition-colors duration-200 ${scrolled
-                    ? 'text-white group-hover:text-white'
-                    : 'text-black group-hover:text-white'
+                  ? 'text-white group-hover:text-white'
+                  : 'text-black group-hover:text-white'
                   }`}
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -76,7 +76,10 @@ export default function Navbar({ locale, toggleLocale, t }: NavbarProps) {
           <div className="hidden md:flex items-center text-sm pr-14 gap-5">
             <button
               onClick={toggleLocale}
-              className="flex items-center gap-1 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition"
+              className={`flex items-center gap-1 transition-colors ${scrolled
+                  ? 'text-white hover:text-gray-300'
+                  : 'text-black hover:text-gray-700'
+                }`}
               aria-label="Toggle Language"
             >
               <Image
