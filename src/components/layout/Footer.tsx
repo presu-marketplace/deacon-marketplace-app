@@ -19,7 +19,7 @@ export default function Footer({ t }: FooterProps) {
         {/* Brand */}
         <div className="w-32">
         <Image
-          src="/logo/presu-03.png"
+          src="/logo/presu-02.png"
           alt="Presu Logo"
           width={100}
           height={31}          
