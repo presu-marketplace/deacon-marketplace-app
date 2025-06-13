@@ -19,6 +19,7 @@ export default function MarketComparison() {
     searchPlaceholder: locale === 'es' ? 'Buscar servicio...' : 'Search service...',
     language: locale === 'es' ? 'Español' : 'English',
     joinAsPro: locale === 'es' ? 'Unirse como proveedor' : 'Join as provider',
+    howItWorks: locale === 'es' ? 'Cómo funciona Presu' : 'How Presu Works',
 
     // Hero
     heroTitle: locale === 'es' ? 'Potenciá tus compras' : 'Boost your purchasing',

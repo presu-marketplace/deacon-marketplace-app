@@ -23,7 +23,6 @@ export default function SideMenu({
   onClose,
   locale,
   t,
-  toggleLocale,
   forceWhite = false,
 }: SideMenuProps) {
   const router = useRouter()

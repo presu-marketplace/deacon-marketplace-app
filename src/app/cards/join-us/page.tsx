@@ -17,6 +17,7 @@ export default function JoinUsPage() {
     searchPlaceholder: locale === 'es' ? 'Buscar servicio...' : 'Search service...',
     language: locale === 'es' ? 'Español' : 'English',
     joinAsPro: locale === 'es' ? 'Unirse como proveedor' : 'Join as provider',
+    howItWorks: locale === 'es' ? 'Cómo funciona Presu' : 'How Presu Works',
     title: locale === 'es'
       ? 'Unite a Presu y conectá con nuevos clientes'
       : 'Join Presu and connect with new clients',

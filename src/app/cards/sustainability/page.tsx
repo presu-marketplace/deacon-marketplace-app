@@ -17,6 +17,7 @@ export default function SustainabilityPage() {
     searchPlaceholder: locale === 'es' ? 'Buscar servicio...' : 'Search service...',
     language: locale === 'es' ? 'Español' : 'English',
     joinAsPro: locale === 'es' ? 'Unirse como proveedor' : 'Join as provider',
+    howItWorks: locale === 'es' ? 'Cómo funciona Presu' : 'How Presu Works',
 
     title: locale === 'es'
       ? 'Comprometidos con la sostenibilidad'
