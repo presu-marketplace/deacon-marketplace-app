@@ -1,3 +1,5 @@
+import Image from 'next/image'
+
 type FooterProps = {
   t: {
     terms: string
@@ -15,7 +17,17 @@ export default function Footer({ t }: FooterProps) {
       <div className="max-w-3xl mx-auto flex flex-col items-center text-center gap-4">
 
         {/* Brand */}
-        <div className="text-red-600 font-bold text-lg">Presu</div>
+        <div className="w-32">
+        <Image
+          src="/logo/presu-03.png"
+          alt="Presu Logo"
+          width={100}
+          height={31}          
+          className="object-contain mx-auto"
+          priority
+        />
+      </div>
+
 
         {/* Legal links */}
         <ul className="flex flex-wrap justify-center items-center gap-3 text-xs text-gray-600">

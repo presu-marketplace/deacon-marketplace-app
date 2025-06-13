@@ -39,7 +39,7 @@ export default function Navbar({ locale, toggleLocale, t }: NavbarProps) {
         className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrolled ? 'bg-white dark:bg-gray-950 shadow-md border-b' : 'bg-transparent'
           }`}
       >
-        <div className="w-full flex items-center justify-between px-6 sm:px-10 lg:px-14 py-3">
+        <div className="w-full flex items-center justify-between px-6 sm:px-10 lg:px-14 py-1.5">
           {/* Left: Hamburger + Logo */}
           <div className="flex items-center gap-3">
             <button
@@ -65,7 +65,7 @@ export default function Navbar({ locale, toggleLocale, t }: NavbarProps) {
             <Image
               src="/logo/presu-02.png"
               alt="Presu Logo"
-              width={120}
+              width={140}
               height={48}
               className="object-contain"
               priority

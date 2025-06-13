@@ -40,7 +40,7 @@ export default function MobileMenu({ isOpen, onClose, locale, t }: MobileMenuPro
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex flex-col h-full p-6 gap-6">
+        <div className="flex flex-col h-full p-[0.875rem] gap-4">
           {/* Close Button */}
           <button
             onClick={onClose}

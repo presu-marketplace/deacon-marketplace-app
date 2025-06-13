@@ -27,7 +27,7 @@ export default function CardSection({ locale }: CardSectionProps) {
             priority
             className="rounded-lg w-full h-[320px] object-cover"
           />
-          <h3 className="text-lg font-bold mt-4 uppercase text-left">
+          <h3 className="text-lg font-bold mt-4 text-left text-gray-900">
             {locale === 'es' ? "Comparativa de mercado" : "Market Comparison"}
           </h3>
           <p className="text-sm mt-2 text-gray-700">
@@ -38,7 +38,7 @@ export default function CardSection({ locale }: CardSectionProps) {
             )}
           </p>
           <a href="#" className="text-sm underline mt-2 inline-block text-gray-800 hover:text-black">
-            {locale === 'es' ? "Comparativa de mercado" : "Market Comparison"}
+            {locale === 'es' ? "Ver cómo funciona" : "See how it works"}
           </a>
         </div>
 
@@ -54,7 +54,7 @@ export default function CardSection({ locale }: CardSectionProps) {
             priority
             className="rounded-lg w-full h-[320px] object-cover"
           />
-          <h3 className="text-lg font-bold mt-4 uppercase text-left">
+          <h3 className="text-lg font-bold mt-4 text-left text-gray-900">
             {locale === 'es' ? "Conectá con nuevos clientes" : "Connect with New Clients"}
           </h3>
           <p className="text-sm mt-2 text-gray-700">
@@ -81,7 +81,7 @@ export default function CardSection({ locale }: CardSectionProps) {
             priority
             className="rounded-lg w-full h-[320px] object-cover"
           />
-          <h3 className="text-lg font-bold mt-4 uppercase text-left">
+          <h3 className="text-lg font-bold mt-4 text-left text-gray-900">
             {locale === 'es' ? "Comprometidos con la sostenibilidad" : "Committed to Sustainability"}
           </h3>
           <p className="text-sm mt-2 text-gray-700">
