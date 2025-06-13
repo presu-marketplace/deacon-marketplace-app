@@ -75,31 +75,33 @@ export default function CardSection({ locale }: CardSectionProps) {
         </Link>
 
         {/* Card 3 */}
-        <div className="w-full">
-          <Image
-            src={card3Img}
-            alt={locale === 'es' ? "Sustentabilidad en Presu" : "Sustainability at Presu"}
-            width={1200}
-            height={800}
-            quality={100}
-            placeholder="blur"
-            priority
-            className="rounded-lg w-full h-[320px] object-cover"
-          />
-          <h3 className="text-lg font-bold mt-4 text-left text-gray-900">
-            {locale === 'es' ? "Comprometidos con la sostenibilidad" : "Committed to Sustainability"}
-          </h3>
-          <p className="text-sm mt-2 text-gray-700">
-            {locale === 'es' ? (
-              <>En <span className="font-medium text-black">Presu</span>, digitalizamos procesos para reducir el uso de papel y energía, conectamos con proveedores responsables y promovemos un consumo más consciente.</>
-            ) : (
-              <>At <span className="font-medium text-black">Presu</span>, we digitize processes to reduce paper and energy use, connect with responsible providers, and promote more conscious consumption.</>
-            )}
-          </p>
-          <a href="#" className="text-sm underline mt-2 inline-block text-gray-800 hover:text-black">
-            {locale === 'es' ? "Conocé nuestro compromiso" : "Learn about our commitment"}
-          </a>
-        </div>
+        <Link href="/cards/sustainability" className="w-full group">
+          <div className="w-full cursor-pointer">
+            <Image
+              src={card3Img}
+              alt={locale === 'es' ? "Sustentabilidad en Presu" : "Sustainability at Presu"}
+              width={1200}
+              height={800}
+              quality={100}
+              placeholder="blur"
+              priority
+              className="rounded-lg w-full h-[320px] object-cover"
+            />
+            <h3 className="text-lg font-bold mt-4 text-left text-gray-900">
+              {locale === 'es' ? "Comprometidos con la sostenibilidad" : "Committed to Sustainability"}
+            </h3>
+            <p className="text-sm mt-2 text-gray-700">
+              {locale === 'es' ? (
+                <>En <span className="font-medium text-black">Presu</span>, digitalizamos procesos para reducir el uso de papel y energía, conectamos con proveedores responsables y promovemos un consumo más consciente.</>
+              ) : (
+                <>At <span className="font-medium text-black">Presu</span>, we digitize processes to reduce paper and energy use, connect with responsible providers, and promote more conscious consumption.</>
+              )}
+            </p>
+            <span className="text-sm underline mt-2 inline-block text-gray-800 group-hover:text-black transition">
+              {locale === 'es' ? "Conocé nuestro compromiso" : "Learn about our commitment"}
+            </span>
+          </div>
+        </Link>
 
       </div>
     </section>

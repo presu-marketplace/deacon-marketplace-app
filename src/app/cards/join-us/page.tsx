@@ -26,9 +26,42 @@ export default function JoinUsPage() {
     intro: locale === 'es'
       ? 'En Presu, estamos revolucionando la forma en que los consumidores encuentran y comparan presupuestos para diversos servicios, y queremos que seas parte de esta innovación.'
       : 'At Presu, we are revolutionizing how consumers find and compare service quotes—and we want you to be part of that.',
-    benefitsTitle: locale === 'es' ? '¿Por qué unirte a Presu?' : 'Why join Presu?',
-    expectationsTitle: locale === 'es' ? '¿Qué buscamos en nuestros proveedores?' : 'What do we look for in our providers?',
-    callToAction: locale === 'es' ? 'Registrate y empezá a recibir solicitudes' : 'Sign up and start receiving requests',
+    benefitsTitle: locale === 'es'
+      ? '¿Por qué unirte a Presu?'
+      : 'Why join Presu?',
+    benefits: locale === 'es'
+      ? [
+          'Acceso a una red de clientes potenciales.',
+          'Transparencia y competencia saludable.',
+          'Compromiso con la sustentabilidad.',
+          'Crecimiento y fidelización a largo plazo.'
+        ]
+      : [
+          'Access to a network of potential clients.',
+          'Transparency and healthy competition.',
+          'Commitment to sustainability.',
+          'Long-term growth and customer loyalty.'
+        ],
+    expectationsTitle: locale === 'es'
+      ? '¿Qué buscamos en nuestros proveedores?'
+      : 'What do we look for in our providers?',
+    expectations: locale === 'es'
+      ? [
+          'Compromiso con la calidad del servicio.',
+          'Verificación de estándares sostenibles y responsables.',
+          'Presupuestos competitivos y detallados.'
+        ]
+      : [
+          'Commitment to service quality.',
+          'Verification of sustainable and responsible standards.',
+          'Competitive and detailed quotes.'
+        ],
+    closing: locale === 'es'
+      ? '¿Listo para sumarte a esta comunidad innovadora?'
+      : 'Ready to join this innovative community?',
+    callToAction: locale === 'es'
+      ? 'Registrate y empezá a recibir solicitudes'
+      : 'Sign up and start receiving requests'
   }
 
   return (
@@ -53,21 +86,20 @@ export default function JoinUsPage() {
 
           <h2 className="text-2xl font-semibold mb-4 text-white">{t.benefitsTitle}</h2>
           <ul className="list-disc pl-6 text-gray-300 mb-8 space-y-2">
-            <li>Acceso a una red de clientes potenciales.</li>
-            <li>Transparencia y competencia saludable.</li>
-            <li>Compromiso con la sustentabilidad.</li>
-            <li>Crecimiento y fidelización a largo plazo.</li>
+            {t.benefits.map((item, index) => (
+              <li key={index}>{item}</li>
+            ))}
           </ul>
 
           <h2 className="text-2xl font-semibold mb-4 text-white">{t.expectationsTitle}</h2>
           <ul className="list-disc pl-6 text-gray-300 mb-8 space-y-2">
-            <li>Compromiso con la calidad del servicio.</li>
-            <li>Verificación de estándares sostenibles y responsables.</li>
-            <li>Presupuestos competitivos y detallados.</li>
+            {t.expectations.map((item, index) => (
+              <li key={index}>{item}</li>
+            ))}
           </ul>
 
           <p className="text-lg font-medium text-white mb-6">
-            ¿Listo para sumarte a esta comunidad innovadora?
+            {t.closing}
           </p>
 
           <a
