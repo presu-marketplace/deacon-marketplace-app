@@ -37,7 +37,7 @@ export default function CardSection({ locale }: CardSectionProps) {
               <>Optimize your purchasing decisions with <span className="font-medium text-black">Presu</span>. Access up-to-date quotes and trusted providers to save time and reduce costs.</>
             )}
           </p>
-          <a href="#" className="text-sm underline mt-2 inline-block text-gray-800 hover:text-black">
+          <a href="/how-it-works" className="text-sm underline mt-2 inline-block text-gray-800 hover:text-black">
             {locale === 'es' ? "Ver cómo funciona" : "See how it works"}
           </a>
         </div>

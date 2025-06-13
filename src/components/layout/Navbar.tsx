@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import MobileMenu from './SideMenu'
+import SideMenu from './SideMenu'
+import Link from 'next/link'
 
 type NavbarProps = {
   locale: 'en' | 'es'
@@ -16,9 +17,10 @@ type NavbarProps = {
     language: string
     joinAsPro: string
   }
+  forceWhite?: boolean
 }
 
-export default function Navbar({ locale, toggleLocale, t }: NavbarProps) {
+export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: NavbarProps) {
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -33,11 +35,18 @@ export default function Navbar({ locale, toggleLocale, t }: NavbarProps) {
 
   if (!mounted) return null
 
+  const isLight = forceWhite || scrolled
+
   return (
     <>
       <header
-        className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrolled ? 'bg-white dark:bg-gray-950 shadow-md border-b' : 'bg-transparent'
-          }`}
+        className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+          isLight
+            ? forceWhite
+              ? 'bg-white shadow-md border-b'
+              : 'bg-white dark:bg-gray-950 shadow-md border-b'
+            : 'bg-transparent'
+        }`}
       >
         <div className="w-full flex items-center justify-between px-6 sm:px-10 lg:px-14 py-1.5">
           {/* Left: Hamburger + Logo */}
@@ -53,33 +62,37 @@ export default function Navbar({ locale, toggleLocale, t }: NavbarProps) {
                 viewBox="0 0 24 24"
                 strokeWidth={3}
                 stroke="currentColor"
-                className={`w-6 h-6 transition-colors duration-200 ${scrolled
-                  ? 'text-white group-hover:text-white'
-                  : 'text-black group-hover:text-white'
-                  }`}
-              >
+                className={`w-6 h-6 transition-colors duration-200 ${
+                  forceWhite || (!scrolled && !forceWhite)
+                    ? 'text-black group-hover:text-white'
+                    : 'text-white group-hover:text-white'
+                }`}
+                                              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
 
-            <Image
-              src="/logo/presu-02.png"
-              alt="Presu Logo"
-              width={140}
-              height={48}
-              className="object-contain"
-              priority
-            />
+            <Link href="/" passHref>
+              <Image
+                src="/logo/presu-02.png"
+                alt="Presu Logo"
+                width={140}
+                height={48}
+                className="object-contain cursor-pointer"
+                priority
+              />
+            </Link>
           </div>
 
           {/* Right: Language + Auth buttons */}
           <div className="hidden md:flex items-center text-sm pr-14 gap-5">
             <button
               onClick={toggleLocale}
-              className={`flex items-center gap-1 transition-colors ${scrolled
-                  ? 'text-white hover:text-gray-300'
-                  : 'text-black hover:text-gray-700'
-                }`}
+              className={`flex items-center gap-1 transition-colors ${
+                forceWhite
+                  ? 'text-black hover:text-gray-700'
+                  : 'text-white hover:text-gray-300'
+              }`}
               aria-label="Toggle Language"
             >
               <Image
@@ -111,12 +124,13 @@ export default function Navbar({ locale, toggleLocale, t }: NavbarProps) {
         </div>
       </header>
 
-      <MobileMenu
+      <SideMenu
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         locale={locale}
         toggleLocale={toggleLocale}
         t={t}
+        forceWhite={forceWhite}
       />
     </>
   )
