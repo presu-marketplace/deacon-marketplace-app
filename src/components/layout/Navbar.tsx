@@ -89,11 +89,11 @@ export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: 
             <button
               onClick={toggleLocale}
               className={`flex items-center gap-1 transition-colors ${
-                forceWhite
+                forceWhite || (!scrolled && !forceWhite)
                   ? 'text-black hover:text-gray-700'
                   : 'text-white hover:text-gray-300'
               }`}
-              aria-label="Toggle Language"
+                            aria-label="Toggle Language"
             >
               <Image
                 src={locale === 'es' ? '/icons/argentina-flag.svg' : '/icons/us-flag.svg'}

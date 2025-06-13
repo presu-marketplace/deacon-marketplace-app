@@ -4,6 +4,7 @@ import Image from 'next/image'
 import card1Img from '@/assets/images/card-section/card-01.jpg'
 import card2Img from '@/assets/images/card-section/card-02.jpg'
 import card3Img from '@/assets/images/card-section/card-03.jpg'
+import Link from 'next/link'
 
 type CardSectionProps = {
   t: Record<string, string>
@@ -16,31 +17,33 @@ export default function CardSection({ locale }: CardSectionProps) {
       <div className="mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
 
         {/* Card 1 */}
-        <div className="w-full">
-          <Image
-            src={card1Img}
-            alt={locale === 'es' ? "Comparativa de mercado" : "Market Comparison"}
-            width={1200}
-            height={800}
-            quality={100}
-            placeholder="blur"
-            priority
-            className="rounded-lg w-full h-[320px] object-cover"
-          />
-          <h3 className="text-lg font-bold mt-4 text-left text-gray-900">
-            {locale === 'es' ? "Comparativa de mercado" : "Market Comparison"}
-          </h3>
-          <p className="text-sm mt-2 text-gray-700">
-            {locale === 'es' ? (
-              <>Optimizá tus decisiones de compra con <span className="font-medium text-black">Presu</span>, accedé a presupuestos actualizados y proveedores confiables para ahorrar tiempo y costos.</>
-            ) : (
-              <>Optimize your purchasing decisions with <span className="font-medium text-black">Presu</span>. Access up-to-date quotes and trusted providers to save time and reduce costs.</>
-            )}
-          </p>
-          <a href="/how-it-works" className="text-sm underline mt-2 inline-block text-gray-800 hover:text-black">
-            {locale === 'es' ? "Ver cómo funciona" : "See how it works"}
-          </a>
-        </div>
+        <Link href="/how-it-works" className="w-full group">
+          <div className="cursor-pointer">
+            <Image
+              src={card1Img}
+              alt={locale === 'es' ? "Comparativa de mercado" : "Market Comparison"}
+              width={1200}
+              height={800}
+              quality={100}
+              placeholder="blur"
+              priority
+              className="rounded-lg w-full h-[320px] object-cover group-hover:brightness-95 transition"
+            />
+            <h3 className="text-lg font-bold mt-4 text-left text-gray-900 group-hover:text-black transition">
+              {locale === 'es' ? "Comparativa de mercado" : "Market Comparison"}
+            </h3>
+            <p className="text-sm mt-2 text-gray-700 group-hover:text-black transition">
+              {locale === 'es' ? (
+                <>Optimizá tus decisiones de compra con <span className="font-medium text-black">Presu</span>, accedé a presupuestos actualizados y proveedores confiables para ahorrar tiempo y costos.</>
+              ) : (
+                <>Optimize your purchasing decisions with <span className="font-medium text-black">Presu</span>. Access up-to-date quotes and trusted providers to save time and reduce costs.</>
+              )}
+            </p>
+            <span className="text-sm underline mt-2 inline-block text-gray-800 group-hover:text-black transition">
+              {locale === 'es' ? "Ver cómo funciona" : "See how it works"}
+            </span>
+          </div>
+        </Link>
 
         {/* Card 2 */}
         <div className="w-full">

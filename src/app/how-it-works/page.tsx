@@ -3,59 +3,127 @@
 import { useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Image from 'next/image'
+import Link from 'next/link'
 
 export default function HowItWorksPage() {
   const [locale, setLocale] = useState<'en' | 'es'>('es')
 
+  const toggleLocale = () => {
+    setLocale(prev => (prev === 'en' ? 'es' : 'en'))
+  }
+
   const t = {
+    // Navbar
     howItWorks: locale === 'es' ? 'Cómo funciona Presu' : 'How Presu Works',
     login: locale === 'es' ? 'Iniciar sesión' : 'Log in',
     signup: locale === 'es' ? 'Crear cuenta' : 'Sign up',
     searchPlaceholder: locale === 'es' ? 'Buscar servicio...' : 'Search service...',
     language: locale === 'es' ? 'Español' : 'English',
     joinAsPro: locale === 'es' ? 'Unirse como proveedor' : 'Join as provider',
-  }
 
-  const toggleLocale = () => {
-    setLocale(prev => (prev === 'en' ? 'es' : 'en'))
+    // Hero
+    heroTitle: locale === 'es' ? 'Potenciá tus compras' : 'Boost your purchasing',
+    heroSubtitle: locale === 'es'
+      ? 'Presu te da el control para tomar decisiones más inteligentes con datos confiables, proveedores validados y una plataforma simple y eficiente.'
+      : 'Presu gives you control to make smarter decisions with trusted data, verified suppliers, and a simple, efficient platform.',
+    heroDesc:
+      locale === 'es'
+        ? 'Optimizá tus decisiones de compras con Presu: la mejor forma de comparar precios de mercado.\n\nEn un entorno empresarial cada vez más competitivo, tomar decisiones informadas y eficientes es clave para maximizar recursos y reducir costos. En Presu, entendemos esa necesidad y por eso hemos desarrollado un servicio corporativo diseñado especialmente para empresas como la tuya. Nuestro servicio de comparación de precios de mercado te permite acceder a presupuestos competitivos y actualizados, facilitando la selección de proveedores confiables y responsables. Con una plataforma sencilla, transparente y alineada con prácticas sostenibles, te ayudamos a ahorrar tiempo, dinero y a tomar decisiones estratégicas que impulsen el crecimiento de tu negocio. Confiá en Presu para potenciar tu gestión de compras y dar un paso más eficiente en tus decisiones.'
+        : 'Optimize your purchasing decisions with Presu: the best way to compare market prices.\n\nIn an increasingly competitive business environment, making informed and efficient decisions is key to maximizing resources and reducing costs. At Presu, we understand that need, which is why we have developed a corporate service specifically designed for companies like yours. Our market price comparison service gives you access to competitive and updated quotes, facilitating the selection of reliable and responsible suppliers. With a simple, transparent platform aligned with sustainable practices, we help you save time, money, and make strategic decisions that drive your business growth. Trust Presu to enhance your purchasing management and take a more efficient step in your decisions.',
+
+    heroCtaPrimary: locale === 'es' ? 'Cómo empezar' : 'How to get started',
+    heroCtaSecondary: locale === 'es' ? 'Ver nuestras soluciones' : 'Check out our solutions',
+
+    // Benefits
+    sectionTitle: locale === 'es'
+      ? 'Una solución corporativa pensada para vos'
+      : 'A corporate solution built for you',
+    benefit1Title: locale === 'es'
+      ? 'Decisiones estratégicas con datos confiables'
+      : 'Strategic decisions with trusted data',
+    benefit1Text: locale === 'es'
+      ? 'Accedé a presupuestos actualizados y seleccioná proveedores confiables para optimizar tu operación sin comprometer calidad ni tiempos.'
+      : 'Access updated quotes and select trusted suppliers to optimize operations without compromising quality or timing.',
+    benefit2Title: locale === 'es'
+      ? 'Gestión simple, eficiente y sostenible'
+      : 'Simple, efficient and sustainable management',
+    benefit2Text: locale === 'es'
+      ? 'Nuestra plataforma combina usabilidad con compromiso ambiental para que puedas ahorrar recursos y generar impacto positivo.'
+      : 'Our platform combines usability with environmental commitment so you can save resources and generate positive impact.'
   }
 
   return (
     <>
       <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
 
-      <main className="bg-white max-w-4xl mx-auto px-4 sm:px-6 pt-32 pb-20">
-        {/* Ícono + título + bajada */}
-        <div className="flex flex-col items-center text-center mb-12">
-          <Image
-            src="/icons/comparativa-icon.png"
-            alt="Icono Presu"
-            width={64}
-            height={64}
-            className="mb-4"
-          />
-          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">
-            Comparativa de mercado
-          </h1>
-          <p className="text-gray-600 text-sm sm:text-base mt-2 max-w-xl">
-            Optimiza tus decisiones de compra con Presu: la mejor forma de comparar precios de mercado.
-          </p>
-        </div>
+      <main className="bg-black text-white w-full pt-32 pb-24">
+        {/* Hero Section */}
+        <section className="max-w-7xl mx-auto px-6 sm:px-12 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          {/* Left */}
+          <div>
+            <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight mb-6">{t.heroTitle}</h1>
+            <p className="text-gray-300 text-lg mb-8">{t.heroSubtitle}</p>
 
-        {/* Contenido editorial */}
-        <section className="space-y-6 text-gray-800 text-[15px] leading-relaxed">
-          <p>
-            En un entorno empresarial cada vez más competitivo, tomar decisiones informadas y eficientes es clave para maximizar recursos y reducir costos.
-          </p>
-          <p>
-            En <strong>Presu</strong>, entendemos esa necesidad y por eso hemos desarrollado un servicio corporativo diseñado especialmente para empresas como la tuya. Nuestro servicio de comparación de precios de mercado te permite acceder a presupuestos competitivos y actualizados, facilitando la selección de proveedores confiables y responsables.
-          </p>
-          <p>
-            Con una plataforma sencilla, transparente y alineada con prácticas sostenibles, te ayudamos a ahorrar tiempo, dinero y a tomar decisiones estratégicas que impulsen el crecimiento de tu negocio.
-          </p>
-          <p>
-            Confía en <strong>Presu</strong> para potenciar tu gestión de compras y dar un paso más eficiente en tus decisiones.
-          </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link href="/signup">
+                <button className="bg-white text-black font-semibold px-6 py-3 rounded-md hover:bg-gray-200 transition">
+                  {t.heroCtaPrimary}
+                </button>
+              </Link>
+              <Link href="/solutions">
+                <button className="text-white border border-white font-semibold px-6 py-3 rounded-md hover:bg-white hover:text-black transition">
+                  {t.heroCtaSecondary}
+                </button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Right: Image */}
+          <div className="flex justify-center">
+            <Image
+              src="/images/how-it-works-section/business-hero.jpg"
+              alt="Business user"
+              width={600}
+              height={400}
+              className="rounded-lg object-cover"
+            />
+          </div>
+        </section>
+
+        {/* Benefits Section */}
+        <section className="max-w-6xl mx-auto px-6 sm:px-12 mt-24">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-12 text-white">{t.sectionTitle}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            {/* Benefit 1 */}
+            <div className="flex gap-4 items-start">
+              <Image
+                src="/images/how-it-works-section/icon-strategic-decisions.png"
+                alt="Data icon"
+                width={48}
+                height={48}
+                className="mt-1"
+              />
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">{t.benefit1Title}</h3>
+                <p className="text-gray-300 text-sm">{t.benefit1Text}</p>
+              </div>
+            </div>
+
+            {/* Benefit 2 */}
+            <div className="flex gap-4 items-start">
+              <Image
+                src="/images/how-it-works-section/icon-smarter-business.png"
+                alt="Sustainability icon"
+                width={48}
+                height={48}
+                className="mt-1"
+              />
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">{t.benefit2Title}</h3>
+                <p className="text-gray-300 text-sm">{t.benefit2Text}</p>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
     </>
