@@ -5,7 +5,7 @@ import Navbar from '@/components/layout/Navbar'
 import Image from 'next/image'
 import Link from 'next/link'
 
-export default function HowItWorksPage() {
+export default function MarketComparison() {
   const [locale, setLocale] = useState<'en' | 'es'>('es')
 
   const toggleLocale = () => {
@@ -14,7 +14,6 @@ export default function HowItWorksPage() {
 
   const t = {
     // Navbar
-    howItWorks: locale === 'es' ? 'Cómo funciona Presu' : 'How Presu Works',
     login: locale === 'es' ? 'Iniciar sesión' : 'Log in',
     signup: locale === 'es' ? 'Crear cuenta' : 'Sign up',
     searchPlaceholder: locale === 'es' ? 'Buscar servicio...' : 'Search service...',
@@ -81,7 +80,7 @@ export default function HowItWorksPage() {
           {/* Right: Image */}
           <div className="flex justify-center">
             <Image
-              src="/images/how-it-works-section/business-hero.jpg"
+              src="/images/market-comparison/business-hero.jpg"
               alt="Business user"
               width={600}
               height={400}
@@ -97,7 +96,7 @@ export default function HowItWorksPage() {
             {/* Benefit 1 */}
             <div className="flex gap-4 items-start">
               <Image
-                src="/images/how-it-works-section/icon-strategic-decisions.png"
+                src="/images/market-comparison/icon-strategic-decisions.png"
                 alt="Data icon"
                 width={48}
                 height={48}
@@ -112,7 +111,7 @@ export default function HowItWorksPage() {
             {/* Benefit 2 */}
             <div className="flex gap-4 items-start">
               <Image
-                src="/images/how-it-works-section/icon-smarter-business.png"
+                src="/images/market-comparison/icon-smarter-business.png"
                 alt="Sustainability icon"
                 width={48}
                 height={48}

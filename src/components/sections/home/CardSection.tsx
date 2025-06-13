@@ -17,7 +17,7 @@ export default function CardSection({ locale }: CardSectionProps) {
       <div className="mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
 
         {/* Card 1 */}
-        <Link href="/how-it-works" className="w-full group">
+        <Link href="/market-comparison" className="w-full group">
           <div className="cursor-pointer">
             <Image
               src={card1Img}
