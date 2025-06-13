@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import RegisterComponent from './RegisterComponent'
+import RegisterComponent from './RegisterForm'
 
 export default function RegisterPageClient() {
   const searchParams = useSearchParams()

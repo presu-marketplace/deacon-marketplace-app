@@ -1,9 +1,9 @@
 'use client'
 
 import Image from 'next/image'
-import card1Img from '@/app/assets/images/card-section/card-01.jpg'
-import card2Img from '@/app/assets/images/card-section/card-02.jpg'
-import card3Img from '@/app/assets/images/card-section/card-03.jpg'
+import card1Img from '@/assets/images/card-section/card-01.jpg'
+import card2Img from '@/assets/images/card-section/card-02.jpg'
+import card3Img from '@/assets/images/card-section/card-03.jpg'
 
 type CardSectionProps = {
   t: Record<string, string>

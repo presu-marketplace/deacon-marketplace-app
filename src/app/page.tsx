@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Navbar from './components/Navbar'
-import HeroSection from './components/HeroSection'
-import CardSection from './components/CardSection'
-import Footer from './components/Footer'
+import Navbar from '../components/layout/Navbar'
+import HeroSection from '../components/sections/home/HeroSection'
+import CardSection from '../components/sections/home/CardSection'
+import Footer from '../components/layout/Footer'
 // import { redirect } from 'next/navigation'
 
 export default function HomePage() {

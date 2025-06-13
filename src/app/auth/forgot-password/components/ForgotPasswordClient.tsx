@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import ForgotPasswordComponent from './ForgotPasswordComponent'
+import ForgotPasswordComponent from './ForgotPasswordForm'
 
 export default function ForgotPasswordClient() {
   const searchParams = useSearchParams()

@@ -2,7 +2,7 @@
 
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import LoginComponent from './LoginComponent'
+import LoginComponent from './LoginForm'
 
 export default function LoginPageClient() {
   const searchParams = useSearchParams()

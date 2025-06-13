@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import RegisterPageClient from './RegisterPageClient'
+import RegisterPageClient from './components/RegisterClient'
 
 export default function RegisterPage() {
   return (

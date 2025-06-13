@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import MobileMenu from './MobileMenu'
+import MobileMenu from './SideMenu'
 
 type NavbarProps = {
   locale: 'en' | 'es'
