@@ -46,46 +46,86 @@ export default function HeroSection({ t }: HeroProps) {
             {t.heroHeadline}
           </h1>
 
-          {/* Search box group */}
-          <div className="w-full mt-8 flex flex-col sm:flex-row sm:justify-center items-center gap-3">
-            
-            {/* Service input */}
-            <div className="flex items-center bg-white rounded-full px-4 py-3 shadow w-full sm:max-w-md">
-              {/* Wrench icon (Phosphor-style) */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5 text-gray-500 mr-3"
-                viewBox="0 0 256 256"
-                fill="currentColor"
-              >
-                <path d="M229.66 195.31l-59-59a64.07 64.07 0 0 0-83.83-83.83l34.06 34.07-27.71 27.7-34.07-34.06a64.07 64.07 0 0 0 83.83 83.83l59 59a8 8 0 0 0 11.32-11.32Z" />
-              </svg>
-              <input
-                type="text"
-                placeholder={t.searchPlaceholder}
-                aria-label={t.searchPlaceholder}
-                className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
-              />
-            </div>
+{/* Mobile layout */}
+<div className="w-full mt-8 flex flex-col sm:hidden items-center gap-3">
 
-            {/* Location button */}
-            <button className="bg-white rounded-full px-5 py-3 shadow text-sm flex items-center gap-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4 text-gray-500"
-                viewBox="0 0 256 256"
-                fill="currentColor"
-              >
-                <path d="M128 16A88.1 88.1 0 0 0 40 104c0 66.14 80.18 131.39 83.6 134a8 8 0 0 0 8.8 0C135.82 235.39 216 170.14 216 104A88.1 88.1 0 0 0 128 16Zm0 112a24 24 0 1 1 24-24 24 24 0 0 1-24 24Z" />
-              </svg>
-              <span className="text-gray-700">{t.location}</span>
-            </button>
+  {/* Service input with location icon inside */}
+  <div className="flex items-center bg-white rounded-full px-4 py-2 shadow w-full">
+    {/* Wrench icon */}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-5 h-5 text-gray-500 mr-2"
+      viewBox="0 0 256 256"
+      fill="currentColor"
+    >
+      <path d="M229.66 195.31l-59-59a64.07 64.07 0 0 0-83.83-83.83l34.06 34.07-27.71 27.7-34.07-34.06a64.07 64.07 0 0 0 83.83 83.83l59 59a8 8 0 0 0 11.32-11.32Z" />
+    </svg>
 
-            {/* Search button */}
-            <button className="bg-black text-white rounded-full px-6 py-3 text-sm font-medium shadow hover:bg-gray-900 transition">
-              {t.searchHere}
-            </button>
-          </div>
+    <input
+      type="text"
+      placeholder={t.searchPlaceholder}
+      aria-label={t.searchPlaceholder}
+      className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
+    />
+
+    {/* Location icon button */}
+    <button className="ml-2 p-2 rounded-full hover:bg-gray-100 transition">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-5 h-5 text-gray-500"
+        viewBox="0 0 256 256"
+        fill="currentColor"
+      >
+        <path d="M128 16A88.1 88.1 0 0 0 40 104c0 66.14 80.18 131.39 83.6 134a8 8 0 0 0 8.8 0C135.82 235.39 216 170.14 216 104A88.1 88.1 0 0 0 128 16Zm0 112a24 24 0 1 1 24-24 24 24 0 0 1-24 24Z" />
+      </svg>
+    </button>
+  </div>
+
+  {/* Search button */}
+  <button className="bg-black text-white rounded-full px-6 py-2 text-sm font-medium shadow hover:bg-gray-900 transition">
+    {t.searchHere}
+  </button>
+</div>
+
+{/* Desktop layout */}
+<div className="hidden sm:flex w-full flex-row justify-center items-center gap-4 mt-8">
+  {/* Service input */}
+  <div className="flex items-center bg-white rounded-full px-4 py-3 shadow w-full max-w-md">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-5 h-5 text-gray-500 mr-3"
+      viewBox="0 0 256 256"
+      fill="currentColor"
+    >
+      <path d="M229.66 195.31l-59-59a64.07 64.07 0 0 0-83.83-83.83l34.06 34.07-27.71 27.7-34.07-34.06a64.07 64.07 0 0 0 83.83 83.83l59 59a8 8 0 0 0 11.32-11.32Z" />
+    </svg>
+    <input
+      type="text"
+      placeholder={t.searchPlaceholder}
+      aria-label={t.searchPlaceholder}
+      className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
+    />
+  </div>
+
+  {/* Location button with text */}
+  <button className="bg-white rounded-full px-5 py-3 shadow text-sm flex items-center gap-2">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="w-4 h-4 text-gray-500"
+      viewBox="0 0 256 256"
+      fill="currentColor"
+    >
+      <path d="M128 16A88.1 88.1 0 0 0 40 104c0 66.14 80.18 131.39 83.6 134a8 8 0 0 0 8.8 0C135.82 235.39 216 170.14 216 104A88.1 88.1 0 0 0 128 16Zm0 112a24 24 0 1 1 24-24 24 24 0 0 1-24 24Z" />
+    </svg>
+    <span className="text-gray-700">{t.location}</span>
+  </button>
+
+  {/* Search button */}
+  <button className="bg-black text-white rounded-full px-6 py-3 text-sm font-medium shadow hover:bg-gray-900 transition">
+    {t.searchHere}
+  </button>
+</div>
+          
         </div>
       </div>
     </section>
