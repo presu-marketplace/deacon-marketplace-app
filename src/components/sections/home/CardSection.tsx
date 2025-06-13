@@ -17,7 +17,7 @@ export default function CardSection({ locale }: CardSectionProps) {
       <div className="mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
 
         {/* Card 1 */}
-        <Link href="/market-comparison" className="w-full group">
+        <Link href="/cards/market-comparison" className="w-full group">
           <div className="cursor-pointer">
             <Image
               src={card1Img}
@@ -46,31 +46,33 @@ export default function CardSection({ locale }: CardSectionProps) {
         </Link>
 
         {/* Card 2 */}
-        <div className="w-full">
-          <Image
-            src={card2Img}
-            alt={locale === 'es' ? "Unite a Presu" : "Join Presu"}
-            width={1200}
-            height={800}
-            quality={100}
-            placeholder="blur"
-            priority
-            className="rounded-lg w-full h-[320px] object-cover"
-          />
-          <h3 className="text-lg font-bold mt-4 text-left text-gray-900">
-            {locale === 'es' ? "Conectá con nuevos clientes" : "Connect with New Clients"}
-          </h3>
-          <p className="text-sm mt-2 text-gray-700">
-            {locale === 'es' ? (
-              <>Unite a <span className="font-medium text-black">Presu</span> y recibí pedidos de usuarios que buscan servicios como el tuyo. Promovemos transparencia, sustentabilidad y relaciones duraderas.</>
-            ) : (
-              <>Join <span className="font-medium text-black">Presu</span> and receive requests from users looking for services like yours. We promote transparency, sustainability, and lasting relationships.</>
-            )}
-          </p>
-          <a href="#" className="text-sm underline mt-2 inline-block text-gray-800 hover:text-black">
-            {locale === 'es' ? "¿Qué buscamos en nuestros proveedores?" : "What do we look for in providers?"}
-          </a>
-        </div>
+        <Link href="/cards/join-us" className="w-full group">
+          <div className="cursor-pointer">
+            <Image
+              src={card2Img}
+              alt={locale === 'es' ? "Unite a Presu" : "Join Presu"}
+              width={1200}
+              height={800}
+              quality={100}
+              placeholder="blur"
+              priority
+              className="rounded-lg w-full h-[320px] object-cover group-hover:brightness-95 transition"
+            />
+            <h3 className="text-lg font-bold mt-4 text-left text-gray-900 group-hover:text-black transition">
+              {locale === 'es' ? "Conectá con nuevos clientes" : "Connect with New Clients"}
+            </h3>
+            <p className="text-sm mt-2 text-gray-700 group-hover:text-black transition">
+              {locale === 'es' ? (
+                <>Unite a <span className="font-medium text-black">Presu</span> y recibí pedidos de usuarios que buscan servicios como el tuyo. Promovemos transparencia, sustentabilidad y relaciones duraderas.</>
+              ) : (
+                <>Join <span className="font-medium text-black">Presu</span> and receive requests from users looking for services like yours. We promote transparency, sustainability, and lasting relationships.</>
+              )}
+            </p>
+            <span className="text-sm underline mt-2 inline-block text-gray-800 group-hover:text-black transition">
+              {locale === 'es' ? "¿Qué buscamos en nuestros proveedores?" : "What do we look for in providers?"}
+            </span>
+          </div>
+        </Link>
 
         {/* Card 3 */}
         <div className="w-full">
