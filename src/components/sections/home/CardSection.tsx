@@ -33,11 +33,11 @@ export default function CardSection({ locale }: CardSectionProps) {
               {locale === 'es' ? "Comparativa de mercado" : "Market Comparison"}
             </h3>
             <p className="text-sm mt-2 text-gray-700 group-hover:text-black transition">
-            {locale === 'es' ? (
-              <>Tomá mejores decisiones con <span className="font-medium text-black">Presu</span> — compará precios, ahorrá tiempo y dinero, y hacé crecer tu negocio.</>
-            ) : (
-              <>Make better decisions with <span className="font-medium text-black">Presu</span> — compare prices, save time and money, and grow your business.</>
-            )}
+              {locale === 'es' ? (
+                <>Optimizá tus decisiones de compras con <span className="font-medium text-black">Presu</span>, somos la mejor forma de comparar precios de mercado. Ahorrá tiempo, dinero y tomá decisiones estratégicas que impulsen el crecimiento de tu negocio.</>
+              ) : (
+                <>Optimize your purchasing decisions with <span className="font-medium text-black">Presu</span> — we’re the best way to compare market prices. Save time, money, and make strategic decisions that drive your business growth.</>
+              )}
             </p>
             <span className="text-sm underline mt-2 inline-block text-gray-800 group-hover:text-black transition">
               {locale === 'es' ? "Ver cómo funciona" : "See how it works"}
@@ -63,12 +63,10 @@ export default function CardSection({ locale }: CardSectionProps) {
             </h3>
             <p className="text-sm mt-2 text-gray-700 group-hover:text-black transition">
             {locale === 'es' ? (
-              <>Formá parte de la <span className="font-medium text-black">red</span> que <span className="font-medium text-black">conecta proveedores</span> con nuevos <span className="font-medium text-black">clientes</span>.
-                Compará presupuestos, mostrá tus servicios y crecé con nosotros.</>
+              <>Estamos revolucionando la forma en que los consumidores encuentran y comparan presupuestos para diversos servicios, queremos que seas parte de esta innovación.</>
             ) : (
               <>
-                Join the <span className="font-medium text-black">network</span> that <span className="font-medium text-black">connects providers</span> with new <span className="font-medium text-black">clients</span>.
-                Compare quotes, showcase your services, and grow with us.
+                We{"'"}re revolutionizing the way consumers find and compare quotes for a wide range of services — and we want you to be part of this innovation.
               </>
             )}
             </p>
@@ -97,13 +95,11 @@ export default function CardSection({ locale }: CardSectionProps) {
             <p className="text-sm mt-2 text-gray-700">
             {locale === 'es' ? (
               <>
-                Creemos que la <span className="font-medium text-black">innovación digital</span> debe ir de la mano con la responsabilidad ambiental y social. 
-                Estamos <span className="font-medium text-black">comprometidos</span> con la sustentabilidad y el <span className="font-medium text-black">medio ambiente</span>.
+                Creemos que la innovación digital debe ir de la mano con la responsabilidad ambiental y social. Estamos comprometidos con la sustentabilidad y el medio ambiente. 
               </>
             ) : (
               <>
-                We believe that <span className="font-medium text-black">digital innovation</span> should go hand in hand with environmental and social responsibility.
-                We are <span className="font-medium text-black">committed</span> to sustainability and the <span className="font-medium text-black">environment</span>.
+                We believe that digital innovation must go hand in hand with environmental and social responsibility. We are committed to sustainability and protecting the environment.
               </>
             )}
             </p>
