@@ -36,7 +36,7 @@ export default function CardSection({ locale }: CardSectionProps) {
             {locale === 'es' ? (
               <>Optimizá tus decisiones de compras con <span className="font-medium text-black">Presu</span>, somos la mejor forma de comparar precios de mercado. Ahorrá tiempo, dinero y tomá decisiones estratégicas que impulsen el crecimiento de tu negocio.</>
             ) : (
-              <>Optimize your purchasing decisions with <span className="font-medium text-black">Presu</span> &mdash; we&rsquo;re the best way to compare market prices. Save time, money, and make strategic decisions that drive your business growth.</>
+              <>Optimize your purchasing decisions with <span className="font-medium text-black">Presu</span> — we’re the best way to compare market prices. Save time, money, and make strategic decisions that drive your business growth.</>
             )}
             </p>
             <span className="text-sm underline mt-2 inline-block text-gray-800 group-hover:text-black transition">
@@ -65,7 +65,9 @@ export default function CardSection({ locale }: CardSectionProps) {
             {locale === 'es' ? (
               "Estamos revolucionando la forma en que los consumidores encuentran y comparan presupuestos para diversos servicios, queremos que seas parte de esta innovación."
             ) : (
-              "We&rsquo;re revolutionizing the way consumers find and compare quotes for a wide range of services &mdash; and we want you to be part of this innovation."
+              <>
+                We{"'"}re revolutionizing the way consumers find and compare quotes for a wide range of services — and we want you to be part of this innovation.
+              </>
             )}
             </p>
             <span className="text-sm underline mt-2 inline-block text-gray-800 group-hover:text-black transition">
