@@ -34,9 +34,9 @@ export default function CardSection({ locale }: CardSectionProps) {
             </h3>
             <p className="text-sm mt-2 text-gray-700 group-hover:text-black transition">
             {locale === 'es' ? (
-              <>Optimizá tus decisiones de compras con <span className="font-medium text-black">Presu</span>, somos la mejor forma de comparar precios de mercado. Ahorrá tiempo, dinero y tomá decisiones estratégicas que impulsen el crecimiento de tu negocio.</>
+              <>Tomá mejores decisiones con <span className="font-medium text-black">Presu</span> — compará precios, ahorrá tiempo y dinero, y hacé crecer tu negocio.</>
             ) : (
-              <>Optimize your purchasing decisions with <span className="font-medium text-black">Presu</span> — we’re the best way to compare market prices. Save time, money, and make strategic decisions that drive your business growth.</>
+              <>Make better decisions with <span className="font-medium text-black">Presu</span> — compare prices, save time and money, and grow your business.</>
             )}
             </p>
             <span className="text-sm underline mt-2 inline-block text-gray-800 group-hover:text-black transition">
@@ -50,7 +50,7 @@ export default function CardSection({ locale }: CardSectionProps) {
           <div className="cursor-pointer">
             <Image
               src={card2Img}
-              alt={locale === 'es' ? "Unite a Presu" : "Join Presu"}
+              alt={locale === 'es' ? "Sé parte de Presu" : "Join Presu"}
               width={1200}
               height={800}
               quality={100}
@@ -59,14 +59,16 @@ export default function CardSection({ locale }: CardSectionProps) {
               className="rounded-lg w-full h-[320px] object-cover group-hover:brightness-95 transition"
             />
             <h3 className="text-lg font-bold mt-4 text-left text-gray-900 group-hover:text-black transition">
-              {locale === 'es' ? "Unite a Presu!" : "Join Presu!"}
+              {locale === 'es' ? "Sé parte de Presu!" : "Join Presu!"}
             </h3>
             <p className="text-sm mt-2 text-gray-700 group-hover:text-black transition">
             {locale === 'es' ? (
-              "Estamos revolucionando la forma en que los consumidores encuentran y comparan presupuestos para diversos servicios, queremos que seas parte de esta innovación."
+              <>Formá parte de la <span className="font-medium text-black">red</span> que <span className="font-medium text-black">conecta proveedores</span> con nuevos <span className="font-medium text-black">clientes</span>.
+                Compará presupuestos, mostrá tus servicios y crecé con nosotros.</>
             ) : (
               <>
-                We{"'"}re revolutionizing the way consumers find and compare quotes for a wide range of services — and we want you to be part of this innovation.
+                Join the <span className="font-medium text-black">network</span> that <span className="font-medium text-black">connects providers</span> with new <span className="font-medium text-black">clients</span>.
+                Compare quotes, showcase your services, and grow with us.
               </>
             )}
             </p>
@@ -93,7 +95,17 @@ export default function CardSection({ locale }: CardSectionProps) {
               {locale === 'es' ? "Comprometidos con la sostenibilidad" : "Committed to Sustainability"}
             </h3>
             <p className="text-sm mt-2 text-gray-700">
-              {locale === 'es' ? "Creemos que la innovación digital debe ir de la mano con la responsabilidad ambiental y social. Estamos comprometidos con la sustentabilidad y el medio ambiente." : "We believe that digital innovation must go hand in hand with environmental and social responsibility. We are committed to sustainability and protecting the environment."}
+            {locale === 'es' ? (
+              <>
+                Creemos que la <span className="font-medium text-black">innovación digital</span> debe ir de la mano con la responsabilidad ambiental y social. 
+                Estamos <span className="font-medium text-black">comprometidos</span> con la sustentabilidad y el <span className="font-medium text-black">medio ambiente</span>.
+              </>
+            ) : (
+              <>
+                We believe that <span className="font-medium text-black">digital innovation</span> should go hand in hand with environmental and social responsibility.
+                We are <span className="font-medium text-black">committed</span> to sustainability and the <span className="font-medium text-black">environment</span>.
+              </>
+            )}
             </p>
             <span className="text-sm underline mt-2 inline-block text-gray-800 group-hover:text-black transition">
               {locale === 'es' ? "Conocé nuestro compromiso" : "Learn about our commitment"}
