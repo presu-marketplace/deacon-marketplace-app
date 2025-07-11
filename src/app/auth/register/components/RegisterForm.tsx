@@ -45,6 +45,7 @@ export default function RegisterComponent({ t = defaultT }: RegisterProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const lang = searchParams.get('lang') || 'es'
+  const postAuthRedirect = searchParams.get('redirectTo') || '/'  // Added for flexibility, mirroring login
 
   const handleRegister = async () => {
     setLoading(true)
@@ -66,7 +67,7 @@ export default function RegisterComponent({ t = defaultT }: RegisterProps) {
     } else if (data?.user && !data?.session) {
       router.push(`/auth/login?check_email=true${lang ? `&lang=${lang}` : ''}`)
     } else {
-      router.push('/dashboard')
+      router.push(postAuthRedirect)
     }
 
     setLoading(false)
@@ -74,10 +75,12 @@ export default function RegisterComponent({ t = defaultT }: RegisterProps) {
 
   const handleGoogleSignup = async () => {
     setGoogleLoading(true)
+    // Dynamic OAuth redirectTo with ?next for final destination
+    const oauthRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(postAuthRedirect)}${lang ? `&lang=${lang}` : ''}`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'http://localhost:3000/auth/callback'
+        redirectTo: oauthRedirectTo
       }
     })
     if (error) {

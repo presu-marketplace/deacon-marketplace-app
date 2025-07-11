@@ -42,7 +42,7 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
 
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirectTo') || '/auth/callback'
+  const postAuthRedirect = searchParams.get('redirectTo') || '/'  // Renamed for clarity; used after successful login
   const lang = searchParams.get('lang') || locale
 
   const handleLogin = async () => {
@@ -54,7 +54,7 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
     if (error) {
       setError(error.message)
     } else {
-      router.push(redirectTo)
+      router.push(postAuthRedirect)
     }
 
     setLoading(false)
@@ -62,10 +62,13 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true)
+    // Always redirect OAuth to /auth/callback, with ?next for final destination
+    const oauthRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(postAuthRedirect)}${lang ? `&lang=${lang}` : ''}`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}${redirectTo}`      }
+        redirectTo: oauthRedirectTo
+      }
     })
     if (error) {
       setError(error.message)
