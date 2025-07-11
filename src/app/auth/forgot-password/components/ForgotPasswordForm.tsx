@@ -45,7 +45,7 @@ export default function ForgotPasswordComponent({
     setSuccess(null)
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'http://localhost:3000/auth/callback'
+      redirectTo: `${window.location.origin}/auth/callback?lang=${locale}`
     })
 
     if (error) {
