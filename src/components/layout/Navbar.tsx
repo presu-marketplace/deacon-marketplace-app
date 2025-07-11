@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import SideMenu from './SideMenu'
 import Link from 'next/link'
+import useUser from '@/features/auth/useUser'
+import UserMenu from './UserMenu'
 
 type NavbarProps = {
   locale: 'en' | 'es'
@@ -25,6 +27,7 @@ export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: 
   const [mounted, setMounted] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const user = useUser()
 
   useEffect(() => {
     setMounted(true)
@@ -35,13 +38,14 @@ export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: 
 
   if (!mounted) return null
 
-  const isLight = forceWhite || scrolled
+  const isLightBg = forceWhite || scrolled
+  const isLightText = forceWhite || (!scrolled && !forceWhite)
 
   return (
     <>
       <header
         className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-          isLight
+          isLightBg
             ? forceWhite
               ? 'bg-white shadow-md border-b'
               : 'bg-white dark:bg-gray-950 shadow-md border-b'
@@ -63,11 +67,9 @@ export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: 
                 strokeWidth={3}
                 stroke="currentColor"
                 className={`w-6 h-6 transition-colors duration-200 ${
-                  forceWhite || (!scrolled && !forceWhite)
-                    ? 'text-black group-hover:text-white'
-                    : 'text-white group-hover:text-white'
+                  isLightText ? 'text-black group-hover:text-white' : 'text-white group-hover:text-white'
                 }`}
-                                              >
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
@@ -84,20 +86,18 @@ export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: 
             </Link>
           </div>
 
-          {/* Right: Language + Auth buttons */}
-          <div className="hidden md:flex items-center text-sm pr-14 gap-5">
+          {/* Right: Language switch + Auth */}
+          <div className="hidden md:flex items-center text-sm pr-14 gap-5 relative">
             <button
               onClick={toggleLocale}
               className={`flex items-center gap-1 transition-colors ${
-                forceWhite || (!scrolled && !forceWhite)
-                  ? 'text-black hover:text-gray-700'
-                  : 'text-white hover:text-gray-300'
+                isLightText ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-300'
               }`}
-                            aria-label="Toggle Language"
+              aria-label="Toggle Language"
             >
               <Image
                 src={locale === 'es' ? '/icons/argentina-flag.svg' : '/icons/us-flag.svg'}
-                alt={locale === 'es' ? 'Español - Argentina' : 'English - United States'}
+                alt={locale === 'es' ? 'Espa\u00f1ol - Argentina' : 'English - United States'}
                 width={20}
                 height={20}
                 className="w-5 h-5 rounded-sm"
@@ -105,21 +105,28 @@ export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: 
               <span className="hidden sm:inline">{t.language}</span>
             </button>
 
-            <button
-              onClick={() => router.push(`/auth/login?lang=${locale}`)}
-              className="bg-white text-black border border-gray-300 px-5 py-2 rounded-full font-medium hover:bg-gray-100 transition"
-            >
-              {t.login}
-            </button>
-            <button
-              onClick={() => router.push(`/auth/register?lang=${locale}`)}
-              className="bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition"
-            >
-              {t.signup}
-            </button>
+            {user ? (
+              <UserMenu user={user} locale={locale} />
+            ) : (
+              <>
+                <button
+                  onClick={() => router.push(`/auth/login?lang=${locale}`)}
+                  className="bg-white text-black border border-gray-300 px-5 py-2 rounded-full font-medium hover:bg-gray-100 transition"
+                >
+                  {t.login}
+                </button>
+
+                <button
+                  onClick={() => router.push(`/auth/register?lang=${locale}`)}
+                  className="bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition"
+                >
+                  {t.signup}
+                </button>
+              </>
+            )}
           </div>
 
-          {/* Right spacer (mobile only) */}
+          {/* Mobile spacer */}
           <div className="md:hidden w-6" />
         </div>
       </header>

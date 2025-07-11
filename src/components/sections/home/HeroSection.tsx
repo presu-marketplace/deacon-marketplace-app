@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 const heroImages = [
   '/images/hero-section/card-01.jpg',
@@ -11,10 +12,13 @@ const heroImages = [
 
 interface HeroProps {
   t: Record<string, string>
+  userAddress: string | null
 }
 
-export default function HeroSection({ t }: HeroProps) {
+export default function HeroSection({ t, userAddress }: HeroProps) {
   const [currentImage, setCurrentImage] = useState(0)
+  const [searchTerm, setSearchTerm] = useState('')
+  const router = useRouter()
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -22,6 +26,13 @@ export default function HeroSection({ t }: HeroProps) {
     }, 4000)
     return () => clearInterval(interval)
   }, [])
+
+  const handleSearch = () => {
+    const params = new URLSearchParams()
+    if (searchTerm) params.set('q', searchTerm)
+    if (userAddress) params.set('location', userAddress)
+    router.push(`/services?${params.toString()}`)
+  }
 
   return (
     <section className="relative w-full h-[580px] md:h-[740px] overflow-hidden">
@@ -41,91 +52,60 @@ export default function HeroSection({ t }: HeroProps) {
       {/* Overlay content */}
       <div className="absolute bottom-[10%] sm:bottom-[15%] left-0 right-0 px-4 sm:px-6 flex justify-center text-white text-center z-20">
         <div className="bg-black/20 rounded-2xl px-8 py-10 w-full max-w-4xl shadow-lg">
-          {/* Headline */}
           <h1 className="text-white text-2xl sm:text-3xl md:text-4xl font-extrabold leading-snug drop-shadow-md select-none">
             {t.heroHeadline}
           </h1>
 
-{/* Mobile layout */}
-<div className="w-full mt-8 flex flex-col sm:hidden items-center gap-3">
+          {/* Mobile layout */}
+          <div className="w-full mt-8 flex flex-col sm:hidden items-center gap-3">
+            <div className="flex items-center bg-white rounded-full px-4 py-2 shadow w-full">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500 mr-2" viewBox="0 0 256 256" fill="currentColor">
+                <path d="M229.66 195.31l-59-59a64.07 64.07 0 0 0-83.83-83.83l34.06 34.07-27.71 27.7-34.07-34.06a64.07 64.07 0 0 0 83.83 83.83l59 59a8 8 0 0 0 11.32-11.32Z" />
+              </svg>
+              <input
+                type="text"
+                placeholder={t.searchPlaceholder}
+                aria-label={t.searchPlaceholder}
+                className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <button className="ml-2 p-2 rounded-full hover:bg-gray-100 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500" viewBox="0 0 256 256" fill="currentColor">
+                  <path d="M128 16A88.1 88.1 0 0 0 40 104c0 66.14 80.18 131.39 83.6 134a8 8 0 0 0 8.8 0C135.82 235.39 216 170.14 216 104A88.1 88.1 0 0 0 128 16Zm0 112a24 24 0 1 1 24-24 24 24 0 0 1-24 24Z" />
+                </svg>
+              </button>
+            </div>
+            <button onClick={handleSearch} className="bg-black text-white rounded-full px-6 py-2 text-sm font-medium shadow hover:bg-gray-900 transition">
+              {t.searchHere}
+            </button>
+          </div>
 
-  {/* Service input with location icon inside */}
-  <div className="flex items-center bg-white rounded-full px-4 py-2 shadow w-full">
-    {/* Wrench icon */}
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-5 h-5 text-gray-500 mr-2"
-      viewBox="0 0 256 256"
-      fill="currentColor"
-    >
-      <path d="M229.66 195.31l-59-59a64.07 64.07 0 0 0-83.83-83.83l34.06 34.07-27.71 27.7-34.07-34.06a64.07 64.07 0 0 0 83.83 83.83l59 59a8 8 0 0 0 11.32-11.32Z" />
-    </svg>
-
-    <input
-      type="text"
-      placeholder={t.searchPlaceholder}
-      aria-label={t.searchPlaceholder}
-      className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
-    />
-
-    {/* Location icon button */}
-    <button className="ml-2 p-2 rounded-full hover:bg-gray-100 transition">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-5 h-5 text-gray-500"
-        viewBox="0 0 256 256"
-        fill="currentColor"
-      >
-        <path d="M128 16A88.1 88.1 0 0 0 40 104c0 66.14 80.18 131.39 83.6 134a8 8 0 0 0 8.8 0C135.82 235.39 216 170.14 216 104A88.1 88.1 0 0 0 128 16Zm0 112a24 24 0 1 1 24-24 24 24 0 0 1-24 24Z" />
-      </svg>
-    </button>
-  </div>
-
-  {/* Search button */}
-  <button className="bg-black text-white rounded-full px-6 py-2 text-sm font-medium shadow hover:bg-gray-900 transition">
-    {t.searchHere}
-  </button>
-</div>
-
-{/* Desktop layout */}
-<div className="hidden sm:flex w-full flex-row justify-center items-center gap-4 mt-8">
-  {/* Service input */}
-  <div className="flex items-center bg-white rounded-full px-4 py-3 shadow w-full max-w-md">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-5 h-5 text-gray-500 mr-3"
-      viewBox="0 0 256 256"
-      fill="currentColor"
-    >
-      <path d="M229.66 195.31l-59-59a64.07 64.07 0 0 0-83.83-83.83l34.06 34.07-27.71 27.7-34.07-34.06a64.07 64.07 0 0 0 83.83 83.83l59 59a8 8 0 0 0 11.32-11.32Z" />
-    </svg>
-    <input
-      type="text"
-      placeholder={t.searchPlaceholder}
-      aria-label={t.searchPlaceholder}
-      className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
-    />
-  </div>
-
-  {/* Location button with text */}
-  <button className="bg-white rounded-full px-5 py-3 shadow text-sm flex items-center gap-2">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-4 h-4 text-gray-500"
-      viewBox="0 0 256 256"
-      fill="currentColor"
-    >
-      <path d="M128 16A88.1 88.1 0 0 0 40 104c0 66.14 80.18 131.39 83.6 134a8 8 0 0 0 8.8 0C135.82 235.39 216 170.14 216 104A88.1 88.1 0 0 0 128 16Zm0 112a24 24 0 1 1 24-24 24 24 0 0 1-24 24Z" />
-    </svg>
-    <span className="text-gray-700">{t.location}</span>
-  </button>
-
-  {/* Search button */}
-  <button className="bg-black text-white rounded-full px-6 py-3 text-sm font-medium shadow hover:bg-gray-900 transition">
-    {t.searchHere}
-  </button>
-</div>
-          
+          {/* Desktop layout */}
+          <div className="hidden sm:flex w-full flex-row justify-center items-center gap-4 mt-8">
+            <div className="flex items-center bg-white rounded-full px-4 py-3 shadow w-full max-w-md">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500 mr-3" viewBox="0 0 256 256" fill="currentColor">
+                <path d="M229.66 195.31l-59-59a64.07 64.07 0 0 0-83.83-83.83l34.06 34.07-27.71 27.7-34.07-34.06a64.07 64.07 0 0 0 83.83 83.83l59 59a8 8 0 0 0 11.32-11.32Z" />
+              </svg>
+              <input
+                type="text"
+                placeholder={t.searchPlaceholder}
+                aria-label={t.searchPlaceholder}
+                className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <button className="bg-white rounded-full px-5 py-3 shadow text-sm flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-500" viewBox="0 0 256 256" fill="currentColor">
+                <path d="M128 16A88.1 88.1 0 0 0 40 104c0 66.14 80.18 131.39 83.6 134a8 8 0 0 0 8.8 0C135.82 235.39 216 170.14 216 104A88.1 88.1 0 0 0 128 16Zm0 112a24 24 0 1 1 24-24 24 24 0 0 1-24 24Z" />
+              </svg>
+              <span className="text-gray-700 truncate max-w-[180px]">{userAddress ?? t.location}</span>
+            </button>
+            <button onClick={handleSearch} className="bg-black text-white rounded-full px-6 py-3 text-sm font-medium shadow hover:bg-gray-900 transition">
+              {t.searchHere}
+            </button>
+          </div>
         </div>
       </div>
     </section>

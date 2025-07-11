@@ -44,7 +44,7 @@ export default function RegisterComponent({ t = defaultT }: RegisterProps) {
 
   const router = useRouter()
   const searchParams = useSearchParams()
-  const lang = searchParams.get('lang')
+  const lang = searchParams.get('lang') || 'es'
 
   const handleRegister = async () => {
     setLoading(true)
@@ -54,7 +54,10 @@ export default function RegisterComponent({ t = defaultT }: RegisterProps) {
       email,
       password,
       options: {
-        data: { full_name: email.split('@')[0] }
+        data: { 
+          full_name: email.split('@')[0],
+          locale: lang
+        }
       }
     })
 

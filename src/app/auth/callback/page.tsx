@@ -10,7 +10,7 @@ export default function CallbackPage() {
     const recover = async () => {
       const { data, error } = await supabase.auth.getSession()
       if (data.session) {
-        router.push('/dashboard')
+        router.push('/') // 🔄 Now goes to homepage
       } else {
         console.error('Recovery failed:', error?.message)
         router.push('/auth/login')
@@ -20,5 +20,5 @@ export default function CallbackPage() {
     recover()
   }, [router])
 
-  return <div className="p-6">Restoring session...</div>
+  return <div className="p-6">Restaurando sesión...</div>
 }

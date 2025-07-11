@@ -5,6 +5,7 @@ import Navbar from '../components/layout/Navbar'
 import HeroSection from '../components/sections/home/HeroSection'
 import CardSection from '../components/sections/home/CardSection'
 import Footer from '../components/layout/Footer'
+import LocationPrompt from '../components/sections/home/LocationPrompt'
 // import { redirect } from 'next/navigation'
 
 export default function HomePage() {
@@ -14,11 +15,18 @@ export default function HomePage() {
   const [locale, setLocale] = useState<'es' | 'en'>('en')
 
   useEffect(() => {
-    const browserLang = navigator.language.startsWith('es') ? 'es' : 'en'
+    const browserLang = navigator.language.toLowerCase().startsWith('es') ? 'es' : 'en'
     setLocale(browserLang as 'es' | 'en')
+  
+    const savedAddress = localStorage.getItem('userAddress')
+    if (savedAddress) {
+      setUserAddress(savedAddress)
+    }
   }, [])
-
+  
   const toggleLocale = () => setLocale(locale === 'en' ? 'es' : 'en')
+
+  const [userAddress, setUserAddress] = useState<string | null>(null)
 
   const t = {
     en: {
@@ -34,23 +42,21 @@ export default function HomePage() {
       footerNote: 'Do Not Sell or Share My Personal Information',
       copyright: 'All rights reserved.',
       heroHeadline: 'Choose smarter, save more.',
-      handyperson: 'Handyperson',
-      landscaping: 'Landscaping',
-      plumbing: 'Plumbing',
-      electrical: 'Electrical',
-      remodeling: 'Remodeling',
-      roofing: 'Roofing',
-      painting: 'Painting',
-      cleaning: 'Cleaning',
-      hvac: 'HVAC',
-      windows: 'Windows',
-      concrete: 'Concrete',
-      applianceRepair: 'Appliance Repair',
       joinAsPro: 'Join as a Pro',
 
       // HeroSection
       location: 'Location',
-      searchHere: 'Search here'
+      searchHere: 'Search here',
+
+      // LocationPrompt
+      allowLocationTitle: 'Allow your location',
+      allowLocationDescription: 'Skip the typing and see services near you',
+      allowButton: 'Allow',
+      typeAddressInstead: 'Type in service address instead',
+      locationFallback: 'Your location',
+      manualLocationPrompt: 'Enter your location:',
+      changeLocation: 'Change',
+
     },
     es: {
       howItWorks: 'Cómo funciona',
@@ -65,23 +71,21 @@ export default function HomePage() {
       footerNote: 'No vender ni compartir mi información personal',
       copyright: 'Todos los derechos reservados.',
       heroHeadline: 'Elegí mejor, ahorrá más.',
-      handyperson: 'Tareas generales',
-      landscaping: 'Jardinería',
-      plumbing: 'Plomería',
-      electrical: 'Electricidad',
-      remodeling: 'Remodelación',
-      roofing: 'Techos',
-      painting: 'Pintura',
-      cleaning: 'Limpieza',
-      hvac: 'Climatización',
-      windows: 'Ventanas',
-      concrete: 'Hormigón',
-      applianceRepair: 'Reparación de electrodomésticos',
       joinAsPro: 'Unirse como profesional',
 
       // HeroSection
       location: 'Ubicación',
       searchHere: 'Buscar',
+
+      // LocationPrompt
+      allowLocationTitle: 'Permitir tu ubicación',
+      allowLocationDescription: 'Omití el ingreso manual y descubrí servicios cerca tuyo',
+      allowButton: 'Permitir',
+      typeAddressInstead: 'Ingresar dirección manualmente',
+      locationFallback: 'Tu ubicación',
+      manualLocationPrompt: 'Ingresá tu ubicación:',
+      changeLocation: 'Cambiar',
+
     }
   }[locale]
 
@@ -91,7 +95,8 @@ export default function HomePage() {
 
       {/* Full-width hero section */}
       <div className="w-full">
-        <HeroSection t={t} />
+        <LocationPrompt t={t} setUserAddress={setUserAddress} />
+        <HeroSection t={t} userAddress={userAddress} />
       </div>
 
       {/* Optional padding wrapper for other sections */}

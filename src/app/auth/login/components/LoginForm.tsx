@@ -42,7 +42,7 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
 
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirectTo') || '/dashboard'
+  const redirectTo = searchParams.get('redirectTo') || '/auth/callback'
   const lang = searchParams.get('lang') || locale
 
   const handleLogin = async () => {
@@ -65,8 +65,7 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'http://localhost:3000/auth/callback'
-      }
+        redirectTo: `${window.location.origin}${redirectTo}`      }
     })
     if (error) {
       setError(error.message)

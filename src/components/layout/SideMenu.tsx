@@ -28,7 +28,7 @@ export default function SideMenu({
   const router = useRouter()
 
   const providerLabel =
-    locale === 'es' ? 'Crear una cuenta de proveedor' : 'Create a provider account'
+    locale === 'es' ? 'Quiero ser cliente' : 'Join as a Customer'
 
   const wrapperClasses = `
     fixed inset-y-0 left-0 w-[85%] max-w-xs z-50 transform transition-transform duration-300 ease-in-out
@@ -91,7 +91,7 @@ export default function SideMenu({
                   router.push(`/auth/register?role=pro&lang=${locale}`)
                   onClose()
                 }}
-                className="w-full text-left"
+                className="w-full text-left pl-4"
               >
                 {providerLabel}
               </button>
