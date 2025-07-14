@@ -1,11 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
 
 export default function SustainabilityPage() {
   const [locale, setLocale] = useState<'en' | 'es'>('es')
+
+  const searchParams = useSearchParams()
+  const langParam = searchParams.get('lang')
+
+  useEffect(() => {
+    if (langParam === 'es' || langParam === 'en') {
+      setLocale(langParam)
+    } else {
+      const browserLang = navigator.language.startsWith('es') ? 'es' : 'en'
+      setLocale(browserLang)
+    }
+  }, [langParam])
 
   const toggleLocale = () => {
     setLocale(prev => (prev === 'en' ? 'es' : 'en'))
@@ -37,19 +50,19 @@ export default function SustainabilityPage() {
 
     reasons: locale === 'es'
       ? [
-          'Reducción del impacto ambiental: Digitalizamos el proceso de solicitud y comparación para minimizar uso de papel, desplazamientos y huella de carbono.',
-          'Eficiencia energética: Nuestra infraestructura prioriza energías renovables y bajo consumo energético.',
-          'Fomento de economías locales: Conectamos clientes con proveedores locales responsables y sostenibles.',
-          'Educación y sensibilización: Compartimos contenidos y guías que fomentan decisiones más conscientes.',
-          'Alianzas y medición de impacto: Colaboramos con organizaciones de sostenibilidad y reportamos nuestros avances.'
-        ]
+        'Reducción del impacto ambiental: Digitalizamos el proceso de solicitud y comparación para minimizar uso de papel, desplazamientos y huella de carbono.',
+        'Eficiencia energética: Nuestra infraestructura prioriza energías renovables y bajo consumo energético.',
+        'Fomento de economías locales: Conectamos clientes con proveedores locales responsables y sostenibles.',
+        'Educación y sensibilización: Compartimos contenidos y guías que fomentan decisiones más conscientes.',
+        'Alianzas y medición de impacto: Colaboramos con organizaciones de sostenibilidad y reportamos nuestros avances.'
+      ]
       : [
-          'Reducing environmental impact: We digitize the request and comparison process to minimize paper use, travel, and carbon footprint.',
-          'Energy efficiency: Our infrastructure prioritizes renewable energy and low energy consumption.',
-          'Support for local economies: We connect clients with responsible, sustainable local providers.',
-          'Education and awareness: We share content and guides that encourage more mindful decisions.',
-          'Alliances and impact measurement: We partner with sustainability organizations and report our progress.'
-        ],
+        'Reducing environmental impact: We digitize the request and comparison process to minimize paper use, travel, and carbon footprint.',
+        'Energy efficiency: Our infrastructure prioritizes renewable energy and low energy consumption.',
+        'Support for local economies: We connect clients with responsible, sustainable local providers.',
+        'Education and awareness: We share content and guides that encourage more mindful decisions.',
+        'Alliances and impact measurement: We partner with sustainability organizations and report our progress.'
+      ],
 
     commitmentTitle: locale === 'es'
       ? 'Nuestro compromiso en acción:'
@@ -57,19 +70,19 @@ export default function SustainabilityPage() {
 
     commitment: locale === 'es'
       ? [
-          'Digitalización integral para reducir el uso de recursos físicos.',
-          'Uso de infraestructura tecnológica eficiente y energías renovables.',
-          'Apoyo a proveedores locales y sostenibles.',
-          'Promoción de prácticas responsables a través de contenidos educativos.',
-          'Medición y reporte de nuestro impacto ambiental y social.'
-        ]
+        'Digitalización integral para reducir el uso de recursos físicos.',
+        'Uso de infraestructura tecnológica eficiente y energías renovables.',
+        'Apoyo a proveedores locales y sostenibles.',
+        'Promoción de prácticas responsables a través de contenidos educativos.',
+        'Medición y reporte de nuestro impacto ambiental y social.'
+      ]
       : [
-          'Comprehensive digitization to reduce the use of physical resources.',
-          'Use of efficient tech infrastructure and renewable energy.',
-          'Support for local and sustainable providers.',
-          'Promotion of responsible practices through educational content.',
-          'Measurement and reporting of our environmental and social impact.'
-        ],
+        'Comprehensive digitization to reduce the use of physical resources.',
+        'Use of efficient tech infrastructure and renewable energy.',
+        'Support for local and sustainable providers.',
+        'Promotion of responsible practices through educational content.',
+        'Measurement and reporting of our environmental and social impact.'
+      ],
 
     closing: locale === 'es'
       ? 'Juntos, podemos marcar la diferencia. En Presu, estamos convencidos de que la innovación y la sostenibilidad son los pilares para un futuro mejor.'
@@ -120,7 +133,7 @@ export default function SustainabilityPage() {
           <p className="text-lg text-gray-300 mb-10">{t.closing2}</p>
 
           <a
-            href="/solutions"
+            href={`/?lang=${locale}`}
             className="inline-block bg-white text-black px-6 py-3 rounded-md font-semibold hover:bg-gray-200 transition"
           >
             {t.callToAction}

@@ -13,9 +13,10 @@ const heroImages = [
 interface HeroProps {
   t: Record<string, string>
   userAddress: string | null
+  locale: 'en' | 'es'
 }
 
-export default function HeroSection({ t, userAddress }: HeroProps) {
+export default function HeroSection({ t, userAddress, locale }: HeroProps) {
   const [currentImage, setCurrentImage] = useState(0)
   const [searchTerm, setSearchTerm] = useState('')
   const router = useRouter()
@@ -31,6 +32,7 @@ export default function HeroSection({ t, userAddress }: HeroProps) {
     const params = new URLSearchParams()
     if (searchTerm) params.set('q', searchTerm)
     if (userAddress) params.set('location', userAddress)
+    if (locale) params.set('lang', locale)
     router.push(`/services?${params.toString()}`)
   }
 
@@ -43,9 +45,8 @@ export default function HeroSection({ t, userAddress }: HeroProps) {
           src={src}
           alt={`Hero ${index + 1}`}
           fill
-          className={`absolute inset-0 object-cover object-[center_20%] transition-opacity duration-1000 ease-in-out ${
-            index === currentImage ? 'opacity-100 z-10' : 'opacity-0 z-0'
-          }`}
+          className={`absolute inset-0 object-cover object-[center_20%] transition-opacity duration-1000 ease-in-out ${index === currentImage ? 'opacity-100 z-10' : 'opacity-0 z-0'
+            }`}
         />
       ))}
 

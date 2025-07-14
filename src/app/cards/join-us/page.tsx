@@ -1,15 +1,32 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 
 export default function JoinUsPage() {
+
   const [locale, setLocale] = useState<'en' | 'es'>('es')
+
+  const searchParams = useSearchParams()
+  const langParam = searchParams.get('lang')
+
+  useEffect(() => {
+    if (langParam === 'es' || langParam === 'en') {
+      setLocale(langParam)
+    } else {
+      const browserLang = navigator.language.startsWith('es') ? 'es' : 'en'
+      setLocale(browserLang)
+    }
+  }, [langParam])
 
   const toggleLocale = () => {
     setLocale(prev => (prev === 'en' ? 'es' : 'en'))
   }
+
+  const router = useRouter()
 
   const t = {
     login: locale === 'es' ? 'Iniciar sesión' : 'Log in',
@@ -32,31 +49,31 @@ export default function JoinUsPage() {
       : 'Why join Presu?',
     benefits: locale === 'es'
       ? [
-          'Acceso a una red de clientes potenciales.',
-          'Transparencia y competencia saludable.',
-          'Compromiso con la sustentabilidad.',
-          'Crecimiento y fidelización a largo plazo.'
-        ]
+        'Acceso a una red de clientes potenciales.',
+        'Transparencia y competencia saludable.',
+        'Compromiso con la sustentabilidad.',
+        'Crecimiento y fidelización a largo plazo.'
+      ]
       : [
-          'Access to a network of potential clients.',
-          'Transparency and healthy competition.',
-          'Commitment to sustainability.',
-          'Long-term growth and customer loyalty.'
-        ],
+        'Access to a network of potential clients.',
+        'Transparency and healthy competition.',
+        'Commitment to sustainability.',
+        'Long-term growth and customer loyalty.'
+      ],
     expectationsTitle: locale === 'es'
       ? '¿Qué buscamos en nuestros proveedores?'
       : 'What do we look for in our providers?',
     expectations: locale === 'es'
       ? [
-          'Compromiso con la calidad del servicio.',
-          'Verificación de estándares sostenibles y responsables.',
-          'Presupuestos competitivos y detallados.'
-        ]
+        'Compromiso con la calidad del servicio.',
+        'Verificación de estándares sostenibles y responsables.',
+        'Presupuestos competitivos y detallados.'
+      ]
       : [
-          'Commitment to service quality.',
-          'Verification of sustainable and responsible standards.',
-          'Competitive and detailed quotes.'
-        ],
+        'Commitment to service quality.',
+        'Verification of sustainable and responsible standards.',
+        'Competitive and detailed quotes.'
+      ],
     closing: locale === 'es'
       ? '¿Listo para sumarte a esta comunidad innovadora?'
       : 'Ready to join this innovative community?',
@@ -103,12 +120,12 @@ export default function JoinUsPage() {
             {t.closing}
           </p>
 
-          <a
-            href="/signup"
-            className="inline-block bg-white text-black px-6 py-3 rounded-md font-semibold hover:bg-gray-200 transition"
+          <button
+            onClick={() => router.push(`/auth/register?role=pro&lang=${locale}`)}
+            className="bg-white text-black px-6 py-3 rounded-md font-semibold hover:bg-gray-200 transition"
           >
             {t.callToAction}
-          </a>
+          </button>
         </section>
       </main>
     </>

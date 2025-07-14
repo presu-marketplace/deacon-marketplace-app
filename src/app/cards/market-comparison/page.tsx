@@ -1,16 +1,35 @@
 'use client'
 
-import { useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 export default function MarketComparison() {
-  const [locale, setLocale] = useState<'en' | 'es'>('es')
 
+  const router = useRouter()
+
+  const searchParams = useSearchParams()
+  const langParam = searchParams.get('lang')
+  
+  const [locale, setLocale] = useState<'en' | 'es'>('en') // don't use null
+  
+  useEffect(() => {
+    if (langParam === 'es' || langParam === 'en') {
+      setLocale(langParam)
+    } else {
+      const browserLang = navigator.language.startsWith('es') ? 'es' : 'en'
+      setLocale(browserLang)
+    }
+  }, [langParam])
+    
   const toggleLocale = () => {
     setLocale(prev => (prev === 'en' ? 'es' : 'en'))
   }
+
+  if (!locale) return null // prevent premature rendering
 
   const t = {
     // Navbar
@@ -65,11 +84,12 @@ export default function MarketComparison() {
             <p className="text-gray-300 text-lg mb-8">{t.heroSubtitle}</p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/signup">
-                <button className="bg-white text-black font-semibold px-6 py-3 rounded-md hover:bg-gray-200 transition">
-                  {t.heroCtaPrimary}
-                </button>
-              </Link>
+              <button
+                onClick={() => router.push(`/auth/register?lang=${locale}`)}
+                className="bg-white text-black font-semibold px-6 py-3 rounded-md hover:bg-gray-200 transition"
+              >
+                {t.heroCtaPrimary}
+              </button>
               <Link href="/solutions">
                 <button className="text-white border border-white font-semibold px-6 py-3 rounded-md hover:bg-white hover:text-black transition">
                   {t.heroCtaSecondary}

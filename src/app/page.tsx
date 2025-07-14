@@ -1,32 +1,36 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Navbar from '../components/layout/Navbar'
 import HeroSection from '../components/sections/home/HeroSection'
 import CardSection from '../components/sections/home/CardSection'
 import Footer from '../components/layout/Footer'
 import LocationPrompt from '../components/sections/home/LocationPrompt'
-// import { redirect } from 'next/navigation'
 
 export default function HomePage() {
-  // Temporarily redirect homepage to under construction
-  // redirect('/under-construction') 
+  const searchParams = useSearchParams()
+  const langParam = searchParams.get('lang')
 
   const [locale, setLocale] = useState<'es' | 'en'>('en')
+  const [userAddress, setUserAddress] = useState<string | null>(null)
 
   useEffect(() => {
-    const browserLang = navigator.language.toLowerCase().startsWith('es') ? 'es' : 'en'
-    setLocale(browserLang as 'es' | 'en')
-  
+    // Prefer ?lang=... from URL over browser language
+    if (langParam === 'es' || langParam === 'en') {
+      setLocale(langParam)
+    } else {
+      const browserLang = navigator.language.toLowerCase().startsWith('es') ? 'es' : 'en'
+      setLocale(browserLang)
+    }
+
     const savedAddress = localStorage.getItem('userAddress')
     if (savedAddress) {
       setUserAddress(savedAddress)
     }
-  }, [])
-  
-  const toggleLocale = () => setLocale(locale === 'en' ? 'es' : 'en')
+  }, [langParam])
 
-  const [userAddress, setUserAddress] = useState<string | null>(null)
+  const toggleLocale = () => setLocale(locale === 'en' ? 'es' : 'en')
 
   const t = {
     en: {
@@ -44,11 +48,9 @@ export default function HomePage() {
       heroHeadline: 'Choose smarter, save more.',
       joinAsPro: 'Join as a Pro',
 
-      // HeroSection
       location: 'Location',
       searchHere: 'Search here',
 
-      // LocationPrompt
       allowLocationTitle: 'Allow your location',
       allowLocationDescription: 'Skip the typing and see services near you',
       allowButton: 'Allow',
@@ -56,7 +58,6 @@ export default function HomePage() {
       locationFallback: 'Your location',
       manualLocationPrompt: 'Enter your location:',
       changeLocation: 'Change',
-
     },
     es: {
       howItWorks: 'Cómo funciona',
@@ -73,11 +74,9 @@ export default function HomePage() {
       heroHeadline: 'Elegí mejor, ahorrá más.',
       joinAsPro: 'Unirse como profesional',
 
-      // HeroSection
       location: 'Ubicación',
       searchHere: 'Buscar',
 
-      // LocationPrompt
       allowLocationTitle: 'Permitir tu ubicación',
       allowLocationDescription: 'Omití el ingreso manual y descubrí servicios cerca tuyo',
       allowButton: 'Permitir',
@@ -85,21 +84,16 @@ export default function HomePage() {
       locationFallback: 'Tu ubicación',
       manualLocationPrompt: 'Ingresá tu ubicación:',
       changeLocation: 'Cambiar',
-
     }
   }[locale]
 
   return (
     <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
       <Navbar locale={locale} toggleLocale={toggleLocale} t={t} />
-
-      {/* Full-width hero section */}
       <div className="w-full">
         <LocationPrompt t={t} setUserAddress={setUserAddress} />
-        <HeroSection t={t} userAddress={userAddress} />
+        <HeroSection locale={locale} t={t} userAddress={userAddress} />
       </div>
-
-      {/* Optional padding wrapper for other sections */}
       <div className="w-full">
         <CardSection locale={locale} t={t} />
         <Footer t={t} />

@@ -1,11 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Navbar from '@/components/layout/Navbar'
+import { useSearchParams } from 'next/navigation'
 
 export default function ServicesPage() {
-  const [locale, setLocale] = useState<'es' | 'en'>('es')
+  const [locale, setLocale] = useState<'en' | 'es'>('es')
+
+  const searchParams = useSearchParams()
+  const langParam = searchParams.get('lang')
+
+  useEffect(() => {
+    if (langParam === 'es' || langParam === 'en') {
+      setLocale(langParam)
+    } else {
+      const browserLang = navigator.language.startsWith('es') ? 'es' : 'en'
+      setLocale(browserLang)
+    }
+  }, [langParam])
 
   const toggleLocale = () => setLocale(prev => (prev === 'en' ? 'es' : 'en'))
 
@@ -22,28 +35,28 @@ export default function ServicesPage() {
       title: t.section1,
       services: [
         {
-          name: locale === 'es' ? 'Plomería Express' : 'Express Plumbing',
+          name: locale === 'es' ? 'Seguridad privada' : 'Private Security',
           rating: '4.8',
           time: '24/7',
-          image: '/images/services/plumbing.jpg'
+          image: '/images/services/security.jpg'
         },
         {
-          name: locale === 'es' ? 'Electricistas Rápidos' : 'Quick Electricians',
-          rating: '4.6',
-          time: '10-18hs',
-          image: '/images/services/electrician.jpg'
-        },
-        {
-          name: locale === 'es' ? 'Climatización Hogar' : 'Home A/C Setup',
-          rating: '4.9',
-          time: '8-20hs',
-          image: '/images/services/air.jpg'
-        },
-        {
-          name: locale === 'es' ? 'Pintores Express' : 'Express Painters',
+          name: locale === 'es' ? 'Limpieza Profesional' : 'Professional Cleaning',
           rating: '4.7',
-          time: 'Lunes a viernes',
-          image: '/images/services/painting.jpg'
+          time: '9-18hs',
+          image: '/images/services/cleaning.jpg'
+        },
+        {
+          name: locale === 'es' ? 'Fumigación a domicilio' : 'Home Fumigation',
+          rating: '4.6',
+          time: '10-17hs',
+          image: '/images/services/fumigation.jpg'
+        },
+        {
+          name: locale === 'es' ? 'Mantenimiento de ascensores' : 'Elevator Maintenance',
+          rating: '4.5',
+          time: '8-16hs',
+          image: '/images/services/elevator_maintenance.jpg'
         }
       ]
     },
@@ -57,22 +70,28 @@ export default function ServicesPage() {
           image: '/images/services/locksmith.jpg'
         },
         {
-          name: locale === 'es' ? 'Fletes y Mudanzas' : 'Moving & Transport',
+          name: locale === 'es' ? 'Escribanía' : 'Notary Services',
+          rating: '4.7',
+          time: '10-18hs',
+          image: '/images/services/notary.jpg'
+        },
+        {
+          name: locale === 'es' ? 'Community Manager' : 'Community Manager',
+          rating: '4.5',
+          time: 'Online',
+          image: '/images/services/community.jpg'
+        },
+        {
+          name: locale === 'es' ? 'Traslados Ejecutivos (Combi)' : 'Executive Transfers (Combi)',
+          rating: '4.8',
+          time: '24/7',
+          image: '/images/services/transfer.jpg'
+        },
+        {
+          name: locale === 'es' ? 'Salones Infantiles' : 'Kids Party Venues',
           rating: '4.6',
-          time: 'Flexible',
-          image: '/images/services/moving.jpg'
-        },
-        {
-          name: locale === 'es' ? 'Reparación Celulares' : 'Phone Repair',
-          rating: '4.4',
-          time: '11-17hs',
-          image: '/images/services/phone.jpg'
-        },
-        {
-          name: locale === 'es' ? 'Albañiles Zona Norte' : 'Bricklayers North Zone',
-          rating: '4.3',
-          time: '9-17hs',
-          image: '/images/services/brick.jpg'
+          time: 'Fines de semana',
+          image: '/images/services/kids-party.jpg'
         }
       ]
     }

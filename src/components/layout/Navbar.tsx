@@ -44,13 +44,12 @@ export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: 
   return (
     <>
       <header
-        className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-          isLightBg
+        className={`fixed top-0 z-50 w-full transition-all duration-300 ${isLightBg
             ? forceWhite
               ? 'bg-white shadow-md border-b'
               : 'bg-white dark:bg-gray-950 shadow-md border-b'
             : 'bg-transparent'
-        }`}
+          }`}
       >
         <div className="w-full flex items-center justify-between px-6 sm:px-10 lg:px-14 py-1.5">
           {/* Left: Hamburger + Logo */}
@@ -66,33 +65,34 @@ export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: 
                 viewBox="0 0 24 24"
                 strokeWidth={3}
                 stroke="currentColor"
-                className={`w-6 h-6 transition-colors duration-200 ${
-                  isLightText ? 'text-black group-hover:text-white' : 'text-white group-hover:text-white'
-                }`}
+                className={`w-6 h-6 transition-colors duration-200 ${isLightText ? 'text-black group-hover:text-white' : 'text-white group-hover:text-white'
+                  }`}
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
 
-            <Link href="/" passHref>
+            <div
+              onClick={() => router.push(`/?lang=${locale}`)}
+              className="cursor-pointer"
+            >
               <Image
                 src="/logo/presu-02.png"
                 alt="Presu Logo"
                 width={140}
                 height={48}
-                className="object-contain cursor-pointer"
+                className="object-contain"
                 priority
               />
-            </Link>
+            </div>
           </div>
 
           {/* Right: Language switch + Auth */}
           <div className="hidden md:flex items-center text-sm pr-14 gap-5 relative">
             <button
               onClick={toggleLocale}
-              className={`flex items-center gap-1 transition-colors ${
-                isLightText ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-300'
-              }`}
+              className={`flex items-center gap-1 transition-colors ${isLightText ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-300'
+                }`}
               aria-label="Toggle Language"
             >
               <Image

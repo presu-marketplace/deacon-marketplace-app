@@ -28,7 +28,7 @@ export default function SideMenu({
   const router = useRouter()
 
   const providerLabel =
-    locale === 'es' ? 'Quiero ser cliente' : 'Join as a Customer'
+    locale === 'es' ? 'Quiero ser proveedor' : 'Join as a provider'
 
   const wrapperClasses = `
     fixed inset-y-0 left-0 w-[85%] max-w-xs z-50 transform transition-transform duration-300 ease-in-out
@@ -84,7 +84,7 @@ export default function SideMenu({
           </button>
 
           {/* Additional Options */}
-          <ul className="text-sm space-y-4 mt-2">
+          <ul className="text-sm space-y-4 font-semibold mt-6">
             <li>
               <button
                 onClick={() => {
