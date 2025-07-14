@@ -61,7 +61,7 @@ export default function ServicesClient() {
         {
           name: locale === 'es' ? 'Mantenimiento de ascensores' : 'Elevator Maintenance',
           rating: '4.5',
-          time: '8-16hs',
+          time: '24/7',
           image: '/images/services/elevator_maintenance.jpg'
         }
       ]
@@ -69,12 +69,12 @@ export default function ServicesClient() {
     {
       title: t.section2,
       services: [
-        {
-          name: locale === 'es' ? 'Cerrajeros 24hs' : '24h Locksmiths',
-          rating: '4.5',
-          time: '24hs',
-          image: '/images/services/locksmith.jpg'
-        },
+        // {
+        //   name: locale === 'es' ? 'Cerrajeros 24hs' : '24h Locksmiths',
+        //   rating: '4.5',
+        //   time: '24hs',
+        //   image: '/images/services/locksmith.jpg'
+        // },
         {
           name: locale === 'es' ? 'Escribanía' : 'Notary Services',
           rating: '4.7',
