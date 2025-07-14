@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import SideMenu from './SideMenu'
-import Link from 'next/link'
 import useUser from '@/features/auth/useUser'
 import UserMenu from './UserMenu'
 
