@@ -159,7 +159,7 @@ export default function ServiceFormClient({ service }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-white dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-white flex flex-col">
+    <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white flex flex-col">
       <Navbar locale={locale} toggleLocale={toggleLocale} t={navT} forceWhite />
       <main className="flex-grow flex items-center justify-center px-4 pt-24 pb-12">
         <form
@@ -168,7 +168,7 @@ export default function ServiceFormClient({ service }: Props) {
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="nombre">
+              <label className="block text-xs font-medium mb-1" htmlFor="nombre">
                 {t.name}
               </label>
               <input
@@ -177,11 +177,11 @@ export default function ServiceFormClient({ service }: Props) {
                 placeholder={t.namePlaceholder}
                 value={nombre}
                 onChange={e => setNombre(e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="email">
+              <label className="block text-xs font-medium mb-1" htmlFor="email">
                 {t.email}
               </label>
               <input
@@ -190,11 +190,11 @@ export default function ServiceFormClient({ service }: Props) {
                 placeholder={t.emailPlaceholder}
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="telefono">
+              <label className="block text-xs font-medium mb-1" htmlFor="telefono">
                 {t.phone}
               </label>
               <input
@@ -203,18 +203,18 @@ export default function ServiceFormClient({ service }: Props) {
                 placeholder={t.phonePlaceholder}
                 value={telefono}
                 onChange={e => setTelefono(e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="tipoPropiedad">
+              <label className="block text-xs font-medium mb-1" htmlFor="tipoPropiedad">
                 {t.propertyType}
               </label>
               <select
                 id="tipoPropiedad"
                 value={tipoPropiedad}
                 onChange={e => setTipoPropiedad(e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
               >
                 <option value="">{t.propertyTypePlaceholder}</option>
                 {t.propertyTypes.map(pt => (
@@ -225,7 +225,7 @@ export default function ServiceFormClient({ service }: Props) {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="direccion">
+              <label className="block text-xs font-medium mb-1" htmlFor="direccion">
                 {t.address}
               </label>
               <input
@@ -234,11 +234,11 @@ export default function ServiceFormClient({ service }: Props) {
                 placeholder={t.addressPlaceholder}
                 value={direccion}
                 onChange={e => setDireccion(e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold mb-1" htmlFor="localidad">
+              <label className="block text-xs font-medium mb-1" htmlFor="localidad">
                 {t.city}
               </label>
               <input
@@ -247,12 +247,12 @@ export default function ServiceFormClient({ service }: Props) {
                 placeholder={t.cityPlaceholder}
                 value={localidad}
                 onChange={e => setLocalidad(e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
               />
             </div>
             {isSeguridad && (
               <div className="sm:col-span-2">
-                <span className="block text-sm font-semibold mb-1">{t.sistemasTitle}</span>
+                <span className="block text-xs font-medium mb-1">{t.sistemasTitle}</span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {t.sistemasOptions.map(opt => (
                     <label
@@ -263,7 +263,7 @@ export default function ServiceFormClient({ service }: Props) {
                         type="checkbox"
                         checked={sistemas.includes(opt)}
                         onChange={() => toggleSistema(opt)}
-                        className="h-4 w-4 text-red-500 focus:ring-red-500"
+                        className="h-4 w-4 text-black dark:text-white focus:ring-black dark:focus:ring-white"
                       />
                       <span className="text-sm">{opt}</span>
                     </label>
@@ -272,7 +272,7 @@ export default function ServiceFormClient({ service }: Props) {
               </div>
             )}
             <div className="sm:col-span-2">
-              <label className="block text-sm font-semibold mb-1" htmlFor="mensaje">
+              <label className="block text-xs font-medium mb-1" htmlFor="mensaje">
                 {t.message}
               </label>
               <textarea
@@ -280,14 +280,14 @@ export default function ServiceFormClient({ service }: Props) {
                 placeholder={t.messagePlaceholder}
                 value={mensaje}
                 onChange={e => setMensaje(e.target.value)}
-                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
                 rows={4}
               />
             </div>
             <div className="sm:col-span-2">
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 rounded-md shadow-md hover:shadow-red-500/50 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-red-300 dark:focus:ring-red-700"
+                className="w-full bg-black text-white rounded-full px-6 py-3 text-sm font-medium shadow hover:bg-gray-900 transition-transform hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-700"
               >
                 {t.send}
               </button>
