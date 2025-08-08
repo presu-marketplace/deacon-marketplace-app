@@ -139,12 +139,12 @@ export default function ServicesClient() {
             </div>
 
             <div className="flex overflow-x-auto space-x-4 pb-2">
-              {section.services.map((s, i) => (
-                <div
-                  key={i}
-                  onClick={() => router.push(`/services/${s.slug}`)}
-                  className="flex-shrink-0 w-[250px] rounded-lg overflow-hidden shadow hover:shadow-md transition bg-white cursor-pointer"
-                >
+                {section.services.map((s, i) => (
+                  <div
+                    key={i}
+                    onClick={() => router.push(`/services/${s.slug}?lang=${locale}`)}
+                    className="flex-shrink-0 w-[250px] rounded-lg overflow-hidden shadow hover:shadow-md transition bg-white cursor-pointer"
+                  >
                   <Image
                     src={s.image}
                     alt={s.name}

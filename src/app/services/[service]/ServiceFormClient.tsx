@@ -5,39 +5,83 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 
-const sistemasOptions = [
-  'Seguridad Física',
-  'TOTEM',
-  'Alarma y CCTV',
-  'Control de acceso',
-  'Reparación y mantenimiento',
-  'Custodia de mercadería',
-  'Otro'
-]
-
-const propertyTypes = [
-  'Departamento',
-  'Casa',
-  'Edificios y condominios',
-  'Country privado',
-  'Empresa o industria',
-  'Comercio',
-  'Proyecto en construcción'
-]
+const translations = {
+  es: {
+    name: 'Nombre',
+    namePlaceholder: 'Tu nombre',
+    email: 'Email',
+    emailPlaceholder: 'tu@email.com',
+    phone: 'Teléfono',
+    phonePlaceholder: 'Tu teléfono',
+    sistemasTitle: 'Sistemas de interés',
+    sistemasOptions: [
+      'Seguridad Física',
+      'TOTEM',
+      'Alarma y CCTV',
+      'Control de acceso',
+      'Reparación y mantenimiento',
+      'Custodia de mercadería',
+      'Otro'
+    ],
+    propertyType: 'Tipo de Propiedad',
+    propertyTypePlaceholder: 'Seleccione...',
+    propertyTypes: [
+      'Departamento',
+      'Casa',
+      'Edificios y condominios',
+      'Country privado',
+      'Empresa o industria',
+      'Comercio',
+      'Proyecto en construcción'
+    ],
+    address: 'Dirección',
+    addressPlaceholder: 'Dirección',
+    city: 'Localidad',
+    cityPlaceholder: 'Localidad',
+    message: 'Mensaje',
+    messagePlaceholder: 'Escribe tu mensaje',
+    send: 'Enviar'
+  },
+  en: {
+    name: 'Name',
+    namePlaceholder: 'Your name',
+    email: 'Email',
+    emailPlaceholder: 'you@example.com',
+    phone: 'Phone',
+    phonePlaceholder: 'Your phone',
+    sistemasTitle: 'Systems of Interest',
+    sistemasOptions: [
+      'Physical Security',
+      'TOTEM',
+      'Alarm & CCTV',
+      'Access Control',
+      'Repair & Maintenance',
+      'Merchandise Custody',
+      'Other'
+    ],
+    propertyType: 'Property Type',
+    propertyTypePlaceholder: 'Select...',
+    propertyTypes: [
+      'Apartment',
+      'House',
+      'Buildings & Condominiums',
+      'Gated Community',
+      'Company or Industry',
+      'Commerce',
+      'Construction Project'
+    ],
+    address: 'Address',
+    addressPlaceholder: 'Address',
+    city: 'City',
+    cityPlaceholder: 'City',
+    message: 'Message',
+    messagePlaceholder: 'Write your message',
+    send: 'Send'
+  }
+}
 
 type Props = {
   service: string
-}
-
-const serviceTitles: Record<string, string> = {
-  seguridad: 'Seguridad',
-  limpieza: 'Limpieza Profesional',
-  fumigacion: 'Fumigación a domicilio',
-  'mantenimiento-ascensores': 'Mantenimiento de ascensores',
-  escribania: 'Escribanía',
-  'community-manager': 'Community Manager',
-  'traslados-ejecutivos': 'Traslados Ejecutivos (Combi)',
-  'salones-infantiles': 'Salones Infantiles'
 }
 
 export default function ServiceFormClient({ service }: Props) {
@@ -71,16 +115,16 @@ export default function ServiceFormClient({ service }: Props) {
   const [sistemas, setSistemas] = useState<string[]>([])
 
   const isSeguridad = service.toLowerCase() === 'seguridad'
+  const t = translations[locale]
 
   const toggleSistema = (value: string) => {
-    setSistemas((prev) =>
-      prev.includes(value) ? prev.filter((s) => s !== value) : [...prev, value]
+    setSistemas(prev =>
+      prev.includes(value) ? prev.filter(s => s !== value) : [...prev, value]
     )
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Placeholder for form submission logic
     console.log({
       nombre,
       email,
@@ -92,8 +136,6 @@ export default function ServiceFormClient({ service }: Props) {
       mensaje
     })
   }
-
-  const title = serviceTitles[service] || service
 
   const navT = {
     login: locale === 'es' ? 'Iniciar sesión' : 'Log in',
@@ -117,134 +159,140 @@ export default function ServiceFormClient({ service }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-white dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-white flex flex-col">
       <Navbar locale={locale} toggleLocale={toggleLocale} t={navT} forceWhite />
       <main className="flex-grow flex items-center justify-center px-4 pt-24 pb-12">
         <form
           onSubmit={handleSubmit}
-          className="w-full max-w-xl space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-8 shadow-lg"
+          className="w-full max-w-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-xl"
         >
-          <h1 className="text-2xl font-bold text-center mb-4">Solicitar servicio: {title}</h1>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="nombre">
-              Nombre
-            </label>
-            <input
-              id="nombre"
-              type="text"
-              placeholder="Tu nombre"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="tu@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="telefono">
-              Teléfono
-            </label>
-            <input
-              id="telefono"
-              type="tel"
-              placeholder="Tu teléfono"
-              value={telefono}
-              onChange={(e) => setTelefono(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-          </div>
-          {isSeguridad && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <span className="block text-sm font-medium mb-1">Sistemas de interés</span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {sistemasOptions.map((opt) => (
-                  <label key={opt} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={sistemas.includes(opt)}
-                      onChange={() => toggleSistema(opt)}
-                      className="h-4 w-4 accent-red-500"
-                    />
-                    <span className="text-sm">{opt}</span>
-                  </label>
-                ))}
-              </div>
+              <label className="block text-sm font-semibold mb-1" htmlFor="nombre">
+                {t.name}
+              </label>
+              <input
+                id="nombre"
+                type="text"
+                placeholder={t.namePlaceholder}
+                value={nombre}
+                onChange={e => setNombre(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+              />
             </div>
-          )}
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="tipoPropiedad">
-              Tipo de Propiedad
-            </label>
-            <select
-              id="tipoPropiedad"
-              value={tipoPropiedad}
-              onChange={(e) => setTipoPropiedad(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500"
-            >
-              <option value="">Seleccione...</option>
-              {propertyTypes.map((pt) => (
-                <option key={pt} value={pt}>
-                  {pt}
-                </option>
-              ))}
-            </select>
+            <div>
+              <label className="block text-sm font-semibold mb-1" htmlFor="email">
+                {t.email}
+              </label>
+              <input
+                id="email"
+                type="email"
+                placeholder={t.emailPlaceholder}
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-1" htmlFor="telefono">
+                {t.phone}
+              </label>
+              <input
+                id="telefono"
+                type="tel"
+                placeholder={t.phonePlaceholder}
+                value={telefono}
+                onChange={e => setTelefono(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-1" htmlFor="tipoPropiedad">
+                {t.propertyType}
+              </label>
+              <select
+                id="tipoPropiedad"
+                value={tipoPropiedad}
+                onChange={e => setTipoPropiedad(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+              >
+                <option value="">{t.propertyTypePlaceholder}</option>
+                {t.propertyTypes.map(pt => (
+                  <option key={pt} value={pt}>
+                    {pt}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-1" htmlFor="direccion">
+                {t.address}
+              </label>
+              <input
+                id="direccion"
+                type="text"
+                placeholder={t.addressPlaceholder}
+                value={direccion}
+                onChange={e => setDireccion(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold mb-1" htmlFor="localidad">
+                {t.city}
+              </label>
+              <input
+                id="localidad"
+                type="text"
+                placeholder={t.cityPlaceholder}
+                value={localidad}
+                onChange={e => setLocalidad(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+              />
+            </div>
+            {isSeguridad && (
+              <div className="sm:col-span-2">
+                <span className="block text-sm font-semibold mb-1">{t.sistemasTitle}</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {t.sistemasOptions.map(opt => (
+                    <label
+                      key={opt}
+                      className="flex items-center space-x-2 rounded-md p-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={sistemas.includes(opt)}
+                        onChange={() => toggleSistema(opt)}
+                        className="h-4 w-4 text-red-500 focus:ring-red-500"
+                      />
+                      <span className="text-sm">{opt}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-semibold mb-1" htmlFor="mensaje">
+                {t.message}
+              </label>
+              <textarea
+                id="mensaje"
+                placeholder={t.messagePlaceholder}
+                value={mensaje}
+                onChange={e => setMensaje(e.target.value)}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 hover:border-red-400"
+                rows={4}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 rounded-md shadow-md hover:shadow-red-500/50 transition-all duration-300 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-red-300 dark:focus:ring-red-700"
+              >
+                {t.send}
+              </button>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="direccion">
-              Dirección
-            </label>
-            <input
-              id="direccion"
-              type="text"
-              placeholder="Dirección"
-              value={direccion}
-              onChange={(e) => setDireccion(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="localidad">
-              Localidad
-            </label>
-            <input
-              id="localidad"
-              type="text"
-              placeholder="Localidad"
-              value={localidad}
-              onChange={(e) => setLocalidad(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="mensaje">
-              Mensaje
-            </label>
-            <textarea
-              id="mensaje"
-              placeholder="Escribe tu mensaje"
-              value={mensaje}
-              onChange={(e) => setMensaje(e.target.value)}
-              className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-3 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500"
-              rows={4}
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-black hover:bg-gray-900 text-white py-3 rounded-full transition"
-          >
-            Enviar
-          </button>
         </form>
       </main>
       <Footer t={footerT} />
