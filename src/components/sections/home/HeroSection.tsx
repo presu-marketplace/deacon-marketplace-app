@@ -97,7 +97,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
           </div>
 
           {/* Desktop layout */}
-          <div className="hidden sm:flex w-full flex-row justify-center percursor-pointeritems-center gap-4 mt-8">
+          <div className="hidden sm:flex w-full flex-row justify-center cursor-pointer items-center gap-4 mt-8">
             <div className="flex items-center bg-white rounded-full px-4 py-3 shadow w-full max-w-md">
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
