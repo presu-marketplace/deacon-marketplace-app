@@ -17,6 +17,23 @@ create table if not exists api.providers (
   coverage_area text[]
 );
 
+-- Ensure provider entries are tied to profiles with provider role
+create function if not exists api.ensure_provider_role()
+returns trigger as $$
+begin
+  if exists (
+    select 1 from api.profiles p where p.id = new.id and p.role = 'provider'
+  ) then
+    return new;
+  end if;
+  raise exception 'profile % is not a provider', new.id;
+end;
+$$ language plpgsql;
+
+create trigger providers_role_check
+  before insert or update on api.providers
+  for each row execute function api.ensure_provider_role();
+
 -- Remove deprecated services array column if present
 alter table api.providers drop column if exists services;
 
@@ -37,6 +54,26 @@ create table if not exists api.service_requests (
   attachments text[],
   created_at timestamptz default now()
 );
+
+-- Ensure service requests come only from client profiles
+create function if not exists api.ensure_client_role()
+returns trigger as $$
+begin
+  if new.user_id is null then
+    return new;
+  end if;
+  if exists (
+    select 1 from api.profiles p where p.id = new.user_id and p.role = 'client'
+  ) then
+    return new;
+  end if;
+  raise exception 'profile % is not a client', new.user_id;
+end;
+$$ language plpgsql;
+
+create trigger service_requests_role_check
+  before insert or update on api.service_requests
+  for each row execute function api.ensure_client_role();
 
 -- Remove legacy category column if exists
 alter table api.service_requests drop column if exists category;
