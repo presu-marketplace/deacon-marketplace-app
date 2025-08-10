@@ -1,8 +1,11 @@
 import * as React from "react";
 
 type StepperProps = {
+  /** 1-based index of the active step */
   currentStep: number;
+  /** Step labels in order */
   steps: string[];
+  /** Optional click handler to allow navigation */
   onStepClick?: (index: number) => void;
   className?: string;
 };
@@ -13,6 +16,7 @@ export default function Stepper({
   onStepClick,
   className = "",
 }: StepperProps) {
+  // clamp for safety
   const active = Math.min(Math.max(currentStep, 1), steps.length);
 
   return (
@@ -29,6 +33,7 @@ export default function Stepper({
 
           return (
             <li key={label} className="flex items-center flex-1 min-w-0">
+              {/* Node */}
               <button
                 type="button"
                 aria-current={isCurrent ? "step" : undefined}
@@ -47,6 +52,7 @@ export default function Stepper({
                 ].join(" ")}
               >
                 {isDone ? (
+                  /* Check icon */
                   <svg
                     viewBox="0 0 24 24"
                     className="h-5 w-5"
@@ -63,6 +69,7 @@ export default function Stepper({
                 )}
               </button>
 
+              {/* Label */}
               <div className="ml-2 sm:ml-3 min-w-0">
                 <span
                   className={[
@@ -77,6 +84,7 @@ export default function Stepper({
                 </span>
               </div>
 
+              {/* Connector */}
               {index !== steps.length && (
                 <div
                   aria-hidden
@@ -97,3 +105,4 @@ export default function Stepper({
     </nav>
   );
 }
+
