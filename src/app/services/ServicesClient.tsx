@@ -142,22 +142,27 @@ export default function ServicesClient() {
                 {section.services.map((s, i) => (
                   <div
                     key={i}
-                    onClick={() => router.push(`/services/${s.slug}?lang=${locale}`)}
-                    className="flex-shrink-0 w-[250px] rounded-lg overflow-hidden shadow hover:shadow-md transition bg-white cursor-pointer"
+                    className="relative flex-shrink-0 w-[250px] rounded-lg overflow-hidden shadow hover:shadow-md transition bg-white"
                   >
-                  <Image
-                    src={s.image}
-                    alt={s.name}
-                    width={250}
-                    height={160}
-                    className="w-full h-36 sm:h-40 object-cover"
-                  />
-                  <div className="px-3 py-2">
-                    <h3 className="font-medium text-sm truncate">{s.name}</h3>
-                    <p className="text-xs text-gray-600">⭐ {s.rating} • {s.time}</p>
+                    <Image
+                      src={s.image}
+                      alt={s.name}
+                      width={250}
+                      height={160}
+                      className="w-full h-36 sm:h-40 object-cover"
+                    />
+                    <div className="px-3 py-2">
+                      <h3 className="font-medium text-sm truncate">{s.name}</h3>
+                      <p className="text-xs text-gray-600">⭐ {s.rating} • {s.time}</p>
+                      <button
+                        onClick={() => router.push(`/services/${s.slug}?lang=${locale}`)}
+                        className="mt-2 inline-block bg-black text-white rounded-full px-3 py-1 text-xs hover:bg-gray-900"
+                      >
+                        {locale === 'es' ? 'Solicitar servicio' : 'Request Service'}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         ))}
