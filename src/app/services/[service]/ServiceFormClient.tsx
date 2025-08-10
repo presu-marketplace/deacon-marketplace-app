@@ -35,29 +35,6 @@ const translations = {
       'Comercio',
       'Proyecto en construcción'
     ],
-    cleaningType: 'Tipo de Servicio',
-    cleaningTypePlaceholder: 'Seleccione una opción',
-    cleaningOptions: [
-      'Limpieza y mantenimiento de oficina',
-      'Limpieza de vidrios en altura',
-      'Limpieza de frente',
-      'Final de obra',
-      'Limpieza de alfombras y sillones',
-      'Hidrolavado',
-      'Tratamiento de residuos patológicos',
-      'Limpieza de planta industrial',
-      'Mantenimiento de jardines y espacios verdes',
-      'Servicio de pulido de pisos',
-      'Plastificado de pisos',
-      'Desinfección',
-      'Desratización',
-      'Desinsectación',
-      'Limpieza de ferrocarril/subterráneos',
-      'Mudanzas',
-      'Parquización'
-    ],
-    frequency: 'Frecuencia',
-    frequencyOptions: ['Día', 'Semana', 'Mes'],
     address: 'Dirección',
     addressPlaceholder: 'Dirección',
     city: 'Localidad',
@@ -96,29 +73,6 @@ const translations = {
       'Commerce',
       'Construction Project'
     ],
-    cleaningType: 'Service Type',
-    cleaningTypePlaceholder: 'Select an option',
-    cleaningOptions: [
-      'Office cleaning & maintenance',
-      'High-rise window cleaning',
-      'Facade cleaning',
-      'Post-construction',
-      'Carpet & upholstery cleaning',
-      'Pressure washing',
-      'Pathological waste treatment',
-      'Industrial plant cleaning',
-      'Gardens & green areas maintenance',
-      'Floor polishing service',
-      'Floor sealing (plasticizing)',
-      'Disinfection',
-      'Rodent control',
-      'Insect control',
-      'Rail/Subway cleaning',
-      'Moving services',
-      'Landscaping'
-    ],
-    frequency: 'Frequency',
-    frequencyOptions: ['Day', 'Week', 'Month'],
     address: 'Address',
     addressPlaceholder: 'Address',
     city: 'City',
@@ -227,8 +181,6 @@ export default function ServiceFormClient({ service }: Props) {
   const [email, setEmail] = useState('')
   const [telefono, setTelefono] = useState('')
   const [tipoPropiedad, setTipoPropiedad] = useState('')
-  const [cleaningType, setCleaningType] = useState('')
-  const [frequency, setFrequency] = useState<string[]>([])
   const [direccion, setDireccion] = useState('')
   const [localidad, setLocalidad] = useState('')
   const [mensaje, setMensaje] = useState('')
@@ -264,12 +216,6 @@ export default function ServiceFormClient({ service }: Props) {
     )
   }
 
-  const toggleFrequency = (value: string) => {
-    setFrequency(prev =>
-      prev.includes(value) ? prev.filter(f => f !== value) : [...prev, value]
-    )
-  }
-
   const handleInvoicesChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -285,8 +231,6 @@ export default function ServiceFormClient({ service }: Props) {
       telefono,
       sistemas,
       tipoPropiedad,
-      cleaningType,
-      frequency,
       direccion,
       localidad,
       mensaje,
@@ -425,67 +369,24 @@ export default function ServiceFormClient({ service }: Props) {
                   className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
                 />
               </div>
-              {service.toLowerCase() === 'fumigacion' && (
-                <div>
-                  <label className="block text-xs font-medium mb-1" htmlFor="tipoPropiedad">
-                    {t.propertyType}
-                  </label>
-                  <select
-                    id="tipoPropiedad"
-                    value={tipoPropiedad}
-                    onChange={e => setTipoPropiedad(e.target.value)}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
-                  >
-                    <option value="">{t.propertyTypePlaceholder}</option>
-                    {t.propertyTypes.map(pt => (
-                      <option key={pt} value={pt}>
-                        {pt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              {service.toLowerCase() === 'limpieza' && (
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium mb-1" htmlFor="cleaningType">
-                    {t.cleaningType}
-                  </label>
-                  <select
-                    id="cleaningType"
-                    value={cleaningType}
-                    onChange={e => setCleaningType(e.target.value)}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
-                  >
-                    <option value="">{t.cleaningTypePlaceholder}</option>
-                    {t.cleaningOptions.map(opt => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              {service.toLowerCase() === 'limpieza' && (
-                <div className="sm:col-span-2">
-                  <span className="block text-xs font-medium mb-1">{t.frequency}</span>
-                  <div className="flex flex-wrap gap-2">
-                    {t.frequencyOptions.map(opt => (
-                      <label
-                        key={opt}
-                        className="flex items-center space-x-2 rounded-md p-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={frequency.includes(opt)}
-                          onChange={() => toggleFrequency(opt)}
-                          className="h-4 w-4 text-black dark:text-white focus:ring-black dark:focus:ring-white"
-                        />
-                        <span className="text-sm">{opt}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <div>
+                <label className="block text-xs font-medium mb-1" htmlFor="tipoPropiedad">
+                  {t.propertyType}
+                </label>
+                <select
+                  id="tipoPropiedad"
+                  value={tipoPropiedad}
+                  onChange={e => setTipoPropiedad(e.target.value)}
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
+                >
+                  <option value="">{t.propertyTypePlaceholder}</option>
+                  {t.propertyTypes.map(pt => (
+                    <option key={pt} value={pt}>
+                      {pt}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div>
                 <label className="block text-xs font-medium mb-1" htmlFor="direccion">
                   {t.address}

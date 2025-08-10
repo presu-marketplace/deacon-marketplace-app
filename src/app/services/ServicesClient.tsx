@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Navbar from '@/components/layout/Navbar'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabaseClient'
 
 export default function ServicesClient() {
   const [locale, setLocale] = useState<'en' | 'es'>('es')
@@ -29,87 +30,31 @@ export default function ServicesClient() {
 
   const t = {
     servicesTitle: locale === 'es' ? 'Servicios disponibles' : 'Available Services',
-    section1: locale === 'es' ? 'Populares cerca tuyo' : 'Popular near you',
-    section2: locale === 'es' ? 'Nuevos en la plataforma' : 'New on the platform',
     rating: locale === 'es' ? 'puntuación' : 'rating',
     schedule: locale === 'es' ? 'Horario estimado' : 'Estimated hours',
-    seeAll: locale === 'es' ? 'Ver todos' : 'See all',
   }
 
-  const sections = [
-    {
-      title: t.section1,
-      services: [
-        {
-          slug: 'seguridad',
-          name: locale === 'es' ? 'Seguridad privada' : 'Private Security',
-          rating: '4.8',
-          time: '24/7',
-          image: '/images/services/security.jpg'
-        },
-        {
-          slug: 'limpieza',
-          name: locale === 'es' ? 'Limpieza Profesional' : 'Professional Cleaning',
-          rating: '4.7',
-          time: '9-18hs',
-          image: '/images/services/cleaning.jpg'
-        },
-        {
-          slug: 'fumigacion',
-          name: locale === 'es' ? 'Fumigación a domicilio' : 'Home Fumigation',
-          rating: '4.6',
-          time: '10-17hs',
-          image: '/images/services/fumigation.jpg'
-        },
-        {
-          slug: 'mantenimiento-ascensores',
-          name: locale === 'es' ? 'Mantenimiento de ascensores' : 'Elevator Maintenance',
-          rating: '4.5',
-          time: '24/7',
-          image: '/images/services/elevator_maintenance.jpg'
-        }
-      ]
-    },
-    {
-      title: t.section2,
-      services: [
-        // {
-        //   name: locale === 'es' ? 'Cerrajeros 24hs' : '24h Locksmiths',
-        //   rating: '4.5',
-        //   time: '24hs',
-        //   image: '/images/services/locksmith.jpg'
-        // },
-        {
-          slug: 'escribania',
-          name: locale === 'es' ? 'Escribanía' : 'Notary Services',
-          rating: '4.7',
-          time: '10-18hs',
-          image: '/images/services/notary.jpg'
-        },
-        {
-          slug: 'community-manager',
-          name: locale === 'es' ? 'Community Manager' : 'Community Manager',
-          rating: '4.5',
-          time: 'Online',
-          image: '/images/services/community.jpg'
-        },
-        {
-          slug: 'traslados-ejecutivos',
-          name: locale === 'es' ? 'Traslados Ejecutivos (Combi)' : 'Executive Transfers (Combi)',
-          rating: '4.8',
-          time: '24/7',
-          image: '/images/services/transfer.jpg'
-        },
-        {
-          slug: 'salones-infantiles',
-          name: locale === 'es' ? 'Salones Infantiles' : 'Kids Party Venues',
-          rating: '4.6',
-          time: 'Fines de semana',
-          image: '/images/services/kids-party.jpg'
-        }
-      ]
+  type Service = {
+    slug: string
+    name_es?: string
+    name_en?: string
+    name?: string
+    rating?: string
+    schedule?: string
+    image_url?: string
+  }
+
+  const [services, setServices] = useState<Service[]>([])
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      const { data } = await supabase
+        .from<Service>('services')
+        .select('*')
+      if (data) setServices(data)
     }
-  ]
+    fetchServices()
+  }, [])
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -129,38 +74,39 @@ export default function ServicesClient() {
       <main className="pt-24 px-4 sm:px-8 max-w-7xl mx-auto">
         <h1 className="text-2xl sm:text-3xl font-bold mb-6">{t.servicesTitle}</h1>
 
-        {sections.map((section, idx) => (
-          <div key={idx} className="mb-10">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xl font-semibold">{section.title}</h2>
-              <button className="text-sm text-gray-500 hover:underline">
-                {t.seeAll}
-              </button>
-            </div>
-
-            <div className="flex overflow-x-auto space-x-4 pb-2">
-                {section.services.map((s, i) => (
-                  <div
-                    key={i}
-                    onClick={() => router.push(`/services/${s.slug}?lang=${locale}`)}
-                    className="relative flex-shrink-0 w-[250px] rounded-lg overflow-hidden shadow hover:shadow-md transition bg-white cursor-pointer"
-                  >
-                    <Image
-                      src={s.image}
-                      alt={s.name}
-                      width={250}
-                      height={160}
-                      className="w-full h-36 sm:h-40 object-cover"
-                    />
-                    <div className="px-3 py-2">
-                      <h3 className="font-medium text-sm truncate">{s.name}</h3>
-                      <p className="text-xs text-gray-600">⭐ {s.rating} • {s.time}</p>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {services.map((s) => {
+            const name =
+              locale === 'es'
+                ? s.name_es || s.name
+                : s.name_en || s.name
+            return (
+              <div
+                key={s.slug}
+                onClick={() => router.push(`/services/${s.slug}?lang=${locale}`)}
+                className="relative rounded-lg overflow-hidden shadow hover:shadow-md transition bg-white cursor-pointer"
+              >
+                <Image
+                  src={s.image_url || `/images/services/${s.slug}.jpg`}
+                  alt={name || s.slug}
+                  width={250}
+                  height={160}
+                  className="w-full h-36 sm:h-40 object-cover"
+                />
+                <div className="px-3 py-2">
+                  <h3 className="font-medium text-sm truncate">{name}</h3>
+                  {(s.rating || s.schedule) && (
+                    <p className="text-xs text-gray-600">
+                      {s.rating ? `⭐ ${s.rating}` : ''}
+                      {s.rating && s.schedule ? ' • ' : ''}
+                      {s.schedule || ''}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </main>
     </div>
   )
