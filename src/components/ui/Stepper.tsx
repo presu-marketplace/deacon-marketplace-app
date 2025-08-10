@@ -1,11 +1,8 @@
 import * as React from "react";
 
 type StepperProps = {
-  /** 1-based index of the active step */
   currentStep: number;
-  /** Step labels in order */
   steps: string[];
-  /** Optional click handler to allow navigation */
   onStepClick?: (index: number) => void;
   className?: string;
 };
@@ -16,7 +13,6 @@ export default function Stepper({
   onStepClick,
   className = "",
 }: StepperProps) {
-  // clamp for safety
   const active = Math.min(Math.max(currentStep, 1), steps.length);
 
   return (
@@ -33,7 +29,6 @@ export default function Stepper({
 
           return (
             <li key={label} className="flex items-center flex-1 min-w-0">
-              {/* Node */}
               <button
                 type="button"
                 aria-current={isCurrent ? "step" : undefined}
@@ -45,14 +40,13 @@ export default function Stepper({
                   "ring-2 ring-offset-0",
                   isDone && "bg-green-500 ring-green-500 text-white",
                   isCurrent &&
-                    "bg-amber-500 ring-amber-500 text-white shadow-lg shadow-amber-500/20",
+                    "bg-blue-900 ring-blue-900 text-white shadow-lg shadow-blue-900/40",
                   isFuture &&
                     "bg-transparent ring-slate-400/50 text-slate-400 dark:ring-slate-600 dark:text-slate-500",
                   onStepClick ? "hover:scale-105" : "cursor-default",
                 ].join(" ")}
               >
                 {isDone ? (
-                  /* Check icon */
                   <svg
                     viewBox="0 0 24 24"
                     className="h-5 w-5"
@@ -69,7 +63,6 @@ export default function Stepper({
                 )}
               </button>
 
-              {/* Label */}
               <div className="ml-2 sm:ml-3 min-w-0">
                 <span
                   className={[
@@ -84,7 +77,6 @@ export default function Stepper({
                 </span>
               </div>
 
-              {/* Connector */}
               {index !== steps.length && (
                 <div
                   aria-hidden
@@ -93,7 +85,7 @@ export default function Stepper({
                     isDone
                       ? "bg-gradient-to-r from-green-500 to-green-500/60"
                       : isCurrent
-                      ? "bg-gradient-to-r from-amber-500/90 to-slate-500/40"
+                      ? "bg-gradient-to-r from-blue-900/90 to-slate-500/40"
                       : "bg-slate-400/40 dark:bg-slate-600/40",
                   ].join(" ")}
                 />
@@ -105,4 +97,3 @@ export default function Stepper({
     </nav>
   );
 }
-
