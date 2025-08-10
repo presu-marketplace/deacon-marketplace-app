@@ -289,18 +289,18 @@ export default function ServiceFormClient({ service }: Props) {
             <span className="font-medium">{locale === 'es' ? 'Solicitud' : 'Request'}</span>
           </nav>
           <div className="relative">
-            <ol className="flex flex-col items-center text-center md:absolute md:-left-40 md:top-1/2 md:-translate-y-1/2 md:transform">
-              <li className="relative flex flex-col items-center pb-16 after:absolute after:top-8 after:left-1/2 after:-translate-x-1/2 after:w-px after:h-16 after:bg-gray-300 after:content-[''] last:after:hidden last:pb-0">
-                <span className="flex items-center justify-center h-6 w-6 rounded-full bg-gray-200 text-gray-600 mb-2">1</span>
+            <ol className="flex flex-col items-end text-xs md:absolute md:-left-40 md:top-1/2 md:-translate-y-1/2 md:transform">
+              <li className="relative flex items-center gap-2 pb-12 after:absolute after:right-2 after:top-4 after:h-12 after:w-px after:bg-gray-300 after:content-[''] last:after:hidden last:pb-0">
                 {locale === 'es' ? 'Seleccionar servicio' : 'Select Service'}
+                <span className="flex items-center justify-center h-4 w-4 rounded-full bg-gray-200 text-gray-600 text-[10px]">1</span>
               </li>
-              <li className="relative flex flex-col items-center pb-16 after:absolute after:top-8 after:left-1/2 after:-translate-x-1/2 after:w-px after:h-16 after:bg-gray-300 after:content-[''] last:after:hidden last:pb-0">
-                <span className="flex items-center justify-center h-6 w-6 rounded-full bg-black text-white mb-2">2</span>
+              <li className="relative flex items-center gap-2 pb-12 after:absolute after:right-2 after:top-4 after:h-12 after:w-px after:bg-gray-300 after:content-[''] last:after:hidden last:pb-0">
                 {locale === 'es' ? 'Completar solicitud' : 'Fill Request'}
+                <span className="flex items-center justify-center h-4 w-4 rounded-full bg-black text-white text-[10px]">2</span>
               </li>
-              <li className="relative flex flex-col items-center pb-16 after:absolute after:top-8 after:left-1/2 after:-translate-x-1/2 after:w-px after:h-16 after:bg-gray-300 after:content-[''] last:after:hidden last:pb-0">
-                <span className="flex items-center justify-center h-6 w-6 rounded-full bg-gray-200 text-gray-600 mb-2">3</span>
+              <li className="relative flex items-center gap-2 pb-12 after:absolute after:right-2 after:top-4 after:h-12 after:w-px after:bg-gray-300 after:content-[''] last:after:hidden last:pb-0">
                 {locale === 'es' ? 'Confirmación' : 'Confirmation'}
+                <span className="flex items-center justify-center h-4 w-4 rounded-full bg-gray-200 text-gray-600 text-[10px]">3</span>
               </li>
             </ol>
             <div className="max-w-lg mx-auto">
