@@ -1,109 +1,89 @@
+export const runtime = 'nodejs'
+
 import { NextResponse } from 'next/server'
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import nodemailer, { type Attachment } from 'nodemailer'
 import { randomUUID } from 'crypto'
+import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
+
+async function parseBody(req: Request) {
+  const ct = req.headers.get('content-type') || ''
+  if (ct.includes('application/json')) {
+    const j = await req.json()
+    return { data: j, files: [] as File[] }
+  }
+  const fd = await req.formData()
+  const toObj = (v: FormDataEntryValue | null) => (v == null ? '' : String(v))
+  const data = {
+    service: toObj(fd.get('service')),
+    nombre: toObj(fd.get('nombre')),
+    email: toObj(fd.get('email')),
+    telefono: toObj(fd.get('telefono')),
+    tipoPropiedad: toObj(fd.get('tipoPropiedad')),
+    cleaningType: toObj(fd.get('cleaningType')),
+    direccion: toObj(fd.get('direccion')),
+    localidad: toObj(fd.get('localidad')),
+    mensaje: toObj(fd.get('mensaje')),
+    sistemas: JSON.parse(toObj(fd.get('sistemas') || '[]')),
+    lang: (fd.get('lang') === 'en' ? 'en' : 'es') as 'es' | 'en',
+    userId: toObj(fd.get('userId')),
+  }
+  const files = fd.getAll('invoices') as File[]
+  return { data, files }
+}
 
 export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
+  let supabaseAdmin
+  try {
+    supabaseAdmin = getSupabaseAdmin()
+  } catch {
+    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
+  }
+
+  const { data, files } = await parseBody(request)
   const {
-    NEXT_PUBLIC_SUPABASE_URL,
-    SUPABASE_SERVICE_ROLE_KEY,
-    SMTP_HOST,
-    SMTP_PORT,
-    SMTP_USER,
-    SMTP_PASS,
-    SMTP_FROM
-  } = process.env
+    service,
+    nombre,
+    email,
+    telefono,
+    tipoPropiedad,
+    cleaningType,
+    direccion,
+    localidad,
+    mensaje,
+    sistemas = [],
+    lang = 'es',
+    userId = '',
+  } = data
 
-  if (!SUPABASE_SERVICE_ROLE_KEY) {
-    return new Response('Missing SUPABASE_SERVICE_ROLE_KEY', { status: 500 })
-  }
-  if (!NEXT_PUBLIC_SUPABASE_URL) {
-    return new Response('Missing NEXT_PUBLIC_SUPABASE_URL', { status: 500 })
-  }
-  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !SMTP_FROM) {
-    return new Response('Missing SMTP configuration', { status: 500 })
-  }
-
-  const supabaseAdmin: SupabaseClient = createClient(
-    NEXT_PUBLIC_SUPABASE_URL,
-    SUPABASE_SERVICE_ROLE_KEY,
-    { auth: { persistSession: false }, db: { schema: 'api' } }
-  )
-
-  const contentType = request.headers.get('content-type') || ''
-  let service = ''
-  let nombre = ''
-  let email = ''
-  let telefono = ''
-  let tipoPropiedad = ''
-  let cleaningType = ''
-  let direccion = ''
-  let localidad = ''
-  let mensaje = ''
-  let sistemas: string[] = []
-  let lang: 'es' | 'en' = 'es'
-  let invoiceFiles: File[] = []
-  let userId = ''
-
-  if (contentType.includes('application/json')) {
-    const body = await request.json()
-    service = String(body.service || '')
-    nombre = String(body.nombre || body.name || '')
-    email = String(body.email || '')
-    telefono = String(body.telefono || '')
-    tipoPropiedad = String(body.tipoPropiedad || '')
-    cleaningType = String(body.cleaningType || '')
-    direccion = String(body.direccion || '')
-    localidad = String(body.localidad || '')
-    mensaje = String(body.mensaje || '')
-    sistemas = Array.isArray(body.sistemas) ? body.sistemas : []
-    lang = body.lang === 'en' ? 'en' : 'es'
-    invoiceFiles = []
-    userId = String(body.userId || '')
-  } else {
-    const formData = await request.formData()
-    service = String(formData.get('service') || '')
-    nombre = String(formData.get('nombre') || '')
-    email = String(formData.get('email') || '')
-    telefono = String(formData.get('telefono') || '')
-    tipoPropiedad = String(formData.get('tipoPropiedad') || '')
-    cleaningType = String(formData.get('cleaningType') || '')
-    direccion = String(formData.get('direccion') || '')
-    localidad = String(formData.get('localidad') || '')
-    mensaje = String(formData.get('mensaje') || '')
-    sistemas = JSON.parse(String(formData.get('sistemas') || '[]')) as string[]
-    lang = (formData.get('lang') === 'en' ? 'en' : 'es') as 'es' | 'en'
-    invoiceFiles = formData.getAll('invoices') as File[]
-    userId = String(formData.get('userId') || '')
-  }
-
-  if (invoiceFiles.length > 3) {
+  if (files.length > 3)
     return NextResponse.json({ error: 'Too many invoices' }, { status: 400 })
-  }
-  for (const f of invoiceFiles) {
-    if (f.type !== 'application/pdf') {
+  for (const f of files)
+    if (f.type !== 'application/pdf')
       return NextResponse.json({ error: 'Invalid file type' }, { status: 400 })
-    }
-  }
 
   const invoiceUrls: string[] = []
   const attachments: Attachment[] = []
-
-  for (const file of invoiceFiles) {
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
+  for (const file of files) {
+    const buffer = Buffer.from(await file.arrayBuffer())
     const filePath = `${randomUUID()}-${file.name}`
-    await supabaseAdmin.storage.from('invoices').upload(filePath, buffer, {
-      contentType: 'application/pdf'
-    })
-    const { data } = supabaseAdmin.storage.from('invoices').getPublicUrl(filePath)
-    invoiceUrls.push(data.publicUrl)
+    const { error } = await supabaseAdmin.storage
+      .from('invoices')
+      .upload(filePath, buffer, {
+        contentType: 'application/pdf',
+        upsert: false,
+      })
+    if (error)
+      return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    const { data: pub } = supabaseAdmin.storage
+      .from('invoices')
+      .getPublicUrl(filePath)
+    invoiceUrls.push(pub.publicUrl)
     attachments.push({ filename: file.name, content: buffer })
   }
 
-  await supabaseAdmin.from('service_requests').insert({
+  const { error: dbErr } = await supabaseAdmin.from('service_requests').insert({
     service,
     nombre,
     email,
@@ -115,20 +95,26 @@ export async function POST(request: Request) {
     mensaje,
     sistemas,
     invoice_urls: invoiceUrls,
-    user_id: userId || null
+    user_id: userId || null,
   })
+  if (dbErr)
+    return NextResponse.json({ error: 'DB insert failed' }, { status: 500 })
+
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = process.env
+  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !SMTP_FROM)
+    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
 
   const transporter = nodemailer.createTransport({
     host: SMTP_HOST,
-    port: Number(SMTP_PORT),
+    port: Number(SMTP_PORT || 587),
     secure: false,
-    auth: { user: SMTP_USER, pass: SMTP_PASS }
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
   })
 
   attachments.push({
     filename: 'logo.png',
     path: `${process.cwd()}/public/logo/presu-02.png`,
-    cid: 'presu-logo'
+    cid: 'presu-logo',
   })
 
   const subject =
@@ -142,14 +128,14 @@ export async function POST(request: Request) {
       : `<div style="font-family:sans-serif"><img src="cid:presu-logo" alt="PRESU" style="height:60px"/><h2>Nueva Solicitud de Servicio</h2><p>Has recibido una nueva solicitud para <strong>${service}</strong>.</p><p><strong>Nombre:</strong> ${nombre}<br/><strong>Email:</strong> ${email}<br/><strong>Teléfono:</strong> ${telefono}</p><p>${mensaje}</p></div>`
 
   await transporter.sendMail({
-    from: email,
+    from: SMTP_FROM,
+    replyTo: email || undefined,
     to: 'rlabarile@analytixcg.com',
     subject,
     html,
     attachments,
-    envelope: { from: SMTP_FROM, to: 'rlabarile@analytixcg.com' },
-    replyTo: email
   })
 
   return NextResponse.json({ ok: true })
 }
+
