@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
@@ -32,17 +32,21 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
     return () => clearInterval(interval)
   }, [])
 
-  useEffect(() => {
-    const fetchServices = async () => {
+  const loadServices = useCallback(async () => {
+    if (services.length === 0) {
       const { data } = await supabase
         .from('reference.services')
         .select('slug, name_en, name_es')
       if (data) setServices(data)
     }
-    fetchServices()
-  }, [])
+  }, [services.length])
 
-  const handleSearch = () => {
+  useEffect(() => {
+    loadServices()
+  }, [loadServices])
+
+  const handleSearch = async () => {
+    await loadServices()
     setShowSuggestions(false)
     const match = services.find(
       (s) =>
@@ -75,10 +79,11 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
     router.push(`/services/${s.slug}?lang=${locale}`)
   }
 
-  const handleIconClick = () => {
+  const handleIconClick = async () => {
     if (searchInputRef.current) {
       searchInputRef.current.focus()
     }
+    await loadServices()
     setShowSuggestions(true)
   }
 
