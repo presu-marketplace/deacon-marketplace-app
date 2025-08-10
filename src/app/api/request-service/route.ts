@@ -10,6 +10,7 @@ export async function POST(request: Request) {
   const email = String(formData.get('email') || '')
   const telefono = String(formData.get('telefono') || '')
   const tipoPropiedad = String(formData.get('tipoPropiedad') || '')
+  const cleaningType = String(formData.get('cleaningType') || '')
   const direccion = String(formData.get('direccion') || '')
   const localidad = String(formData.get('localidad') || '')
   const mensaje = String(formData.get('mensaje') || '')
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
     email,
     telefono,
     tipo_propiedad: tipoPropiedad,
+    cleaning_type: cleaningType,
     direccion,
     localidad,
     mensaje,

@@ -25,6 +25,27 @@ const translations = {
       'Custodia de mercadería',
       'Otro'
     ],
+    cleaningType: 'Tipo de Servicio',
+    cleaningTypePlaceholder: 'Seleccione una opción',
+    cleaningOptions: [
+      'Limpieza y mantenimiento de oficina',
+      'Limpieza de vidrios en altura',
+      'Limpieza de frente',
+      'Final de obra',
+      'Limpieza de alfombras y sillones',
+      'Hidrolavado',
+      'Tratamiento de residuos patológicos',
+      'Limpieza de planta industrial',
+      'Mantenimiento de jardines y espacios verdes',
+      'Servicio de pulido de pisos',
+      'Plastificado de pisos',
+      'Desinfección',
+      'Desratización',
+      'Desinsectación',
+      'Limpieza de ferrocarril/subterráneos',
+      'Mudanzas',
+      'Parquización'
+    ],
     propertyType: 'Tipo de Propiedad',
     propertyTypePlaceholder: 'Seleccione...',
     propertyTypes: [
@@ -64,6 +85,27 @@ const translations = {
       'Repair & Maintenance',
       'Merchandise Custody',
       'Other'
+    ],
+    cleaningType: 'Service Type',
+    cleaningTypePlaceholder: 'Select an option',
+    cleaningOptions: [
+      'Office cleaning & maintenance',
+      'High-rise window cleaning',
+      'Facade cleaning',
+      'Post-construction',
+      'Carpet & upholstery cleaning',
+      'Pressure washing',
+      'Pathological waste treatment',
+      'Industrial plant cleaning',
+      'Gardens & green areas maintenance',
+      'Floor polishing service',
+      'Floor sealing (plasticizing)',
+      'Disinfection',
+      'Rodent control',
+      'Insect control',
+      'Rail/Subway cleaning',
+      'Moving services',
+      'Landscaping'
     ],
     propertyType: 'Property Type',
     propertyTypePlaceholder: 'Select...',
@@ -186,6 +228,7 @@ export default function ServiceFormClient({ service }: Props) {
   const [email, setEmail] = useState('')
   const [telefono, setTelefono] = useState('')
   const [tipoPropiedad, setTipoPropiedad] = useState('')
+  const [cleaningType, setCleaningType] = useState('')
   const [direccion, setDireccion] = useState('')
   const [localidad, setLocalidad] = useState('')
   const [mensaje, setMensaje] = useState('')
@@ -252,6 +295,7 @@ export default function ServiceFormClient({ service }: Props) {
     formData.append('email', email)
     formData.append('telefono', telefono)
     formData.append('tipoPropiedad', tipoPropiedad)
+    formData.append('cleaningType', cleaningType)
     formData.append('direccion', direccion)
     formData.append('localidad', localidad)
     formData.append('mensaje', mensaje)
@@ -267,6 +311,7 @@ export default function ServiceFormClient({ service }: Props) {
       setEmail('')
       setTelefono('')
       setTipoPropiedad('')
+      setCleaningType('')
       setDireccion('')
       setLocalidad('')
       setMensaje('')
@@ -386,7 +431,26 @@ export default function ServiceFormClient({ service }: Props) {
                   className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
                 />
               </div>
-              {(isSeguridad || isLimpieza || isFumigacion) && (
+              {isLimpieza ? (
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-medium mb-1" htmlFor="cleaningType">
+                    {t.cleaningType}
+                  </label>
+                  <select
+                    id="cleaningType"
+                    value={cleaningType}
+                    onChange={e => setCleaningType(e.target.value)}
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
+                  >
+                    <option value="">{t.cleaningTypePlaceholder}</option>
+                    {t.cleaningOptions.map(opt => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
                 <div>
                   <label className="block text-xs font-medium mb-1" htmlFor="tipoPropiedad">
                     {t.propertyType}
