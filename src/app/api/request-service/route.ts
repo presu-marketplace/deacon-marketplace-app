@@ -20,7 +20,7 @@ type JsonBody = {
   direccion?: string
   localidad?: string
   mensaje?: string
-  sistemas?: any[]
+  sistemas?: unknown[]
   lang?: 'es' | 'en'
   userId?: string
   deadline?: string // yyyy-mm-dd (optional)
@@ -148,13 +148,14 @@ export async function POST(request: Request) {
     .select('id')
     .single()
 
-  if (dbErr) {
-    if (!isProd) console.error('Insert failed:', dbErr)
-    return NextResponse.json(
-      { error: 'DB insert failed', code: dbErr.code, message: dbErr.message, details: (dbErr as any).details, hint: (dbErr as any).hint },
-      { status: 500 }
-    )
-  }
+    if (dbErr) {
+      if (!isProd) console.error('Insert failed:', dbErr)
+      const err = dbErr as { details?: string | null; hint?: string | null }
+      return NextResponse.json(
+        { error: 'DB insert failed', code: dbErr.code, message: dbErr.message, details: err.details, hint: err.hint },
+        { status: 500 }
+      )
+    }
 
   // 6) Email notification
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = process.env

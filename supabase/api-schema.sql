@@ -85,3 +85,11 @@ create table if not exists api.service_request_services (
   provider_id uuid references api.providers(id) on delete set null,
   primary key (request_id, service_slug)
 );
+
+-- Grant API schema privileges to service_role
+grant usage on schema api to service_role;
+grant all on api.profiles to service_role;
+grant all on api.providers to service_role;
+grant all on api.provider_services to service_role;
+grant all on api.service_requests to service_role;
+grant all on api.service_request_services to service_role;

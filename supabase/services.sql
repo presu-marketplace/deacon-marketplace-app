@@ -34,5 +34,5 @@ create or replace view api.services as
   from reference.services;
 
 -- Allow read access to the view for anonymous and authenticated users
-grant usage on schema api to anon, authenticated;
-grant select on api.services to anon, authenticated;
+grant usage on schema api to anon, authenticated, service_role;
+grant select on api.services to anon, authenticated, service_role;

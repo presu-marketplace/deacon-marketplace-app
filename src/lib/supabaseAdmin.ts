@@ -1,13 +1,13 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-let client: SupabaseClient<any, 'api'> | null = null
+let client: SupabaseClient<unknown, 'api'> | null = null
 
-export function getSupabaseAdmin(): SupabaseClient<any, 'api'> {
+export function getSupabaseAdmin(): SupabaseClient<unknown, 'api'> {
   if (client) return client
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  client = createClient<any, 'api'>(url, serviceKey, {
+  client = createClient<unknown, 'api'>(url, serviceKey, {
     auth: { persistSession: false },
     db: { schema: 'api' },
   })
