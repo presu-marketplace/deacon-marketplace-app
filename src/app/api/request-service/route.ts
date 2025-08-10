@@ -3,6 +3,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import nodemailer, { type Attachment } from 'nodemailer'
 import { randomUUID } from 'crypto'
 
+export const runtime = 'nodejs'
+
 export async function POST(request: Request) {
   const {
     NEXT_PUBLIC_SUPABASE_URL,
