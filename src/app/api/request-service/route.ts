@@ -1,9 +1,18 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import nodemailer, { type Attachment } from 'nodemailer'
 import { randomUUID } from 'crypto'
 
 export async function POST(request: Request) {
+  let supabaseAdmin: SupabaseClient
+  try {
+    supabaseAdmin = getSupabaseAdmin()
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
+  }
+
   const formData = await request.formData()
   const service = String(formData.get('service') || '')
   const nombre = String(formData.get('nombre') || '')
