@@ -148,7 +148,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                     return (
                       <div
                         key={s.slug}
-                        onClick={() => handleSelect(s)}
+                        onPointerDown={() => handleSelect(s)}
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
                       >
                         {name}
@@ -196,7 +196,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                     return (
                       <div
                         key={s.slug}
-                        onClick={() => handleSelect(s)}
+                        onPointerDown={() => handleSelect(s)}
                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
                       >
                         {name}
