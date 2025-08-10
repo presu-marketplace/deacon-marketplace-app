@@ -289,16 +289,16 @@ export default function ServiceFormClient({ service }: Props) {
             <span className="font-medium">{locale === 'es' ? 'Solicitud' : 'Request'}</span>
           </nav>
           <div className="relative">
-            <ol className="flex flex-col items-center text-center space-y-8 md:absolute md:-left-40 md:top-24">
-              <li className="flex flex-col items-center">
+            <ol className="flex flex-col items-center text-center md:absolute md:-left-40 md:top-1/2 md:-translate-y-1/2 md:transform">
+              <li className="relative flex flex-col items-center pb-16 after:absolute after:top-8 after:left-1/2 after:-translate-x-1/2 after:w-px after:h-16 after:bg-gray-300 after:content-[''] last:after:hidden last:pb-0">
                 <span className="flex items-center justify-center h-6 w-6 rounded-full bg-gray-200 text-gray-600 mb-2">1</span>
                 {locale === 'es' ? 'Seleccionar servicio' : 'Select Service'}
               </li>
-              <li className="flex flex-col items-center">
+              <li className="relative flex flex-col items-center pb-16 after:absolute after:top-8 after:left-1/2 after:-translate-x-1/2 after:w-px after:h-16 after:bg-gray-300 after:content-[''] last:after:hidden last:pb-0">
                 <span className="flex items-center justify-center h-6 w-6 rounded-full bg-black text-white mb-2">2</span>
                 {locale === 'es' ? 'Completar solicitud' : 'Fill Request'}
               </li>
-              <li className="flex flex-col items-center">
+              <li className="relative flex flex-col items-center pb-16 after:absolute after:top-8 after:left-1/2 after:-translate-x-1/2 after:w-px after:h-16 after:bg-gray-300 after:content-[''] last:after:hidden last:pb-0">
                 <span className="flex items-center justify-center h-6 w-6 rounded-full bg-gray-200 text-gray-600 mb-2">3</span>
                 {locale === 'es' ? 'Confirmación' : 'Confirmation'}
               </li>
