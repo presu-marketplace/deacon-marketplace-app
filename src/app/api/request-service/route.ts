@@ -67,15 +67,22 @@ export async function POST(request: Request) {
     user_id: userId || null
   })
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
+  let transporter
+  try {
+    const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env
+    if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
+      throw new Error('Missing SMTP credentials')
     }
-  })
+    transporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: Number(SMTP_PORT || 587),
+      secure: false,
+      auth: { user: SMTP_USER, pass: SMTP_PASS }
+    })
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
+  }
 
   attachments.push({
     filename: 'logo.png',
@@ -94,8 +101,8 @@ export async function POST(request: Request) {
       : `<div style="font-family:sans-serif"><img src="cid:presu-logo" alt="PRESU" style="height:60px"/><h2>Nueva Solicitud de Servicio</h2><p>Has recibido una nueva solicitud para <strong>${service}</strong>.</p><p><strong>Nombre:</strong> ${nombre}<br/><strong>Email:</strong> ${email}<br/><strong>Teléfono:</strong> ${telefono}</p><p>${mensaje}</p></div>`
 
   await transporter.sendMail({
-    from: process.env.SMTP_FROM,
-    to: 'rlabarile@analytxcg.com',
+    from: email,
+    to: 'rlabarile@analytixcg.com',
     subject,
     html,
     attachments
