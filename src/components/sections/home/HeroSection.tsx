@@ -33,13 +33,18 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
 
   useEffect(() => {
     const fetchServices = async () => {
-      const { data } = await supabase
-        .from('reference.services')
-        .select('slug, name_en, name_es')
-      if (data) setServices(data)
-    }
-    fetchServices()
-  }, [])
+      const { data, error } = await supabase
+      .schema('api')
+      .from('services')
+      .select('slug, name_en, name_es')
+      .order(locale === 'es' ? 'name_es' : 'name_en', { ascending: true });
+        
+      if (error) console.error('fetchServices error:', error.message);
+      else setServices(data ?? []);
+    };
+
+    fetchServices();
+  }, []);
 
   const handleSearch = () => {
     const match = services.find(
@@ -60,10 +65,10 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
 
   const filteredServices = searchTerm
     ? services.filter((s) =>
-        (locale === 'es' ? s.name_es : s.name_en)
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      )
+      (locale === 'es' ? s.name_es : s.name_en)
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    )
     : []
 
   const handleSelect = (s: { slug: string; name_en: string; name_es: string }) => {
