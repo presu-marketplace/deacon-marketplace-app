@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabaseClient'
 
 const heroImages = [
   '/images/hero-section/card-01.jpg',
@@ -19,6 +20,8 @@ interface HeroProps {
 export default function HeroSection({ t, userAddress, locale }: HeroProps) {
   const [currentImage, setCurrentImage] = useState(0)
   const [searchTerm, setSearchTerm] = useState('')
+  const [services, setServices] = useState<{ slug: string; name_en: string; name_es: string }[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const router = useRouter()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -29,7 +32,27 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
     return () => clearInterval(interval)
   }, [])
 
+  useEffect(() => {
+    const fetchServices = async () => {
+      const { data } = await supabase
+        .from('reference.services')
+        .select('slug, name_en, name_es')
+      if (data) setServices(data)
+    }
+    fetchServices()
+  }, [])
+
   const handleSearch = () => {
+    setShowSuggestions(false)
+    const match = services.find(
+      (s) =>
+        (locale === 'es' ? s.name_es : s.name_en)
+          .toLowerCase() === searchTerm.toLowerCase()
+    )
+    if (match) {
+      router.push(`/services/${match.slug}?lang=${locale}`)
+      return
+    }
     const params = new URLSearchParams()
     if (searchTerm) params.set('q', searchTerm)
     if (userAddress) params.set('location', userAddress)
@@ -37,10 +60,26 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
     router.push(`/services?${params.toString()}`)
   }
 
+  const filteredServices = showSuggestions
+    ? services.filter((s) =>
+        (locale === 'es' ? s.name_es : s.name_en)
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
+    : []
+
+  const handleSelect = (s: { slug: string; name_en: string; name_es: string }) => {
+    const name = locale === 'es' ? s.name_es : s.name_en
+    setSearchTerm(name)
+    setShowSuggestions(false)
+    router.push(`/services/${s.slug}?lang=${locale}`)
+  }
+
   const handleIconClick = () => {
     if (searchInputRef.current) {
       searchInputRef.current.focus()
     }
+    setShowSuggestions(true)
   }
 
   return (
@@ -66,11 +105,11 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
 
           {/* Mobile layout */}
           <div className="w-full mt-8 flex flex-col sm:hidden items-center gap-3">
-            <div className="flex items-center bg-white rounded-full px-4 py-2 shadow w-full">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="w-5 h-5 text-gray-500 mr-2 cursor-pointer" 
-                viewBox="0 0 256 256" 
+            <div className="relative flex items-center bg-white rounded-full px-4 py-2 shadow w-full">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 text-gray-500 mr-2 cursor-pointer"
+                viewBox="0 0 256 256"
                 fill="currentColor"
                 onClick={handleIconClick}
               >
@@ -83,13 +122,34 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                 aria-label={t.searchPlaceholder}
                 className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={() => setShowSuggestions(true)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setShowSuggestions(true)
+                }}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
               />
               <button className="ml-2 p-2 rounded-full hover:bg-gray-100 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500" viewBox="0 0 256 256" fill="currentColor">
                   <path d="M128 16A88.1 88.1 0 0 0 40 104c0 66.14 80.18 131.39 83.6 134a8 8 0 0 0 8.8 0C135.82 235.39 216 170.14 216 104A88.1 88.1 0 0 0 128 16Zm0 112a24 24 0 1 1 24-24 24 24 0 0 1-24 24Z" />
                 </svg>
               </button>
+              {filteredServices.length > 0 && (
+                <div className="absolute top-full left-0 right-0 bg-white text-gray-800 shadow rounded-b-lg mt-1 max-h-60 overflow-auto z-50">
+                  {filteredServices.map((s) => {
+                    const name = locale === 'es' ? s.name_es : s.name_en
+                    return (
+                      <div
+                        key={s.slug}
+                        onClick={() => handleSelect(s)}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                      >
+                        {name}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
             <button onClick={handleSearch} className="bg-black text-white rounded-full px-6 py-2 text-sm font-medium shadow hover:bg-gray-900 transition">
               {t.searchHere}
@@ -98,11 +158,11 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
 
           {/* Desktop layout */}
           <div className="hidden sm:flex w-full flex-row justify-center cursor-pointer items-center gap-4 mt-8">
-            <div className="flex items-center bg-white rounded-full px-4 py-3 shadow w-full max-w-md">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="w-5 h-5 text-gray-500 mr-3 cursor-pointer" 
-                viewBox="0 0 256 256" 
+            <div className="relative flex items-center bg-white rounded-full px-4 py-3 shadow w-full max-w-md">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 text-gray-500 mr-3 cursor-pointer"
+                viewBox="0 0 256 256"
                 fill="currentColor"
                 onClick={handleIconClick}
               >
@@ -115,8 +175,29 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                 aria-label={t.searchPlaceholder}
                 className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={() => setShowSuggestions(true)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setShowSuggestions(true)
+                }}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
               />
+              {filteredServices.length > 0 && (
+                <div className="absolute top-full left-0 right-0 bg-white text-gray-800 shadow rounded-b-lg mt-1 max-h-60 overflow-auto z-50">
+                  {filteredServices.map((s) => {
+                    const name = locale === 'es' ? s.name_es : s.name_en
+                    return (
+                      <div
+                        key={s.slug}
+                        onClick={() => handleSelect(s)}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                      >
+                        {name}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
             <button className="bg-white rounded-full px-5 py-3 shadow text-sm flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-500" viewBox="0 0 256 256" fill="currentColor">
