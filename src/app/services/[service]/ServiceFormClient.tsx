@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import Stepper from '@/components/ui/Stepper'
 
 const translations = {
   es: {
@@ -262,6 +263,11 @@ export default function ServiceFormClient({ service }: Props) {
     copyright: locale === 'es' ? 'Todos los derechos reservados.' : 'All rights reserved.'
   }
 
+  const stepLabels =
+    locale === 'es'
+      ? ['Seleccionar servicio', 'Completar solicitud', 'Confirmación']
+      : ['Select Service', 'Fill Request', 'Confirmation']
+
   return (
     <div className="min-h-screen flex flex-col bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
       <Navbar locale={locale} toggleLocale={toggleLocale} t={navT} forceWhite />
@@ -291,28 +297,7 @@ export default function ServiceFormClient({ service }: Props) {
             <span className="font-medium">{locale === 'es' ? 'Solicitud' : 'Request'}</span>
           </nav>
           <div className="mb-8">
-            <ol className="flex items-center justify-between text-xs sm:text-sm">
-              <li className="flex items-center flex-1">
-                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white text-sm">✓</span>
-                <span className="ml-2">
-                  {locale === 'es' ? 'Seleccionar servicio' : 'Select Service'}
-                </span>
-                <span className="flex-1 h-0.5 bg-green-500 mx-4"></span>
-              </li>
-              <li className="flex items-center flex-1">
-                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-white text-sm">2</span>
-                <span className="ml-2 font-medium">
-                  {locale === 'es' ? 'Completar solicitud' : 'Fill Request'}
-                </span>
-                <span className="flex-1 h-0.5 bg-gray-300 mx-4"></span>
-              </li>
-              <li className="flex items-center">
-                <span className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-gray-300 text-gray-400 text-sm">3</span>
-                <span className="ml-2">
-                  {locale === 'es' ? 'Confirmación' : 'Confirmation'}
-                </span>
-              </li>
-            </ol>
+            <Stepper currentStep={2} steps={stepLabels} />
           </div>
           <div className="max-w-lg mx-auto">
               <h1 className="text-2xl font-bold mb-4">
