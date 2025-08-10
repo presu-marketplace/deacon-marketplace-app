@@ -40,6 +40,8 @@ const translations = {
     cityPlaceholder: 'Localidad',
     message: 'Mensaje',
     messagePlaceholder: 'Escribe tu mensaje',
+    invoices: 'Facturas',
+    invoicesHint: 'Sube hasta 3 facturas (PDF o imagen)',
     send: 'Enviar'
   },
   en: {
@@ -76,6 +78,8 @@ const translations = {
     cityPlaceholder: 'City',
     message: 'Message',
     messagePlaceholder: 'Write your message',
+    invoices: 'Invoices',
+    invoicesHint: 'Upload up to 3 invoices (PDF or image)',
     send: 'Send'
   }
 }
@@ -113,6 +117,7 @@ export default function ServiceFormClient({ service }: Props) {
   const [localidad, setLocalidad] = useState('')
   const [mensaje, setMensaje] = useState('')
   const [sistemas, setSistemas] = useState<string[]>([])
+  const [invoices, setInvoices] = useState<File[]>([])
 
   const isSeguridad = service.toLowerCase() === 'seguridad'
   const t = translations[locale]
@@ -121,6 +126,13 @@ export default function ServiceFormClient({ service }: Props) {
     setSistemas(prev =>
       prev.includes(value) ? prev.filter(s => s !== value) : [...prev, value]
     )
+  }
+
+  const handleInvoicesChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = e.target.files ? Array.from(e.target.files).slice(0, 3) : []
+    setInvoices(files)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -133,7 +145,8 @@ export default function ServiceFormClient({ service }: Props) {
       tipoPropiedad,
       direccion,
       localidad,
-      mensaje
+      mensaje,
+      invoices
     })
   }
 
@@ -272,6 +285,24 @@ export default function ServiceFormClient({ service }: Props) {
               </div>
             )}
             <div className="sm:col-span-2">
+              <label className="block text-xs font-medium mb-1" htmlFor="invoices">
+                {t.invoices}
+              </label>
+              <input
+                id="invoices"
+                type="file"
+                multiple
+                accept="application/pdf,image/*"
+                onChange={handleInvoicesChange}
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-black file:text-white hover:file:bg-gray-900 file:text-sm"
+              />
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {invoices.length > 0
+                  ? invoices.map(f => f.name).join(', ')
+                  : t.invoicesHint}
+              </p>
+            </div>
+            <div className="sm:col-span-2">
               <label className="block text-xs font-medium mb-1" htmlFor="mensaje">
                 {t.message}
               </label>
@@ -299,3 +330,4 @@ export default function ServiceFormClient({ service }: Props) {
     </div>
   )
 }
+
