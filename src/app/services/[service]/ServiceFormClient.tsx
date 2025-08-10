@@ -239,7 +239,6 @@ export default function ServiceFormClient({ service }: Props) {
 
   const isSeguridad = service.toLowerCase() === 'seguridad'
   const isLimpieza = service.toLowerCase() === 'limpieza'
-  const isFumigacion = service.toLowerCase() === 'fumigacion'
   const t = translations[locale]
   type ServiceInfo = typeof serviceInfo[keyof typeof serviceInfo]
   const info: ServiceInfo =
