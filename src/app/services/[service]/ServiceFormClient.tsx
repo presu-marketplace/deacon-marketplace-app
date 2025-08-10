@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import useUser from '@/features/auth/useUser'
 import Image from 'next/image'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
@@ -236,6 +237,7 @@ export default function ServiceFormClient({ service }: Props) {
   const [invoices, setInvoices] = useState<File[]>([])
   const [invoiceError, setInvoiceError] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const user = useUser()
 
   const isSeguridad = service.toLowerCase() === 'seguridad'
   const isLimpieza = service.toLowerCase() === 'limpieza'
@@ -259,6 +261,10 @@ export default function ServiceFormClient({ service }: Props) {
       setSistemas([])
     }
   }, [isSeguridad, locale])
+
+  useEffect(() => {
+    if (user?.email) setEmail(user.email)
+  }, [user])
 
   const toggleSistema = (value: string) => {
     setSistemas(prev =>
@@ -300,6 +306,9 @@ export default function ServiceFormClient({ service }: Props) {
     formData.append('mensaje', mensaje)
     formData.append('sistemas', JSON.stringify(sistemas))
     formData.append('lang', locale)
+    if (user?.id) {
+      formData.append('userId', user.id)
+    }
     invoices.forEach(f => formData.append('invoices', f))
     const res = await fetch('/api/request-service', {
       method: 'POST',

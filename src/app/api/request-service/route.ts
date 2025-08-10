@@ -17,6 +17,7 @@ export async function POST(request: Request) {
   const sistemas = JSON.parse(String(formData.get('sistemas') || '[]')) as string[]
   const lang = (formData.get('lang') === 'en' ? 'en' : 'es') as 'es' | 'en'
   const invoiceFiles = formData.getAll('invoices') as File[]
+  const userId = String(formData.get('userId') || '')
 
   if (invoiceFiles.length > 3) {
     return NextResponse.json({ error: 'Too many invoices' }, { status: 400 })
@@ -53,7 +54,8 @@ export async function POST(request: Request) {
     localidad,
     mensaje,
     sistemas,
-    invoice_urls: invoiceUrls
+    invoice_urls: invoiceUrls,
+    user_id: userId || null
   })
 
   const transporter = nodemailer.createTransport({
