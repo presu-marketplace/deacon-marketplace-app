@@ -1,9 +1,9 @@
-export const runtime = 'nodejs'
-
 import { NextResponse } from 'next/server'
 import nodemailer, { type Attachment } from 'nodemailer'
 import { randomUUID } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
+
+export const runtime = 'nodejs'
 
 async function parseBody(req: Request) {
   const ct = req.headers.get('content-type') || ''
@@ -30,8 +30,6 @@ async function parseBody(req: Request) {
   const files = fd.getAll('invoices') as File[]
   return { data, files }
 }
-
-export const runtime = 'nodejs'
 
 export async function POST(request: Request) {
   let supabaseAdmin
