@@ -299,6 +299,7 @@ export default function ServiceFormClient({ service }: Props) {
     formData.append('localidad', localidad)
     formData.append('mensaje', mensaje)
     formData.append('sistemas', JSON.stringify(sistemas))
+    formData.append('lang', locale)
     invoices.forEach(f => formData.append('invoices', f))
     const res = await fetch('/api/request-service', {
       method: 'POST',

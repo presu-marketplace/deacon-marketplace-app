@@ -15,6 +15,7 @@ export async function POST(request: Request) {
   const localidad = String(formData.get('localidad') || '')
   const mensaje = String(formData.get('mensaje') || '')
   const sistemas = JSON.parse(String(formData.get('sistemas') || '[]')) as string[]
+  const lang = (formData.get('lang') === 'en' ? 'en' : 'es') as 'es' | 'en'
   const invoiceFiles = formData.getAll('invoices') as File[]
 
   if (invoiceFiles.length > 3) {
@@ -65,17 +66,27 @@ export async function POST(request: Request) {
     }
   })
 
-    attachments.push({
-      filename: 'logo.png',
-      path: `${process.cwd()}/public/logo/presu-02.png`,
-      cid: 'presu-logo'
-    })
+  attachments.push({
+    filename: 'logo.png',
+    path: `${process.cwd()}/public/logo/presu-02.png`,
+    cid: 'presu-logo'
+  })
+
+  const subject =
+    lang === 'en'
+      ? `New service request: ${service}`
+      : `Nueva solicitud de servicio: ${service}`
+
+  const html =
+    lang === 'en'
+      ? `<div style="font-family:sans-serif"><img src="cid:presu-logo" alt="PRESU" style="height:60px"/><h2>New Service Request</h2><p>You have received a new request for <strong>${service}</strong>.</p><p><strong>Name:</strong> ${nombre}<br/><strong>Email:</strong> ${email}<br/><strong>Phone:</strong> ${telefono}</p><p>${mensaje}</p></div>`
+      : `<div style="font-family:sans-serif"><img src="cid:presu-logo" alt="PRESU" style="height:60px"/><h2>Nueva Solicitud de Servicio</h2><p>Has recibido una nueva solicitud para <strong>${service}</strong>.</p><p><strong>Nombre:</strong> ${nombre}<br/><strong>Email:</strong> ${email}<br/><strong>Teléfono:</strong> ${telefono}</p><p>${mensaje}</p></div>`
 
   await transporter.sendMail({
     from: process.env.SMTP_FROM,
-    to: 'rlabarile@analytixcg.com',
-    subject: `Nueva solicitud de servicio: ${service}`,
-    html: `<div style="font-family:sans-serif"><img src="cid:presu-logo" alt="PRESU" style="height:40px"/><p>Nuevo pedido de ${nombre} (${email}) para ${service}.</p><p>${mensaje}</p></div>`,
+    to: 'rlabarile@analytxcg.com',
+    subject,
+    html,
     attachments
   })
 
