@@ -43,7 +43,9 @@ const translations = {
     message: 'Mensaje',
     messagePlaceholder: 'Escribe tu mensaje',
     invoices: '¿Ya tienes otras ofertas? Sube hasta 3 facturas…',
-    invoicesHint: 'Archivos PDF o imagen',
+    invoicesHint: 'Archivos PDF',
+    invoicesTooMany: 'Puedes subir hasta 3 facturas',
+    invoicesTypeError: 'Solo se permiten archivos PDF',
     send: 'Enviar'
   },
   en: {
@@ -81,7 +83,9 @@ const translations = {
     message: 'Message',
     messagePlaceholder: 'Write your message',
     invoices: 'Already have other offers? Upload up to 3 invoices.',
-    invoicesHint: 'PDF or image files',
+    invoicesHint: 'PDF files only',
+    invoicesTooMany: 'You can upload up to 3 invoices',
+    invoicesTypeError: 'Only PDF files are allowed',
     send: 'Send'
   }
 }
@@ -187,6 +191,7 @@ export default function ServiceFormClient({ service }: Props) {
   const [mensaje, setMensaje] = useState('')
   const [sistemas, setSistemas] = useState<string[]>([])
   const [invoices, setInvoices] = useState<File[]>([])
+  const [invoiceError, setInvoiceError] = useState('')
   const [submitted, setSubmitted] = useState(false)
 
   const isSeguridad = service.toLowerCase() === 'seguridad'
@@ -222,24 +227,52 @@ export default function ServiceFormClient({ service }: Props) {
   const handleInvoicesChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const files = e.target.files ? Array.from(e.target.files).slice(0, 3) : []
+    const files = e.target.files ? Array.from(e.target.files) : []
+    if (files.length > 3) {
+      setInvoiceError(translations[locale].invoicesTooMany)
+      setInvoices([])
+      return
+    }
+    const pdfOnly = files.every(f => f.type === 'application/pdf')
+    if (!pdfOnly) {
+      setInvoiceError(translations[locale].invoicesTypeError)
+      setInvoices([])
+      return
+    }
+    setInvoiceError('')
     setInvoices(files)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log({
-      nombre,
-      email,
-      telefono,
-      sistemas,
-      tipoPropiedad,
-      direccion,
-      localidad,
-      mensaje,
-      invoices
+    if (invoiceError) return
+    const formData = new FormData()
+    formData.append('service', service)
+    formData.append('nombre', nombre)
+    formData.append('email', email)
+    formData.append('telefono', telefono)
+    formData.append('tipoPropiedad', tipoPropiedad)
+    formData.append('direccion', direccion)
+    formData.append('localidad', localidad)
+    formData.append('mensaje', mensaje)
+    formData.append('sistemas', JSON.stringify(sistemas))
+    invoices.forEach(f => formData.append('invoices', f))
+    const res = await fetch('/api/request-service', {
+      method: 'POST',
+      body: formData
     })
-    setSubmitted(true)
+    if (res.ok) {
+      setSubmitted(true)
+      setNombre('')
+      setEmail('')
+      setTelefono('')
+      setTipoPropiedad('')
+      setDireccion('')
+      setLocalidad('')
+      setMensaje('')
+      setSistemas([])
+      setInvoices([])
+    }
   }
 
   const navT = {
@@ -431,7 +464,7 @@ export default function ServiceFormClient({ service }: Props) {
                   id="invoices"
                   type="file"
                   multiple
-                  accept="application/pdf,image/*"
+                  accept="application/pdf"
                   onChange={handleInvoicesChange}
                   className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-black file:text-white hover:file:bg-gray-900 file:text-sm"
                 />
@@ -440,6 +473,9 @@ export default function ServiceFormClient({ service }: Props) {
                     ? invoices.map(f => f.name).join(', ')
                     : t.invoicesHint}
                 </p>
+                {invoiceError && (
+                  <p className="mt-1 text-xs text-red-500">{invoiceError}</p>
+                )}
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-xs font-medium mb-1" htmlFor="mensaje">
