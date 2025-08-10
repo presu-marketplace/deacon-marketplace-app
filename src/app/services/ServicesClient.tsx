@@ -41,24 +41,28 @@ export default function ServicesClient() {
       title: t.section1,
       services: [
         {
+          slug: 'seguridad',
           name: locale === 'es' ? 'Seguridad privada' : 'Private Security',
           rating: '4.8',
           time: '24/7',
           image: '/images/services/security.jpg'
         },
         {
+          slug: 'limpieza',
           name: locale === 'es' ? 'Limpieza Profesional' : 'Professional Cleaning',
           rating: '4.7',
           time: '9-18hs',
           image: '/images/services/cleaning.jpg'
         },
         {
+          slug: 'fumigacion',
           name: locale === 'es' ? 'Fumigación a domicilio' : 'Home Fumigation',
           rating: '4.6',
           time: '10-17hs',
           image: '/images/services/fumigation.jpg'
         },
         {
+          slug: 'mantenimiento-ascensores',
           name: locale === 'es' ? 'Mantenimiento de ascensores' : 'Elevator Maintenance',
           rating: '4.5',
           time: '24/7',
@@ -76,24 +80,28 @@ export default function ServicesClient() {
         //   image: '/images/services/locksmith.jpg'
         // },
         {
+          slug: 'escribania',
           name: locale === 'es' ? 'Escribanía' : 'Notary Services',
           rating: '4.7',
           time: '10-18hs',
           image: '/images/services/notary.jpg'
         },
         {
+          slug: 'community-manager',
           name: locale === 'es' ? 'Community Manager' : 'Community Manager',
           rating: '4.5',
           time: 'Online',
           image: '/images/services/community.jpg'
         },
         {
+          slug: 'traslados-ejecutivos',
           name: locale === 'es' ? 'Traslados Ejecutivos (Combi)' : 'Executive Transfers (Combi)',
           rating: '4.8',
           time: '24/7',
           image: '/images/services/transfer.jpg'
         },
         {
+          slug: 'salones-infantiles',
           name: locale === 'es' ? 'Salones Infantiles' : 'Kids Party Venues',
           rating: '4.6',
           time: 'Fines de semana',
@@ -131,24 +139,30 @@ export default function ServicesClient() {
             </div>
 
             <div className="flex overflow-x-auto space-x-4 pb-2">
-              {section.services.map((s, i) => (
-                <div
-                  key={i}
-                  className="flex-shrink-0 w-[250px] rounded-lg overflow-hidden shadow hover:shadow-md transition bg-white"
-                >
-                  <Image
-                    src={s.image}
-                    alt={s.name}
-                    width={250}
-                    height={160}
-                    className="w-full h-36 sm:h-40 object-cover"
-                  />
-                  <div className="px-3 py-2">
-                    <h3 className="font-medium text-sm truncate">{s.name}</h3>
-                    <p className="text-xs text-gray-600">⭐ {s.rating} • {s.time}</p>
+                {section.services.map((s, i) => (
+                  <div
+                    key={i}
+                    className="relative flex-shrink-0 w-[250px] rounded-lg overflow-hidden shadow hover:shadow-md transition bg-white"
+                  >
+                    <Image
+                      src={s.image}
+                      alt={s.name}
+                      width={250}
+                      height={160}
+                      className="w-full h-36 sm:h-40 object-cover"
+                    />
+                    <div className="px-3 py-2">
+                      <h3 className="font-medium text-sm truncate">{s.name}</h3>
+                      <p className="text-xs text-gray-600">⭐ {s.rating} • {s.time}</p>
+                      <button
+                        onClick={() => router.push(`/services/${s.slug}?lang=${locale}`)}
+                        className="mt-2 inline-block bg-black text-white rounded-full px-3 py-1 text-xs hover:bg-gray-900"
+                      >
+                        {locale === 'es' ? 'Solicitar servicio' : 'Request Service'}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         ))}
