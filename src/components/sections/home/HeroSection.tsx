@@ -21,6 +21,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
   const [currentImage, setCurrentImage] = useState(0)
   const [searchTerm, setSearchTerm] = useState('')
   const [services, setServices] = useState<{ slug: string; name_en: string; name_es: string }[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const router = useRouter()
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -33,20 +34,16 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
 
   useEffect(() => {
     const fetchServices = async () => {
-      const { data, error } = await supabase
-      .schema('api')
-      .from('services')
-      .select('slug, name_en, name_es')
-      .order(locale === 'es' ? 'name_es' : 'name_en', { ascending: true });
-        
-      if (error) console.error('fetchServices error:', error.message);
-      else setServices(data ?? []);
-    };
-
-    fetchServices();
-  }, []);
+      const { data } = await supabase
+        .from('reference.services')
+        .select('slug, name_en, name_es')
+      if (data) setServices(data)
+    }
+    fetchServices()
+  }, [])
 
   const handleSearch = () => {
+    setShowSuggestions(false)
     const match = services.find(
       (s) =>
         (locale === 'es' ? s.name_es : s.name_en)
@@ -63,17 +60,18 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
     router.push(`/services?${params.toString()}`)
   }
 
-  const filteredServices = searchTerm
+  const filteredServices = showSuggestions
     ? services.filter((s) =>
-      (locale === 'es' ? s.name_es : s.name_en)
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    )
+        (locale === 'es' ? s.name_es : s.name_en)
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
     : []
 
   const handleSelect = (s: { slug: string; name_en: string; name_es: string }) => {
     const name = locale === 'es' ? s.name_es : s.name_en
     setSearchTerm(name)
+    setShowSuggestions(false)
     router.push(`/services/${s.slug}?lang=${locale}`)
   }
 
@@ -81,6 +79,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
     if (searchInputRef.current) {
       searchInputRef.current.focus()
     }
+    setShowSuggestions(true)
   }
 
   return (
@@ -123,7 +122,12 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                 aria-label={t.searchPlaceholder}
                 className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={() => setShowSuggestions(true)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setShowSuggestions(true)
+                }}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
               />
               <button className="ml-2 p-2 rounded-full hover:bg-gray-100 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500" viewBox="0 0 256 256" fill="currentColor">
@@ -171,7 +175,12 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                 aria-label={t.searchPlaceholder}
                 className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={() => setShowSuggestions(true)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  setShowSuggestions(true)
+                }}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
               />
               {filteredServices.length > 0 && (
                 <div className="absolute top-full left-0 right-0 bg-white text-gray-800 shadow rounded-b-lg mt-1 max-h-60 overflow-auto z-50">
