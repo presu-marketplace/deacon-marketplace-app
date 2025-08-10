@@ -35,8 +35,10 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
   const loadServices = useCallback(async () => {
     if (services.length === 0) {
       const { data } = await supabase
-        .from('reference.services')
+        .schema('api')
+        .from('services')
         .select('slug, name_en, name_es')
+
       if (data) setServices(data)
     }
   }, [services.length])
