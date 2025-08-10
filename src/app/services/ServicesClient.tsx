@@ -142,7 +142,8 @@ export default function ServicesClient() {
                 {section.services.map((s, i) => (
                   <div
                     key={i}
-                    className="relative flex-shrink-0 w-[250px] rounded-lg overflow-hidden shadow hover:shadow-md transition bg-white"
+                    onClick={() => router.push(`/services/${s.slug}?lang=${locale}`)}
+                    className="relative flex-shrink-0 w-[250px] rounded-lg overflow-hidden shadow hover:shadow-md transition bg-white cursor-pointer"
                   >
                     <Image
                       src={s.image}
@@ -154,12 +155,6 @@ export default function ServicesClient() {
                     <div className="px-3 py-2">
                       <h3 className="font-medium text-sm truncate">{s.name}</h3>
                       <p className="text-xs text-gray-600">⭐ {s.rating} • {s.time}</p>
-                      <button
-                        onClick={() => router.push(`/services/${s.slug}?lang=${locale}`)}
-                        className="mt-2 inline-block bg-black text-white rounded-full px-3 py-1 text-xs hover:bg-gray-900"
-                      >
-                        {locale === 'es' ? 'Solicitar servicio' : 'Request Service'}
-                      </button>
                     </div>
                   </div>
                 ))}

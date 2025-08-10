@@ -263,61 +263,61 @@ export default function ServiceFormClient({ service }: Props) {
   return (
     <div className="min-h-screen flex flex-col bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
       <Navbar locale={locale} toggleLocale={toggleLocale} t={navT} forceWhite />
-      <main className="flex-grow pt-24 pb-12 px-4">
-        <nav className="mb-4 text-xs text-gray-600">
-          <button
-            onClick={() => router.push(`/services?lang=${locale}`)}
-            className="hover:underline"
-          >
-            {locale === 'es' ? 'Servicios' : 'Services'}
-          </button>
-          <span className="mx-1">→</span>
-          <span>{locale === 'es' ? info.esName : info.enName}</span>
-          <span className="mx-1">→</span>
-          <span className="font-medium">{locale === 'es' ? 'Solicitud' : 'Request'}</span>
-        </nav>
-        <ol className="flex items-center mb-6 text-xs text-gray-600">
-          <li className="flex items-center">
-            <span className="flex items-center justify-center h-6 w-6 rounded-full bg-gray-200 text-gray-600 mr-2">1</span>
-            {locale === 'es' ? 'Seleccionar servicio' : 'Select Service'}
-          </li>
-          <li className="flex-auto border-t border-gray-300 mx-2" />
-          <li className="flex items-center">
-            <span className="flex items-center justify-center h-6 w-6 rounded-full bg-black text-white mr-2">2</span>
-            {locale === 'es' ? 'Completar solicitud' : 'Fill Request'}
-          </li>
-          <li className="flex-auto border-t border-gray-300 mx-2" />
-          <li className="flex items-center">
-            <span className="flex items-center justify-center h-6 w-6 rounded-full bg-gray-200 text-gray-600 mr-2">3</span>
-            {locale === 'es' ? 'Confirmación' : 'Confirmation'}
-          </li>
-        </ol>
-        <div className="grid md:grid-cols-2 gap-8">
-          <div>
-            {info.image && (
-              <Image
-                src={info.image}
-                alt={locale === 'es' ? info.esName : info.enName}
-                width={600}
-                height={300}
-                className="w-full h-48 object-cover rounded-lg"
-              />
-            )}
-            <h1 className="text-2xl font-bold mt-4">
-              {locale === 'es' ? info.esName : info.enName}
-            </h1>
-            {info.rating && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">⭐ {info.rating}</p>
-            )}
-            <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-              {locale === 'es' ? info.esDesc : info.enDesc}
-            </p>
+      <main className="flex-grow pt-24 pb-12">
+        {info.image && (
+          <div className="relative w-full h-48 md:h-64">
+            <Image
+              src={info.image}
+              alt={locale === 'es' ? info.esName : info.enName}
+              fill
+              sizes="100vw"
+              className="object-cover"
+            />
           </div>
-          <form
-            onSubmit={handleSubmit}
-            className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-xl"
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        )}
+        <div className="max-w-5xl mx-auto px-4 mt-6">
+          <nav className="mb-4 text-xs text-gray-600">
+            <button
+              onClick={() => router.push(`/services?lang=${locale}`)}
+              className="hover:underline"
+            >
+              {locale === 'es' ? 'Servicios' : 'Services'}
+            </button>
+            <span className="mx-1">→</span>
+            <span>{locale === 'es' ? info.esName : info.enName}</span>
+            <span className="mx-1">→</span>
+            <span className="font-medium">{locale === 'es' ? 'Solicitud' : 'Request'}</span>
+          </nav>
+          <div className="relative">
+            <ol className="flex flex-col items-center text-center space-y-8 md:absolute md:-left-40 md:top-24">
+              <li className="flex flex-col items-center">
+                <span className="flex items-center justify-center h-6 w-6 rounded-full bg-gray-200 text-gray-600 mb-2">1</span>
+                {locale === 'es' ? 'Seleccionar servicio' : 'Select Service'}
+              </li>
+              <li className="flex flex-col items-center">
+                <span className="flex items-center justify-center h-6 w-6 rounded-full bg-black text-white mb-2">2</span>
+                {locale === 'es' ? 'Completar solicitud' : 'Fill Request'}
+              </li>
+              <li className="flex flex-col items-center">
+                <span className="flex items-center justify-center h-6 w-6 rounded-full bg-gray-200 text-gray-600 mb-2">3</span>
+                {locale === 'es' ? 'Confirmación' : 'Confirmation'}
+              </li>
+            </ol>
+            <div className="max-w-lg mx-auto">
+              <h1 className="text-2xl font-bold mb-4">
+                {locale === 'es' ? info.esName : info.enName}
+              </h1>
+              {info.rating && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">⭐ {info.rating}</p>
+              )}
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
+                {locale === 'es' ? info.esDesc : info.enDesc}
+              </p>
+              <form
+                onSubmit={handleSubmit}
+                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-xl"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium mb-1" htmlFor="nombre">
                   {t.name}
@@ -467,6 +467,8 @@ export default function ServiceFormClient({ service }: Props) {
             </div>
           </form>
         </div>
+      </div>
+    </div>
       </main>
       <Footer t={footerT} />
       {submitted && (
@@ -493,5 +495,4 @@ export default function ServiceFormClient({ service }: Props) {
     </div>
   )
 }
-
 
