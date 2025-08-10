@@ -34,7 +34,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
   useEffect(() => {
     const fetchServices = async () => {
       const { data } = await supabase
-        .from('services')
+        .from('reference.services')
         .select('slug, name_en, name_es')
       if (data) setServices(data)
     }
