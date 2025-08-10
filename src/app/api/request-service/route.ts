@@ -1,32 +1,81 @@
 import { NextResponse } from 'next/server'
-import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import nodemailer, { type Attachment } from 'nodemailer'
 import { randomUUID } from 'crypto'
 
 export async function POST(request: Request) {
-  let supabaseAdmin: SupabaseClient
-  try {
-    supabaseAdmin = getSupabaseAdmin()
-  } catch (err) {
-    console.error(err)
-    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
+  const {
+    NEXT_PUBLIC_SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY,
+    SMTP_HOST,
+    SMTP_PORT,
+    SMTP_USER,
+    SMTP_PASS,
+    SMTP_FROM
+  } = process.env
+
+  if (!SUPABASE_SERVICE_ROLE_KEY) {
+    return new Response('Missing SUPABASE_SERVICE_ROLE_KEY', { status: 500 })
+  }
+  if (!NEXT_PUBLIC_SUPABASE_URL) {
+    return new Response('Missing NEXT_PUBLIC_SUPABASE_URL', { status: 500 })
+  }
+  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !SMTP_FROM) {
+    return new Response('Missing SMTP configuration', { status: 500 })
   }
 
-  const formData = await request.formData()
-  const service = String(formData.get('service') || '')
-  const nombre = String(formData.get('nombre') || '')
-  const email = String(formData.get('email') || '')
-  const telefono = String(formData.get('telefono') || '')
-  const tipoPropiedad = String(formData.get('tipoPropiedad') || '')
-  const cleaningType = String(formData.get('cleaningType') || '')
-  const direccion = String(formData.get('direccion') || '')
-  const localidad = String(formData.get('localidad') || '')
-  const mensaje = String(formData.get('mensaje') || '')
-  const sistemas = JSON.parse(String(formData.get('sistemas') || '[]')) as string[]
-  const lang = (formData.get('lang') === 'en' ? 'en' : 'es') as 'es' | 'en'
-  const invoiceFiles = formData.getAll('invoices') as File[]
-  const userId = String(formData.get('userId') || '')
+  const supabaseAdmin: SupabaseClient = createClient(
+    NEXT_PUBLIC_SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY,
+    { auth: { persistSession: false }, db: { schema: 'api' } }
+  )
+
+  const contentType = request.headers.get('content-type') || ''
+  let service = ''
+  let nombre = ''
+  let email = ''
+  let telefono = ''
+  let tipoPropiedad = ''
+  let cleaningType = ''
+  let direccion = ''
+  let localidad = ''
+  let mensaje = ''
+  let sistemas: string[] = []
+  let lang: 'es' | 'en' = 'es'
+  let invoiceFiles: File[] = []
+  let userId = ''
+
+  if (contentType.includes('application/json')) {
+    const body = await request.json()
+    service = String(body.service || '')
+    nombre = String(body.nombre || body.name || '')
+    email = String(body.email || '')
+    telefono = String(body.telefono || '')
+    tipoPropiedad = String(body.tipoPropiedad || '')
+    cleaningType = String(body.cleaningType || '')
+    direccion = String(body.direccion || '')
+    localidad = String(body.localidad || '')
+    mensaje = String(body.mensaje || '')
+    sistemas = Array.isArray(body.sistemas) ? body.sistemas : []
+    lang = body.lang === 'en' ? 'en' : 'es'
+    invoiceFiles = []
+    userId = String(body.userId || '')
+  } else {
+    const formData = await request.formData()
+    service = String(formData.get('service') || '')
+    nombre = String(formData.get('nombre') || '')
+    email = String(formData.get('email') || '')
+    telefono = String(formData.get('telefono') || '')
+    tipoPropiedad = String(formData.get('tipoPropiedad') || '')
+    cleaningType = String(formData.get('cleaningType') || '')
+    direccion = String(formData.get('direccion') || '')
+    localidad = String(formData.get('localidad') || '')
+    mensaje = String(formData.get('mensaje') || '')
+    sistemas = JSON.parse(String(formData.get('sistemas') || '[]')) as string[]
+    lang = (formData.get('lang') === 'en' ? 'en' : 'es') as 'es' | 'en'
+    invoiceFiles = formData.getAll('invoices') as File[]
+    userId = String(formData.get('userId') || '')
+  }
 
   if (invoiceFiles.length > 3) {
     return NextResponse.json({ error: 'Too many invoices' }, { status: 400 })
@@ -67,22 +116,12 @@ export async function POST(request: Request) {
     user_id: userId || null
   })
 
-  let transporter
-  try {
-    const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env
-    if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
-      throw new Error('Missing SMTP credentials')
-    }
-    transporter = nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: Number(SMTP_PORT || 587),
-      secure: false,
-      auth: { user: SMTP_USER, pass: SMTP_PASS }
-    })
-  } catch (err) {
-    console.error(err)
-    return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
-  }
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: Number(SMTP_PORT),
+    secure: false,
+    auth: { user: SMTP_USER, pass: SMTP_PASS }
+  })
 
   attachments.push({
     filename: 'logo.png',
@@ -105,7 +144,9 @@ export async function POST(request: Request) {
     to: 'rlabarile@analytixcg.com',
     subject,
     html,
-    attachments
+    attachments,
+    envelope: { from: SMTP_FROM, to: 'rlabarile@analytixcg.com' },
+    replyTo: email
   })
 
   return NextResponse.json({ ok: true })
