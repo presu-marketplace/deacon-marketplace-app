@@ -238,6 +238,7 @@ export default function ServiceFormClient({ service }: Props) {
   const [invoices, setInvoices] = useState<File[]>([])
   const [invoiceError, setInvoiceError] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
   const user = useUser()
 
   const isSeguridad = service.toLowerCase() === 'seguridad'
@@ -312,6 +313,7 @@ export default function ServiceFormClient({ service }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (invoiceError) return
+    setError('')
     const formData = new FormData()
     formData.append('service', service)
     formData.append('nombre', nombre)
@@ -328,11 +330,12 @@ export default function ServiceFormClient({ service }: Props) {
       formData.append('userId', user.id)
     }
     invoices.forEach(f => formData.append('invoices', f))
-    const res = await fetch('/api/request-service', {
-      method: 'POST',
-      body: formData
-    })
-    if (res.ok) {
+    try {
+      const res = await fetch('/api/request-service', {
+        method: 'POST',
+        body: formData
+      })
+      if (!res.ok) throw new Error('Request failed')
       setSubmitted(true)
       setNombre('')
       setEmail('')
@@ -344,6 +347,12 @@ export default function ServiceFormClient({ service }: Props) {
       setMensaje('')
       setSistemas([])
       setInvoices([])
+    } catch {
+      setError(
+        locale === 'es'
+          ? 'Ocurrió un error al enviar la solicitud. Intenta nuevamente.'
+          : 'There was an error sending your request. Please try again.'
+      )
     }
   }
 
@@ -588,6 +597,9 @@ export default function ServiceFormClient({ service }: Props) {
                 >
                   {t.send}
                 </button>
+                {error && (
+                  <p className="mt-2 text-sm text-red-500 text-center">{error}</p>
+                )}
               </div>
             </div>
           </form>
