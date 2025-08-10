@@ -35,6 +35,27 @@ const translations = {
       'Comercio',
       'Proyecto en construcción'
     ],
+    cleaningType: 'Tipo de Servicio',
+    cleaningTypePlaceholder: 'Seleccione una opción',
+    cleaningOptions: [
+      'Limpieza y mantenimiento de oficina',
+      'Limpieza de vidrios en altura',
+      'Limpieza de frente',
+      'Final de obra',
+      'Limpieza de alfombras y sillones',
+      'Hidrolavado',
+      'Tratamiento de residuos patológicos',
+      'Limpieza de planta industrial',
+      'Mantenimiento de jardines y espacios verdes',
+      'Servicio de pulido de pisos',
+      'Plastificado de pisos',
+      'Desinfección',
+      'Desratización',
+      'Desinsectación',
+      'Limpieza de ferrocarril/subterráneos',
+      'Mudanzas',
+      'Parquización'
+    ],
     address: 'Dirección',
     addressPlaceholder: 'Dirección',
     city: 'Localidad',
@@ -72,6 +93,27 @@ const translations = {
       'Company or Industry',
       'Commerce',
       'Construction Project'
+    ],
+    cleaningType: 'Service Type',
+    cleaningTypePlaceholder: 'Select an option',
+    cleaningOptions: [
+      'Office cleaning & maintenance',
+      'High-rise window cleaning',
+      'Facade cleaning',
+      'Post-construction',
+      'Carpet & upholstery cleaning',
+      'Pressure washing',
+      'Pathological waste treatment',
+      'Industrial plant cleaning',
+      'Gardens & green areas maintenance',
+      'Floor polishing service',
+      'Floor sealing (plasticizing)',
+      'Disinfection',
+      'Rodent control',
+      'Insect control',
+      'Rail/Subway cleaning',
+      'Moving services',
+      'Landscaping'
     ],
     address: 'Address',
     addressPlaceholder: 'Address',
@@ -181,6 +223,7 @@ export default function ServiceFormClient({ service }: Props) {
   const [email, setEmail] = useState('')
   const [telefono, setTelefono] = useState('')
   const [tipoPropiedad, setTipoPropiedad] = useState('')
+  const [cleaningType, setCleaningType] = useState('')
   const [direccion, setDireccion] = useState('')
   const [localidad, setLocalidad] = useState('')
   const [mensaje, setMensaje] = useState('')
@@ -231,6 +274,7 @@ export default function ServiceFormClient({ service }: Props) {
       telefono,
       sistemas,
       tipoPropiedad,
+      cleaningType,
       direccion,
       localidad,
       mensaje,
@@ -380,13 +424,33 @@ export default function ServiceFormClient({ service }: Props) {
                   className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
                 >
                   <option value="">{t.propertyTypePlaceholder}</option>
-                  {t.propertyTypes.map(pt => (
+              {t.propertyTypes.map(pt => (
                     <option key={pt} value={pt}>
                       {pt}
                     </option>
                   ))}
                 </select>
               </div>
+              {service.toLowerCase() === 'limpieza' && (
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-medium mb-1" htmlFor="cleaningType">
+                    {t.cleaningType}
+                  </label>
+                  <select
+                    id="cleaningType"
+                    value={cleaningType}
+                    onChange={e => setCleaningType(e.target.value)}
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
+                  >
+                    <option value="">{t.cleaningTypePlaceholder}</option>
+                    {t.cleaningOptions.map(opt => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-medium mb-1" htmlFor="direccion">
                   {t.address}
