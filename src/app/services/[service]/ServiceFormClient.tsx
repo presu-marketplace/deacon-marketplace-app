@@ -288,22 +288,34 @@ export default function ServiceFormClient({ service }: Props) {
             <span className="mx-1">→</span>
             <span className="font-medium">{locale === 'es' ? 'Solicitud' : 'Request'}</span>
           </nav>
-          <div className="relative">
-            <ol className="flex flex-col items-center text-center space-y-8 md:absolute md:-left-40 md:top-24">
-              <li className="flex flex-col items-center">
-                <span className="flex items-center justify-center h-6 w-6 rounded-full bg-gray-200 text-gray-600 mb-2">1</span>
-                {locale === 'es' ? 'Seleccionar servicio' : 'Select Service'}
+          <div className="mb-8">
+            <ol className="flex items-center justify-between text-xs sm:text-sm">
+              <li className="flex items-center flex-1">
+                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white text-sm">✓</span>
+                <span className="ml-2 flex items-center">
+                  <span className="mr-1">🛠️</span>
+                  {locale === 'es' ? 'Seleccionar servicio' : 'Select Service'}
+                </span>
+                <span className="flex-1 h-0.5 bg-green-500 mx-4"></span>
               </li>
-              <li className="flex flex-col items-center">
-                <span className="flex items-center justify-center h-6 w-6 rounded-full bg-black text-white mb-2">2</span>
-                {locale === 'es' ? 'Completar solicitud' : 'Fill Request'}
+              <li className="flex items-center flex-1">
+                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-white text-sm">2</span>
+                <span className="ml-2 flex items-center font-medium">
+                  <span className="mr-1">📝</span>
+                  {locale === 'es' ? 'Completar solicitud' : 'Fill Request'}
+                </span>
+                <span className="flex-1 h-0.5 bg-gray-300 mx-4"></span>
               </li>
-              <li className="flex flex-col items-center">
-                <span className="flex items-center justify-center h-6 w-6 rounded-full bg-gray-200 text-gray-600 mb-2">3</span>
-                {locale === 'es' ? 'Confirmación' : 'Confirmation'}
+              <li className="flex items-center">
+                <span className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-gray-300 text-gray-400 text-sm">3</span>
+                <span className="ml-2 flex items-center">
+                  <span className="mr-1">✅</span>
+                  {locale === 'es' ? 'Confirmación' : 'Confirmation'}
+                </span>
               </li>
             </ol>
-            <div className="max-w-lg mx-auto">
+          </div>
+          <div className="max-w-lg mx-auto">
               <h1 className="text-2xl font-bold mb-4">
                 {locale === 'es' ? info.esName : info.enName}
               </h1>
@@ -467,11 +479,10 @@ export default function ServiceFormClient({ service }: Props) {
             </div>
           </form>
         </div>
-      </div>
-    </div>
+        </div>
       </main>
       <Footer t={footerT} />
-      {submitted && (
+        {submitted && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg text-center shadow-lg">
             <span className="text-3xl mb-2 inline-block animate-bounce text-green-500">✓</span>
