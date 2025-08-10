@@ -189,6 +189,8 @@ export default function ServiceFormClient({ service }: Props) {
   const [submitted, setSubmitted] = useState(false)
 
   const isSeguridad = service.toLowerCase() === 'seguridad'
+  const isLimpieza = service.toLowerCase() === 'limpieza'
+  const isFumigacion = service.toLowerCase() === 'fumigacion'
   const t = translations[locale]
   type ServiceInfo = typeof serviceInfo[keyof typeof serviceInfo]
   const info: ServiceInfo =
@@ -292,24 +294,21 @@ export default function ServiceFormClient({ service }: Props) {
             <ol className="flex items-center justify-between text-xs sm:text-sm">
               <li className="flex items-center flex-1">
                 <span className="flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white text-sm">✓</span>
-                <span className="ml-2 flex items-center">
-                  <span className="mr-1">🛠️</span>
+                <span className="ml-2">
                   {locale === 'es' ? 'Seleccionar servicio' : 'Select Service'}
                 </span>
                 <span className="flex-1 h-0.5 bg-green-500 mx-4"></span>
               </li>
               <li className="flex items-center flex-1">
                 <span className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-white text-sm">2</span>
-                <span className="ml-2 flex items-center font-medium">
-                  <span className="mr-1">📝</span>
+                <span className="ml-2 font-medium">
                   {locale === 'es' ? 'Completar solicitud' : 'Fill Request'}
                 </span>
                 <span className="flex-1 h-0.5 bg-gray-300 mx-4"></span>
               </li>
               <li className="flex items-center">
                 <span className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-gray-300 text-gray-400 text-sm">3</span>
-                <span className="ml-2 flex items-center">
-                  <span className="mr-1">✅</span>
+                <span className="ml-2">
                   {locale === 'es' ? 'Confirmación' : 'Confirmation'}
                 </span>
               </li>
@@ -369,24 +368,26 @@ export default function ServiceFormClient({ service }: Props) {
                   className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-medium mb-1" htmlFor="tipoPropiedad">
-                  {t.propertyType}
-                </label>
-                <select
-                  id="tipoPropiedad"
-                  value={tipoPropiedad}
-                  onChange={e => setTipoPropiedad(e.target.value)}
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
-                >
-                  <option value="">{t.propertyTypePlaceholder}</option>
-                  {t.propertyTypes.map(pt => (
-                    <option key={pt} value={pt}>
-                      {pt}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {(isSeguridad || isLimpieza || isFumigacion) && (
+                <div>
+                  <label className="block text-xs font-medium mb-1" htmlFor="tipoPropiedad">
+                    {t.propertyType}
+                  </label>
+                  <select
+                    id="tipoPropiedad"
+                    value={tipoPropiedad}
+                    onChange={e => setTipoPropiedad(e.target.value)}
+                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
+                  >
+                    <option value="">{t.propertyTypePlaceholder}</option>
+                    {t.propertyTypes.map(pt => (
+                      <option key={pt} value={pt}>
+                        {pt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-medium mb-1" htmlFor="direccion">
                   {t.address}
