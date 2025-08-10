@@ -45,7 +45,7 @@ export default function Stepper({
                   "ring-2 ring-offset-0",
                   isDone && "bg-green-500 ring-green-500 text-white",
                   isCurrent &&
-                    "bg-amber-500 ring-amber-500 text-white shadow-lg shadow-amber-500/20",
+                    "bg-blue-900 ring-blue-900 text-white shadow-lg shadow-blue-900/40",
                   isFuture &&
                     "bg-transparent ring-slate-400/50 text-slate-400 dark:ring-slate-600 dark:text-slate-500",
                   onStepClick ? "hover:scale-105" : "cursor-default",
@@ -93,7 +93,7 @@ export default function Stepper({
                     isDone
                       ? "bg-gradient-to-r from-green-500 to-green-500/60"
                       : isCurrent
-                      ? "bg-gradient-to-r from-amber-500/90 to-slate-500/40"
+                      ? "bg-gradient-to-r from-blue-900/90 to-slate-500/40"
                       : "bg-slate-400/40 dark:bg-slate-600/40",
                   ].join(" ")}
                 />
