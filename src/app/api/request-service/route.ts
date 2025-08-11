@@ -192,8 +192,58 @@ export async function POST(request: Request) {
 
   const subject = lang === 'en' ? 'New service request' : 'Nueva solicitud de servicio'
   const html = lang === 'en'
-    ? `<div style="font-family:sans-serif"><img src="cid:presu-logo" alt="PRESU" style="height:60px"/><h2>New Service Request</h2><p>${description || ''}</p><p><strong>Name:</strong> ${nombre || ''}<br/><strong>Email:</strong> ${email || ''}<br/><strong>Phone:</strong> ${telefono || ''}</p></div>`
-    : `<div style="font-family:sans-serif"><img src="cid:presu-logo" alt="PRESU" style="height:60px"/><h2>Nueva Solicitud de Servicio</h2><p>${description || ''}</p><p><strong>Nombre:</strong> ${nombre || ''}<br/><strong>Email:</strong> ${email || ''}<br/><strong>Teléfono:</strong> ${telefono || ''}</p></div>`
+    ? `
+      <div style="background-color:#f9f9f9;padding:20px;font-family:Arial,sans-serif;color:#333;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:auto;background:#ffffff;border-radius:8px;overflow:hidden;">
+          <tr>
+            <td style="text-align:center;padding:20px 20px 0;">
+              <img src="cid:presu-logo" alt="PRESU" style="height:60px"/>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px;text-align:center;">
+              <h2 style="margin:0;font-size:20px;">New Service Request</h2>
+              <p style="margin:10px 0 0;">${description || ''}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 20px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr><td style="font-weight:bold;padding:4px 0;">Name:</td><td>${nombre || ''}</td></tr>
+                <tr><td style="font-weight:bold;padding:4px 0;">Email:</td><td>${email || ''}</td></tr>
+                <tr><td style="font-weight:bold;padding:4px 0;">Phone:</td><td>${telefono || ''}</td></tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    `
+    : `
+      <div style="background-color:#f9f9f9;padding:20px;font-family:Arial,sans-serif;color:#333;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:auto;background:#ffffff;border-radius:8px;overflow:hidden;">
+          <tr>
+            <td style="text-align:center;padding:20px 20px 0;">
+              <img src="cid:presu-logo" alt="PRESU" style="height:60px"/>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:20px;text-align:center;">
+              <h2 style="margin:0;font-size:20px;">Nueva Solicitud de Servicio</h2>
+              <p style="margin:10px 0 0;">${description || ''}</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 20px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr><td style="font-weight:bold;padding:4px 0;">Nombre:</td><td>${nombre || ''}</td></tr>
+                <tr><td style="font-weight:bold;padding:4px 0;">Email:</td><td>${email || ''}</td></tr>
+                <tr><td style="font-weight:bold;padding:4px 0;">Teléfono:</td><td>${telefono || ''}</td></tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </div>
+    `
 
   try {
     await transporter.sendMail({
