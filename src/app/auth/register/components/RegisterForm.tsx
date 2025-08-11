@@ -45,7 +45,8 @@ export default function RegisterComponent({ t = defaultT }: RegisterProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const lang = searchParams.get('lang') || 'es'
-  const postAuthRedirect = searchParams.get('redirectTo') || '/'  // Added for flexibility, mirroring login
+  // Added for flexibility, mirroring login
+  const postAuthRedirect = searchParams.get('redirectTo') || '/'
 
   const handleRegister = async () => {
     setLoading(true)
@@ -55,12 +56,20 @@ export default function RegisterComponent({ t = defaultT }: RegisterProps) {
       email,
       password,
       options: {
-        data: { 
+        data: {
           full_name: email.split('@')[0],
           locale: lang
         }
       }
     })
+
+    if (!error && data?.user) {
+      await fetch('/api/create-user-folder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: data.user.id })
+      })
+    }
 
     if (error) {
       setError(error.message)

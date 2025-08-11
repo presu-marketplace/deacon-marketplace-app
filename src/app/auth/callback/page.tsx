@@ -10,7 +10,12 @@ export default function CallbackPage() {
     const recover = async () => {
       const { data, error } = await supabase.auth.getSession()
       if (data.session) {
-        router.push('/') // 🔄 Now goes to homepage
+        await fetch('/api/create-user-folder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: data.session.user.id })
+        })
+        router.push('/')
       } else {
         console.error('Recovery failed:', error?.message)
         router.push('/auth/login')
