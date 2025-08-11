@@ -32,20 +32,37 @@ export default function useUser() {
       const bucket = 'users-data'
       const placeholderPath = `${user?.id}/user-placeholder.png`
 
-      if (user && !user.user_metadata?.avatar_url) {
+      const isValidImageUrl = (url: string) =>
+        /\.(png|jpe?g|gif|webp)$/i.test(url)
+
+      const inUserBucket = (url: string) =>
+        url.includes(`/storage/v1/object/public/${bucket}/`)
+
+      const needsPlaceholder = () => {
+        if (!user) return false
+        const url = user.user_metadata?.avatar_url
+        if (!url) return true
+        if (url.startsWith('/images/')) return true
+        if (inUserBucket(url) && !isValidImageUrl(url)) return true
+        return false
+      }
+
+      if (needsPlaceholder()) {
         const { data } = supabase.storage
           .from(bucket)
           .getPublicUrl(placeholderPath)
         const avatarUrl = data?.publicUrl || '/images/user/user-placeholder.png'
         await supabase.auth.updateUser({ data: { avatar_url: avatarUrl } })
         await supabase.auth.refreshSession()
+        const { data: fresh } = await supabase.auth.getUser()
+        if (fresh?.user) setUser(fresh.user)
         router.refresh()
         return
       }
 
       if (
         user?.user_metadata?.avatar_url &&
-        !user.user_metadata.avatar_url.includes('/storage/v1/object/public/users-data/') &&
+        !inUserBucket(user.user_metadata.avatar_url) &&
         !user.user_metadata.avatar_url.startsWith('/images/')
       ) {
         try {
@@ -72,6 +89,8 @@ export default function useUser() {
           }
 
           await supabase.auth.refreshSession()
+          const { data: fresh } = await supabase.auth.getUser()
+          if (fresh?.user) setUser(fresh.user)
           router.refresh()
         } catch (e) {
           console.error('Failed to sync avatar', e)
@@ -80,6 +99,8 @@ export default function useUser() {
             .getPublicUrl(placeholderPath)
           await supabase.auth.updateUser({ data: { avatar_url: placeholder?.publicUrl } })
           await supabase.auth.refreshSession()
+          const { data: fresh } = await supabase.auth.getUser()
+          if (fresh?.user) setUser(fresh.user)
           router.refresh()
         }
       }
