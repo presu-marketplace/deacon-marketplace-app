@@ -198,17 +198,33 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Settings list (display style) */}
+          {/* Editable settings list */}
           <div className="bg-white divide-y divide-gray-200">
-            <Row label={pageT.name} value={fullName} />
-            <Row
+            <InputRow
+              label={pageT.name}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
+            <InputRow
               label={pageT.phone}
-              value={
-                <span className="inline-flex items-center gap-2">
-                  {phone}
-                  {!!phone && <FiCheckCircle className="text-green-600" title={pageT.verified} />}
-                </span>
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              type="tel"
+              after={
+                !!phone && (
+                  <FiCheckCircle className="text-green-600" title={pageT.verified} />
+                )
               }
+            />
+            <InputRow
+              label={pageT.address}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+            <InputRow
+              label={pageT.city}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
             />
             <Row
               label={pageT.email}
@@ -250,6 +266,40 @@ function Row({
         <div className="mt-1 text-sm text-gray-700">{value}</div>
       </div>
       <FiChevronRight className="text-gray-400 shrink-0" aria-hidden />
+    </div>
+  )
+}
+
+function InputRow({
+  label,
+  value,
+  onChange,
+  type = 'text',
+  after,
+}: {
+  label: string
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  type?: string
+  after?: React.ReactNode
+}) {
+  return (
+    <div className="py-4 flex items-center justify-between">
+      <div className="flex-1">
+        <label className="text-sm font-semibold text-gray-900" htmlFor={label}>
+          {label}
+        </label>
+        <div className="mt-1 flex items-center gap-2">
+          <input
+            id={label}
+            type={type}
+            value={value}
+            onChange={onChange}
+            className="text-sm text-gray-900 border border-gray-300 rounded-md w-full p-2"
+          />
+          {after}
+        </div>
+      </div>
     </div>
   )
 }
