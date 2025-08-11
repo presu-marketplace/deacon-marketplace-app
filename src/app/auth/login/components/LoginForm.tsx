@@ -46,18 +46,25 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
 
   const router = useRouter()
   const searchParams = useSearchParams()
-  const postAuthRedirect = searchParams.get('redirectTo') || '/'  // Renamed for clarity; used after successful login
+  const postAuthRedirect = searchParams.get('redirectTo') || '/'
   const lang = searchParams.get('lang') || locale
 
   const handleLogin = async () => {
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
       setError(error.message)
     } else {
+      if (data.user) {
+        await fetch('/api/create-user-folder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: data.user.id }),
+        })
+      }
       router.push(postAuthRedirect)
     }
 
