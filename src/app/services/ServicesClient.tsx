@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Navbar from '@/components/layout/Navbar'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { Service, upcomingServices } from '@/lib/serviceCatalog'
 
 type Service = {
   slug: string
