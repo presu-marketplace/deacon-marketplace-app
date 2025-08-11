@@ -106,7 +106,6 @@ export default function SettingsPage() {
 
   const pageT = {
     personalInfo: locale === 'es' ? 'Información personal' : 'Personal info',
-    photo: locale === 'es' ? 'Foto' : 'Photo',
     photoHelp:
       locale === 'es'
         ? 'Una foto ayuda a personalizar tu cuenta.'
@@ -119,40 +118,40 @@ export default function SettingsPage() {
     verified: locale === 'es' ? 'Verificado' : 'Verified',
     update: locale === 'es' ? 'Actualizar' : 'Update',
     updating: locale === 'es' ? 'Actualizando...' : 'Updating...',
-    placeholderName:
-      locale === 'es' ? 'Tu nombre completo' : 'Your full name',
+    placeholderName: locale === 'es' ? 'Tu nombre completo' : 'Your full name',
     placeholderPhone: '+549...',
-    placeholderAddress:
-      locale === 'es' ? 'Tu dirección' : 'Your address',
+    placeholderAddress: locale === 'es' ? 'Tu dirección' : 'Your address',
     placeholderCity: locale === 'es' ? 'Tu ciudad' : 'Your city',
     loading: locale === 'es' ? 'Cargando...' : 'Loading...',
   }
 
   if (!user)
-      return (
-        <React.Fragment>
-          <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
-          <div className="bg-white min-h-screen pt-32">
-            <div className="max-w-6xl mx-auto px-6 py-8">{pageT.loading}</div>
-          </div>
-        </React.Fragment>
-      )
-
     return (
-      <React.Fragment>
+      <>
         <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
         <div className="bg-white min-h-screen pt-32">
-          <div className="max-w-6xl mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-6">{pageT.personalInfo}</h1>
+          <div className="max-w-6xl mx-auto px-6 py-8">{pageT.loading}</div>
+        </div>
+      </>
+    )
 
-          <div className="bg-white rounded-2xl shadow-sm border">
-            <div className="p-6 flex items-center gap-6">
+  return (
+    <>
+      <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
+      <div className="bg-white min-h-screen pt-32">
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          <h1 className="text-3xl font-extrabold tracking-tight mb-6">
+            {pageT.personalInfo}
+          </h1>
+
+          {/* Avatar row */}
+          <div className="flex items-center gap-4 mb-6">
             <div className="relative">
               <Image
                 src={avatarUrl || '/images/user/user-placeholder.png'}
                 alt="Avatar"
-                width={96}
-                height={96}
+                width={64}
+                height={64}
                 className="rounded-full object-cover ring-1 ring-black/5"
               />
               <button
@@ -172,43 +171,45 @@ export default function SettingsPage() {
                 className="hidden"
               />
             </div>
-            <div className="space-y-1">
-              <p className="text-sm text-gray-800">{pageT.photo}</p>
-              <p className="text-xs text-gray-600">{pageT.photoHelp}</p>
+            <div>
+              <div className="text-sm text-gray-900 font-medium">
+                {fullName || pageT.placeholderName}
+              </div>
+              <div className="text-xs text-gray-500">{pageT.photoHelp}</div>
             </div>
           </div>
 
-          <hr className="border-t" />
-
-          <div className="divide-y">
+          {/* Settings list */}
+          <div className="bg-white divide-y divide-gray-200">
             <Row
               label={pageT.name}
               rightEl={
-                <div className="w-full sm:w-[560px]">
-                  <input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="w-full border rounded-lg px-3 py-2"
-                    placeholder={pageT.placeholderName}
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full px-0 py-2 border-0 bg-transparent focus:outline-none text-gray-900 placeholder:text-gray-400"
+                  placeholder={pageT.placeholderName}
+                />
               }
             />
 
             <Row
               label={pageT.phone}
               rightEl={
-                <div className="flex items-center gap-3 w-full sm:w-[560px]">
+                <div className="flex items-center gap-2 w-full">
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="flex-1 border rounded-lg px-3 py-2"
+                    className="flex-1 px-0 py-2 border-0 bg-transparent focus:outline-none"
                     placeholder={pageT.placeholderPhone}
                   />
                   {!!phone && (
-                    <FiCheckCircle className="text-green-600 shrink-0" title={pageT.verified} />
+                    <FiCheckCircle
+                      className="text-green-600 shrink-0"
+                      title={pageT.verified}
+                    />
                   )}
                 </div>
               }
@@ -217,50 +218,47 @@ export default function SettingsPage() {
             <Row
               label={pageT.address}
               rightEl={
-                <div className="w-full sm:w-[560px]">
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="w-full border rounded-lg px-3 py-2"
-                    placeholder={pageT.placeholderAddress}
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="w-full px-0 py-2 border-0 bg-transparent focus:outline-none"
+                  placeholder={pageT.placeholderAddress}
+                />
               }
             />
 
             <Row
               label={pageT.city}
               rightEl={
-                <div className="w-full sm:w-[560px]">
-                  <input
-                    type="text"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="w-full border rounded-lg px-3 py-2"
-                    placeholder={pageT.placeholderCity}
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full px-0 py-2 border-0 bg-transparent focus:outline-none"
+                  placeholder={pageT.placeholderCity}
+                />
               }
             />
 
             <Row
               label={pageT.email}
               rightEl={
-                <div className="flex items-center gap-3 w-full sm:w-[560px]">
+                <div className="flex items-center gap-2 w-full">
                   <input
                     type="text"
                     value={user.email}
                     disabled
-                    className="flex-1 border rounded-lg px-3 py-2 bg-gray-100"
+                    className="flex-1 px-0 py-2 border-0 bg-transparent text-gray-900"
                   />
                   <FiCheckCircle className="text-green-600 shrink-0" title={pageT.verified} />
                 </div>
               }
             />
+
           </div>
 
-          <div className="p-6">
+          <div className="mt-6">
             <button
               onClick={handleSave}
               disabled={saving}
@@ -271,8 +269,7 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-    </div>
-    </React.Fragment>
+    </>
   )
 }
 
@@ -284,11 +281,10 @@ function Row({
   rightEl: React.ReactNode
 }) {
   return (
-    <div className="p-6 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
-      <div className="w-40 shrink-0 text-sm text-gray-500">{label}</div>
+    <div className="py-4 flex items-start sm:items-center gap-3">
+      <div className="w-40 shrink-0 text-sm text-gray-900 font-medium">{label}</div>
       <div className="flex-1">{rightEl}</div>
-      <div className="hidden sm:block text-gray-400">{'›'}</div>
+      <div className="text-gray-400">{'›'}</div>
     </div>
   )
 }
-
