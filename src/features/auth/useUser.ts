@@ -27,5 +27,33 @@ export default function useUser() {
     return () => subscription.unsubscribe()
   }, [router])
 
+  useEffect(() => {
+    const syncAvatar = async () => {
+      if (
+        user?.user_metadata?.avatar_url &&
+        !user.user_metadata.avatar_url.includes('/storage/v1/object/public/users-data/')
+      ) {
+        try {
+          const response = await fetch(user.user_metadata.avatar_url)
+          const blob = await response.blob()
+          const ext = blob.type.split('/')[1] || 'jpg'
+          const filePath = `${user.id}/avatar.${ext}`
+          const { error } = await supabase.storage
+            .from('users-data')
+            .upload(filePath, blob, { upsert: true })
+          if (!error) {
+            const { data } = supabase.storage.from('users-data').getPublicUrl(filePath)
+            await supabase.auth.updateUser({ data: { avatar_url: data.publicUrl } })
+            await supabase.auth.refreshSession()
+            router.refresh()
+          }
+        } catch (e) {
+          console.error('Failed to sync avatar', e)
+        }
+      }
+    }
+    syncAvatar()
+  }, [user, router])
+
   return user
 }

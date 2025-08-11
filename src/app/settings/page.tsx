@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { FiEdit2, FiCheckCircle, FiExternalLink } from 'react-icons/fi'
+import { FiEdit2, FiCheckCircle } from 'react-icons/fi'
 import Navbar from '@/components/layout/Navbar'
 import { supabase } from '@/lib/supabaseClient'
 import useUser from '@/features/auth/useUser'
@@ -11,6 +11,7 @@ import useUser from '@/features/auth/useUser'
 export default function SettingsPage() {
   const searchParams = useSearchParams()
   const langParam = searchParams.get('lang')
+  const router = useRouter()
 
   const [locale, setLocale] = useState<'en' | 'es'>('en')
   useEffect(() => {
@@ -42,6 +43,8 @@ export default function SettingsPage() {
   const [fullName, setFullName] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState('')
+  const [city, setCity] = useState('')
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -50,13 +53,15 @@ export default function SettingsPage() {
     const loadProfile = async () => {
       if (!user) return
       setAvatarUrl(user.user_metadata?.avatar_url || '')
-      setPhone(user.user_metadata?.phone || '')
       const { data } = await supabase
         .from('api.profiles')
-        .select('full_name')
+        .select('full_name, phone, address, city')
         .eq('id', user.id)
         .single()
-      if (data?.full_name) setFullName(data.full_name)
+      setFullName(data?.full_name || user.user_metadata?.name || '')
+      setPhone(data?.phone || user.user_metadata?.phone || '')
+      setAddress(data?.address || user.user_metadata?.address || '')
+      setCity(data?.city || user.user_metadata?.city || '')
     }
     loadProfile()
   }, [user])
@@ -64,8 +69,18 @@ export default function SettingsPage() {
   const handleSave = async () => {
     if (!user) return
     setSaving(true)
-    await supabase.auth.updateUser({ data: { full_name: fullName, avatar_url: avatarUrl, phone } })
-    await supabase.from('api.profiles').upsert({ id: user.id, full_name: fullName })
+    await supabase.auth.updateUser({
+      data: { avatar_url: avatarUrl, name: fullName, phone, address, city },
+    })
+    await supabase.from('api.profiles').upsert({
+      id: user.id,
+      full_name: fullName,
+      phone,
+      address,
+      city,
+    })
+    await supabase.auth.refreshSession()
+    router.refresh()
     setSaving(false)
   }
 
@@ -77,32 +92,61 @@ export default function SettingsPage() {
     const ext = file.name.split('.').pop()
     const filePath = `${user.id}/avatar.${ext}`
     const { error } = await supabase.storage
-      .from('user-uploads')
+      .from('users-data')
       .upload(filePath, file, { upsert: true })
     if (!error) {
-      const { data } = supabase.storage.from('user-uploads').getPublicUrl(filePath)
+      const { data } = supabase.storage.from('users-data').getPublicUrl(filePath)
       setAvatarUrl(data.publicUrl)
       await supabase.auth.updateUser({ data: { avatar_url: data.publicUrl } })
+      await supabase.auth.refreshSession()
+      router.refresh()
     }
     setUploading(false)
+  }
+
+  const pageT = {
+    personalInfo: locale === 'es' ? 'Información personal' : 'Personal info',
+    photo: locale === 'es' ? 'Foto' : 'Photo',
+    photoHelp:
+      locale === 'es'
+        ? 'Una foto ayuda a personalizar tu cuenta.'
+        : 'A photo helps personalize your account.',
+    name: locale === 'es' ? 'Nombre' : 'Name',
+    phone: locale === 'es' ? 'Teléfono' : 'Phone number',
+    address: locale === 'es' ? 'Dirección' : 'Address',
+    city: locale === 'es' ? 'Ciudad' : 'City',
+    email: locale === 'es' ? 'Correo electrónico' : 'Email',
+    verified: locale === 'es' ? 'Verificado' : 'Verified',
+    update: locale === 'es' ? 'Actualizar' : 'Update',
+    updating: locale === 'es' ? 'Actualizando...' : 'Updating...',
+    placeholderName:
+      locale === 'es' ? 'Tu nombre completo' : 'Your full name',
+    placeholderPhone: '+549...',
+    placeholderAddress:
+      locale === 'es' ? 'Tu dirección' : 'Your address',
+    placeholderCity: locale === 'es' ? 'Tu ciudad' : 'Your city',
+    loading: locale === 'es' ? 'Cargando...' : 'Loading...',
   }
 
   if (!user)
     return (
       <>
         <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
-        <div className="max-w-6xl mx-auto px-6 py-8 pt-32">Loading...</div>
+        <div className="bg-white min-h-screen pt-32">
+          <div className="max-w-6xl mx-auto px-6 py-8">{pageT.loading}</div>
+        </div>
       </>
     )
 
   return (
     <>
       <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
-      <div className="max-w-6xl mx-auto px-6 py-8 pt-32">
-        <h1 className="text-3xl font-bold tracking-tight mb-6">Personal info</h1>
+      <div className="bg-white min-h-screen pt-32">
+        <div className="max-w-6xl mx-auto px-6 py-8">
+          <h1 className="text-3xl font-bold tracking-tight mb-6">{pageT.personalInfo}</h1>
 
-        <div className="bg-white rounded-2xl shadow-sm border">
-          <div className="p-6 flex items-center gap-6">
+          <div className="bg-white rounded-2xl shadow-sm border">
+            <div className="p-6 flex items-center gap-6">
             <div className="relative">
               <Image
                 src={avatarUrl || '/images/user/user-placeholder.png'}
@@ -129,8 +173,8 @@ export default function SettingsPage() {
               />
             </div>
             <div className="space-y-1">
-              <p className="text-sm text-gray-500">Photo</p>
-              <p className="text-xs text-gray-400">A photo helps personalize your account.</p>
+              <p className="text-sm text-gray-800">{pageT.photo}</p>
+              <p className="text-xs text-gray-600">{pageT.photoHelp}</p>
             </div>
           </div>
 
@@ -138,7 +182,7 @@ export default function SettingsPage() {
 
           <div className="divide-y">
             <Row
-              label="Name"
+              label={pageT.name}
               rightEl={
                 <div className="w-full sm:w-[560px]">
                   <input
@@ -146,14 +190,14 @@ export default function SettingsPage() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full border rounded-lg px-3 py-2"
-                    placeholder="Your full name"
+                    placeholder={pageT.placeholderName}
                   />
                 </div>
               }
             />
 
             <Row
-              label="Phone number"
+              label={pageT.phone}
               rightEl={
                 <div className="flex items-center gap-3 w-full sm:w-[560px]">
                   <input
@@ -161,17 +205,47 @@ export default function SettingsPage() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="flex-1 border rounded-lg px-3 py-2"
-                    placeholder="+549..."
+                    placeholder={pageT.placeholderPhone}
                   />
                   {!!phone && (
-                    <FiCheckCircle className="text-green-600 shrink-0" title="Verified" />
+                    <FiCheckCircle className="text-green-600 shrink-0" title={pageT.verified} />
                   )}
                 </div>
               }
             />
 
             <Row
-              label="Email"
+              label={pageT.address}
+              rightEl={
+                <div className="w-full sm:w-[560px]">
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full border rounded-lg px-3 py-2"
+                    placeholder={pageT.placeholderAddress}
+                  />
+                </div>
+              }
+            />
+
+            <Row
+              label={pageT.city}
+              rightEl={
+                <div className="w-full sm:w-[560px]">
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full border rounded-lg px-3 py-2"
+                    placeholder={pageT.placeholderCity}
+                  />
+                </div>
+              }
+            />
+
+            <Row
+              label={pageT.email}
               rightEl={
                 <div className="flex items-center gap-3 w-full sm:w-[560px]">
                   <input
@@ -180,22 +254,8 @@ export default function SettingsPage() {
                     disabled
                     className="flex-1 border rounded-lg px-3 py-2 bg-gray-100"
                   />
-                  <FiCheckCircle className="text-green-600 shrink-0" title="Verified" />
+                  <FiCheckCircle className="text-green-600 shrink-0" title={pageT.verified} />
                 </div>
-              }
-            />
-
-            <Row
-              label="Language"
-              rightEl={
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 text-sm text-gray-700 hover:underline"
-                  onClick={() => window.open('/device-language', '_blank')}
-                >
-                  Update device language
-                  <FiExternalLink className="w-4 h-4" />
-                </button>
               }
             />
           </div>
@@ -204,9 +264,9 @@ export default function SettingsPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white px-4 py-2 rounded-lg"
+              className="bg-black hover:bg-gray-800 disabled:opacity-60 text-white px-4 py-2 rounded-lg"
             >
-              {saving ? 'Saving...' : 'Save'}
+              {saving ? pageT.updating : pageT.update}
             </button>
           </div>
         </div>
@@ -225,6 +285,23 @@ function Row({
   return (
     <div className="p-6 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
       <div className="w-40 shrink-0 text-sm text-gray-500">{label}</div>
+      <div className="flex-1">{rightEl}</div>
+      <div className="hidden sm:block text-gray-400">{'›'}</div>
+    </div>
+    </>
+  )
+}
+
+function Row({
+  label,
+  rightEl,
+}: {
+  label: string
+  rightEl: React.ReactNode
+}) {
+  return (
+    <div className="p-6 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+      <div className="w-40 shrink-0 text-sm text-gray-800">{label}</div>
       <div className="flex-1">{rightEl}</div>
       <div className="hidden sm:block text-gray-400">{'›'}</div>
     </div>
