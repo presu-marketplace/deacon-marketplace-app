@@ -81,11 +81,11 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
   }
 
   return (
-    <div className="w-full max-w-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 space-y-6 border border-gray-200/60 dark:border-gray-700">
-        <h2 className="text-2xl font-extrabold text-center mb-2">
+    <div className="w-full max-w-md bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 space-y-6 border border-gray-700">
+        <h2 className="text-2xl font-extrabold text-center text-white mb-2">
           {t.loginTo}
         </h2>
-        <p className="text-sm text-center text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-center text-gray-400">
           {t.noAccount}{' '}
           <a
             href={`/auth/register?lang=${lang}`}
@@ -97,7 +97,7 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
 
         <button
           onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center gap-2 bg-white text-black border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 text-sm font-medium"
+          className="w-full flex items-center justify-center gap-2 bg-gray-700 text-white border border-gray-600 px-4 py-2 rounded-lg hover:bg-gray-600 transition disabled:opacity-50 text-sm font-medium"
           disabled={googleLoading}
         >
           {googleLoading && <span className="loader border-blue-500" />}
@@ -106,14 +106,14 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
         </button>
 
         <div className="relative text-center">
-          <span className="text-xs text-gray-400 px-2 bg-white dark:bg-gray-800 z-10 relative">
+          <span className="text-xs text-gray-400 px-2 bg-gray-800 z-10 relative">
             {t.orLoginWithEmail}
           </span>
-          <div className="absolute top-1/2 left-0 w-full border-t border-gray-300 dark:border-gray-600 -z-0 transform -translate-y-1/2" />
+          <div className="absolute top-1/2 left-0 w-full border-t border-gray-600 -z-0 transform -translate-y-1/2" />
         </div>
 
         <div className="text-left">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-semibold text-gray-300 mb-1">
             {t.email}
           </label>
           <div className="relative">
@@ -123,13 +123,13 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
               placeholder={t.email}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+              className="w-full pl-10 pr-3 py-2 border border-gray-700 rounded-lg bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
             />
           </div>
         </div>
 
         <div className="text-left">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-semibold text-gray-300 mb-1">
             {t.password}
           </label>
           <div className="relative">
@@ -139,7 +139,7 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
               placeholder={t.password}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+              className="w-full pl-10 pr-3 py-2 border border-gray-700 rounded-lg bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
             />
           </div>
         </div>
