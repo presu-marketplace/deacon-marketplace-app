@@ -159,7 +159,7 @@ export default function SettingsPage() {
       <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
       <div className="bg-white min-h-screen pt-32">
         <div className="max-w-6xl mx-auto px-6 py-8">
-          <h1 className="text-3xl font-extrabold tracking-tight mb-6">
+          <h1 className="text-3xl font-bold text-black tracking-tight mb-6">
             {pageT.personalInfo}
           </h1>
 
@@ -198,17 +198,36 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Settings list (display style) */}
+          {/* Editable settings list */}
           <div className="bg-white divide-y divide-gray-200">
-            <Row label={pageT.name} value={fullName} />
-            <Row
+            <EditableRow
+              label={pageT.name}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
+            <EditableRow
               label={pageT.phone}
-              value={
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              type="tel"
+              displayValue={
                 <span className="inline-flex items-center gap-2">
                   {phone}
-                  {!!phone && <FiCheckCircle className="text-green-600" title={pageT.verified} />}
+                  {!!phone && (
+                    <FiCheckCircle className="text-green-600" title={pageT.verified} />
+                  )}
                 </span>
               }
+            />
+            <EditableRow
+              label={pageT.address}
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+            <EditableRow
+              label={pageT.city}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
             />
             <Row
               label={pageT.email}
@@ -221,12 +240,12 @@ export default function SettingsPage() {
             />
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 flex justify-center">
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-black hover:bg-gray-800 disabled:opacity-60 text-white px-4 py-2 rounded-lg"
-            >
+              className="w-full max-w-xs bg-black hover:bg-gray-800 disabled:opacity-60 text-white font-bold text-lg py-3 rounded-xl transition transform hover:scale-[1.02]"
+              >
               {saving ? pageT.updating : pageT.update}
             </button>
           </div>
@@ -250,6 +269,48 @@ function Row({
         <div className="mt-1 text-sm text-gray-700">{value}</div>
       </div>
       <FiChevronRight className="text-gray-400 shrink-0" aria-hidden />
+    </div>
+  )
+}
+
+function EditableRow({
+  label,
+  value,
+  onChange,
+  type = 'text',
+  displayValue,
+}: {
+  label: string
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  type?: string
+  displayValue?: React.ReactNode
+}) {
+  const [editing, setEditing] = useState(false)
+  return (
+    <div className="py-4 flex items-center justify-between">
+      <div className="flex-1">
+        <label className="text-sm font-semibold text-gray-900">{label}</label>
+        {editing ? (
+          <input
+            type={type}
+            value={value}
+            onChange={onChange}
+            onBlur={() => setEditing(false)}
+            autoFocus
+            className="mt-1 text-sm text-gray-900 border border-white rounded-md w-full p-2 focus:outline-none focus:ring-2 focus:ring-black"
+            />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="mt-1 text-sm text-gray-700 text-left w-full"
+          >
+            {displayValue ?? value}
+          </button>
+        )}
+      </div>
+      {!editing && <FiChevronRight className="text-gray-400 shrink-0" aria-hidden />}
     </div>
   )
 }
