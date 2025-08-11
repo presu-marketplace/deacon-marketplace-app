@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef, useCallback } from 'react'
+import type { ReactNode } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
@@ -89,6 +90,40 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
     setShowSuggestions(true)
   }
 
+  const highlightMatch = (name: string): ReactNode => {
+    if (!searchTerm) return name
+    const lower = name.toLowerCase()
+    const term = searchTerm.toLowerCase()
+    const start = lower.indexOf(term)
+    if (start === -1) return name
+    const end = start + term.length
+    return (
+      <>
+        {name.slice(0, start)}
+        <span className="text-blue-600">{name.slice(start, end)}</span>
+        {name.slice(end)}
+      </>
+    )
+  }
+
+  const renderSuggestions = () =>
+    filteredServices.length > 0 && (
+      <ul className="absolute top-full left-0 right-0 mt-1 max-h-60 overflow-auto z-50 bg-white border border-gray-200 rounded-md shadow-lg divide-y divide-gray-100">
+        {filteredServices.map((s) => {
+          const name = locale === 'es' ? s.name_es : s.name_en
+          return (
+            <li
+              key={s.slug}
+              onPointerDown={() => handleSelect(s)}
+              className="px-4 py-2 text-sm text-gray-800 cursor-pointer hover:bg-gray-50 transition-colors"
+            >
+              {highlightMatch(name)}
+            </li>
+          )
+        })}
+      </ul>
+    )
+
   return (
     <section className="relative w-full h-[580px] md:h-[740px] overflow-hidden">
       {/* Rotating background images */}
@@ -141,22 +176,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                   <path d="M128 16A88.1 88.1 0 0 0 40 104c0 66.14 80.18 131.39 83.6 134a8 8 0 0 0 8.8 0C135.82 235.39 216 170.14 216 104A88.1 88.1 0 0 0 128 16Zm0 112a24 24 0 1 1 24-24 24 24 0 0 1-24 24Z" />
                 </svg>
               </button>
-              {filteredServices.length > 0 && (
-                <div className="absolute top-full left-0 right-0 bg-white text-gray-800 shadow rounded-b-lg mt-1 max-h-60 overflow-auto z-50">
-                  {filteredServices.map((s) => {
-                    const name = locale === 'es' ? s.name_es : s.name_en
-                    return (
-                      <div
-                        key={s.slug}
-                        onPointerDown={() => handleSelect(s)}
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                      >
-                        {name}
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
+              {renderSuggestions()}
             </div>
             <button onClick={handleSearch} className="bg-black text-white rounded-full px-6 py-2 text-sm font-medium shadow hover:bg-gray-900 transition">
               {t.searchHere}
@@ -189,22 +209,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                 }}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
               />
-              {filteredServices.length > 0 && (
-                <div className="absolute top-full left-0 right-0 bg-white text-gray-800 shadow rounded-b-lg mt-1 max-h-60 overflow-auto z-50">
-                  {filteredServices.map((s) => {
-                    const name = locale === 'es' ? s.name_es : s.name_en
-                    return (
-                      <div
-                        key={s.slug}
-                        onPointerDown={() => handleSelect(s)}
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                      >
-                        {name}
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
+              {renderSuggestions()}
             </div>
             <button className="bg-white rounded-full px-5 py-3 shadow text-sm flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-500" viewBox="0 0 256 256" fill="currentColor">
