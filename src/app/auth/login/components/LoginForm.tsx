@@ -53,11 +53,18 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
       setError(error.message)
     } else {
+      if (data.user) {
+        await fetch('/api/create-user-folder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: data.user.id }),
+        })
+      }
       router.push(postAuthRedirect)
     }
 
