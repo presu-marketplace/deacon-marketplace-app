@@ -28,6 +28,9 @@ export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const user = useUser()
 
+  const providerLabel =
+    locale === 'es' ? 'Quiero ser proveedor' : 'Join as a provider'
+
   useEffect(() => {
     setMounted(true)
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -120,6 +123,13 @@ export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: 
                   className="bg-black text-white px-5 py-2 rounded-full font-medium hover:bg-gray-800 transition"
                 >
                   {t.signup}
+                </button>
+
+                <button
+                  onClick={() => router.push(`/auth/register?role=pro&lang=${locale}`)}
+                  className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-5 py-2 rounded-full font-medium hover:from-purple-700 hover:to-indigo-700 transition"
+                >
+                  {providerLabel}
                 </button>
               </>
             )}
