@@ -180,7 +180,7 @@ export async function POST(request: Request) {
   const transporter = nodemailer.createTransport({
     host: SMTP_HOST,
     port: Number(SMTP_PORT || 587),
-    secure: false,
+    secure: Number(SMTP_PORT) === 465,
     auth: { user: SMTP_USER, pass: SMTP_PASS },
   })
 
@@ -195,14 +195,19 @@ export async function POST(request: Request) {
     ? `<div style="font-family:sans-serif"><img src="cid:presu-logo" alt="PRESU" style="height:60px"/><h2>New Service Request</h2><p>${description || ''}</p><p><strong>Name:</strong> ${nombre || ''}<br/><strong>Email:</strong> ${email || ''}<br/><strong>Phone:</strong> ${telefono || ''}</p></div>`
     : `<div style="font-family:sans-serif"><img src="cid:presu-logo" alt="PRESU" style="height:60px"/><h2>Nueva Solicitud de Servicio</h2><p>${description || ''}</p><p><strong>Nombre:</strong> ${nombre || ''}<br/><strong>Email:</strong> ${email || ''}<br/><strong>Teléfono:</strong> ${telefono || ''}</p></div>`
 
-  await transporter.sendMail({
-    from: SMTP_FROM,
-    replyTo: email || undefined,
-    to: 'rlabarile@analytixcg.com',
-    subject,
-    html,
-    attachments: mailAttachments,
-  })
+  try {
+    await transporter.sendMail({
+      from: SMTP_FROM,
+      replyTo: email || undefined,
+      to: 'rlabarile@analytixcg.com',
+      subject,
+      html,
+      attachments: mailAttachments,
+    })
+  } catch (e) {
+    if (!isProd) console.error('Mail send failed:', e)
+    return NextResponse.json({ error: 'Mail send failed' }, { status: 500 })
+  }
 
   return NextResponse.json({ ok: true, id: inserted?.id })
 }
