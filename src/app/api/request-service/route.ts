@@ -251,7 +251,7 @@ export async function POST(request: Request) {
     await transporter.sendMail({
       from: SMTP_FROM,
       replyTo: email || undefined,
-      to: 'rlabarile@analytixcg.com',
+      to: 'info@presu.com.ar',
       subject,
       html,
       attachments: mailAttachments,
