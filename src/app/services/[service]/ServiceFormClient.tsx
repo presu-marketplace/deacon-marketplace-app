@@ -67,7 +67,8 @@ const translations = {
     cityPlaceholder: 'Localidad',
     message: 'Mensaje',
     messagePlaceholder: 'Escribe tu mensaje',
-    invoices: '¿Ya tienes otras ofertas? Sube hasta 3 facturas…',
+    invoices:
+      '¿Tienes otra oferta? Compártenos tu facturación actual y te presentaremos una propuesta superadora.',
     invoicesHint: 'Archivos PDF',
     invoicesTooMany: 'Puedes subir hasta 3 facturas',
     invoicesTypeError: 'Solo se permiten archivos PDF',
@@ -130,7 +131,8 @@ const translations = {
     cityPlaceholder: 'City',
     message: 'Message',
     messagePlaceholder: 'Write your message',
-    invoices: 'Already have other offers? Upload up to 3 invoices.',
+    invoices:
+      "Do you have another offer? Share your current billing and we'll present a superior proposal.",
     invoicesHint: 'PDF files only',
     invoicesTooMany: 'You can upload up to 3 invoices',
     invoicesTypeError: 'Only PDF files are allowed',
@@ -520,7 +522,7 @@ export default function ServiceFormClient({ service }: Props) {
                     </div>
                   </div>
                 </>
-              ) : (
+              ) : isSeguridad ? (
                 <div>
                   <label className="block text-xs font-medium mb-1" htmlFor="tipoPropiedad">
                     {t.propertyType}
@@ -539,7 +541,7 @@ export default function ServiceFormClient({ service }: Props) {
                     ))}
                   </select>
                 </div>
-              )}
+              ) : null}
               <div>
                 <label className="block text-xs font-medium mb-1" htmlFor="direccion">
                   {t.address}
