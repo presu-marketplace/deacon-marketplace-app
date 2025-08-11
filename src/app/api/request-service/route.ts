@@ -17,6 +17,7 @@ type JsonBody = {
   telefono?: string
   tipoPropiedad?: string
   cleaningType?: string
+  frequency?: unknown[]
   direccion?: string
   localidad?: string
   mensaje?: string
@@ -41,6 +42,7 @@ async function parseBody(req: Request) {
     telefono: s(fd.get('telefono')),
     tipoPropiedad: s(fd.get('tipoPropiedad')),
     cleaningType: s(fd.get('cleaningType')),
+    frequency: JSON.parse(s(fd.get('frequency') || '[]')),
     direccion: s(fd.get('direccion')),
     localidad: s(fd.get('localidad')),
     mensaje: s(fd.get('mensaje')),
@@ -66,7 +68,7 @@ export async function POST(request: Request) {
   const { data, files } = await parseBody(request)
   const {
     service, nombre, email, telefono,
-    tipoPropiedad, cleaningType, direccion, localidad, mensaje,
+    tipoPropiedad, cleaningType, frequency = [], direccion, localidad, mensaje,
     sistemas = [], lang = 'es', userId = '', deadline,
   } = data
 
@@ -115,7 +117,7 @@ export async function POST(request: Request) {
   // 4) Build description + deadline
   const description =
     (mensaje?.trim() || '') ||
-    `[${service || 'Servicio'}] ${tipoPropiedad || ''} ${cleaningType || ''} — ${direccion || ''} ${localidad || ''}`
+    `[${service || 'Servicio'}] ${tipoPropiedad || ''} ${cleaningType || ''} ${Array.isArray(frequency) ? frequency.join('/') : ''} — ${direccion || ''} ${localidad || ''}`
       .replace(/\s+/g, ' ')
       .trim() || null
 
@@ -131,6 +133,7 @@ export async function POST(request: Request) {
     telefono: telefono || null,
     tipo_propiedad: tipoPropiedad || null,
     cleaning_type: cleaningType || null,
+    frequency,
     direccion: direccion || null,
     localidad: localidad || null,
     mensaje: mensaje || null,

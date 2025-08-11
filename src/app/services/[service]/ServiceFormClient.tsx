@@ -48,6 +48,8 @@ const translations = {
       'Mudanzas',
       'Parquización'
     ],
+    frequency: 'Frecuencia',
+    frequencyOptions: ['Día', 'Semana', 'Mes'],
     propertyType: 'Tipo de Propiedad',
     propertyTypePlaceholder: 'Seleccione...',
     propertyTypes: [
@@ -109,6 +111,8 @@ const translations = {
       'Moving services',
       'Landscaping'
     ],
+    frequency: 'Frequency',
+    frequencyOptions: ['Day', 'Week', 'Month'],
     propertyType: 'Property Type',
     propertyTypePlaceholder: 'Select...',
     propertyTypes: [
@@ -231,6 +235,7 @@ export default function ServiceFormClient({ service }: Props) {
   const [telefono, setTelefono] = useState('')
   const [tipoPropiedad, setTipoPropiedad] = useState('')
   const [cleaningType, setCleaningType] = useState('')
+  const [frequency, setFrequency] = useState<string[]>([])
   const [direccion, setDireccion] = useState('')
   const [localidad, setLocalidad] = useState('')
   const [mensaje, setMensaje] = useState('')
@@ -291,6 +296,12 @@ export default function ServiceFormClient({ service }: Props) {
     )
   }
 
+  const toggleFrequency = (value: string) => {
+    setFrequency(prev =>
+      prev.includes(value) ? prev.filter(f => f !== value) : [...prev, value]
+    )
+  }
+
   const handleInvoicesChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -321,6 +332,7 @@ export default function ServiceFormClient({ service }: Props) {
     formData.append('telefono', telefono)
     formData.append('tipoPropiedad', tipoPropiedad)
     formData.append('cleaningType', cleaningType)
+    formData.append('frequency', JSON.stringify(frequency))
     formData.append('direccion', direccion)
     formData.append('localidad', localidad)
     formData.append('mensaje', mensaje)
@@ -342,6 +354,7 @@ export default function ServiceFormClient({ service }: Props) {
       setTelefono('')
       setTipoPropiedad('')
       setCleaningType('')
+      setFrequency([])
       setDireccion('')
       setLocalidad('')
       setMensaje('')
@@ -468,24 +481,45 @@ export default function ServiceFormClient({ service }: Props) {
                 />
               </div>
               {isLimpieza ? (
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-medium mb-1" htmlFor="cleaningType">
-                    {t.cleaningType}
-                  </label>
-                  <select
-                    id="cleaningType"
-                    value={cleaningType}
-                    onChange={e => setCleaningType(e.target.value)}
-                    className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
-                  >
-                    <option value="">{t.cleaningTypePlaceholder}</option>
-                    {t.cleaningOptions.map(opt => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <>
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-medium mb-1" htmlFor="cleaningType">
+                      {t.cleaningType}
+                    </label>
+                    <select
+                      id="cleaningType"
+                      value={cleaningType}
+                      onChange={e => setCleaningType(e.target.value)}
+                      className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:border-black dark:focus:ring-white dark:focus:border-white hover:border-gray-400"
+                    >
+                      <option value="">{t.cleaningTypePlaceholder}</option>
+                      {t.cleaningOptions.map(opt => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <span className="block text-xs font-medium mb-1">{t.frequency}</span>
+                    <div className="flex flex-wrap gap-2">
+                      {t.frequencyOptions.map(opt => (
+                        <label
+                          key={opt}
+                          className="flex items-center space-x-2 rounded-md p-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={frequency.includes(opt)}
+                            onChange={() => toggleFrequency(opt)}
+                            className="h-4 w-4 text-black dark:text-white focus:ring-black dark:focus:ring-white"
+                          />
+                          <span className="text-sm">{opt}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </>
               ) : (
                 <div>
                   <label className="block text-xs font-medium mb-1" htmlFor="tipoPropiedad">
