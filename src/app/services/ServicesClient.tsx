@@ -32,7 +32,8 @@ export default function ServicesClient() {
   }
 
   const t = {
-    servicesTitle: locale === 'es' ? 'Servicios disponibles' : 'Available Services',
+    availableTitle: locale === 'es' ? 'Servicios disponibles' : 'Available Services',
+    upcomingTitle: locale === 'es' ? 'Servicios próximos' : 'Upcoming Services',
     rating: locale === 'es' ? 'puntuación' : 'rating',
     schedule: locale === 'es' ? 'Horario estimado' : 'Estimated hours',
   }
@@ -45,16 +46,61 @@ export default function ServicesClient() {
         .select('*')
 
       if (error) {
-        // Fallback to upcoming only if the query fails
-        setServices(upcomingServices)
+        setServices([])
         return
       }
 
       const fetched = (data ?? []) as Service[]
-      setServices([...fetched, ...upcomingServices])
+      setServices(fetched)
     }
     fetchServices()
   }, [])
+
+  const renderCard = (s: Service) => {
+    const name = locale === 'es' ? s.name_es : s.name_en
+    const handleClick = () => {
+      if (s.disabled) {
+        router.push(`/under-construction?lang=${locale}`)
+      } else {
+        router.push(`/services/${s.slug}?lang=${locale}`)
+      }
+    }
+
+    return (
+      <div
+        key={s.slug}
+        onClick={handleClick}
+        className={`relative rounded-lg overflow-hidden shadow transition bg-white ${
+          s.disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:shadow-md'
+        }`}
+      >
+        <Image
+          src={s.image_url}
+          alt={name}
+          width={250}
+          height={160}
+          className="w-full h-36 sm:h-40 object-cover"
+        />
+
+        {s.disabled && (
+          <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-sm font-semibold">
+            {locale === 'es' ? 'Próximamente' : 'Coming Soon'}
+          </div>
+        )}
+
+        <div className="px-3 py-2">
+          <h3 className="font-medium text-sm truncate">{name}</h3>
+          {(s.rating || s.schedule) && (
+            <p className="text-xs text-gray-600">
+              {s.rating ? `⭐ ${s.rating}` : ''}
+              {s.rating && s.schedule ? ' • ' : ''}
+              {s.schedule || ''}
+            </p>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -72,55 +118,20 @@ export default function ServicesClient() {
       />
 
       <main className="pt-24 px-4 sm:px-8 max-w-7xl mx-auto">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-6">{t.servicesTitle}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6">{t.availableTitle}</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {services.map((s) => {
-            const name = locale === 'es' ? s.name_es : s.name_en
-            const handleClick = () => {
-              if (s.disabled) {
-                router.push(`/under-construction?lang=${locale}`)
-              } else {
-                router.push(`/services/${s.slug}?lang=${locale}`)
-              }
-            }
-
-            return (
-              <div
-                key={s.slug}
-                onClick={handleClick}
-                className={`relative rounded-lg overflow-hidden shadow transition bg-white ${
-                  s.disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:shadow-md'
-                }`}
-              >
-                <Image
-                  src={s.image_url}
-                  alt={name}
-                  width={250}
-                  height={160}
-                  className="w-full h-36 sm:h-40 object-cover"
-                />
-
-                {s.disabled && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-sm font-semibold">
-                    {locale === 'es' ? 'Próximamente' : 'Coming Soon'}
-                  </div>
-                )}
-
-                <div className="px-3 py-2">
-                  <h3 className="font-medium text-sm truncate">{name}</h3>
-                  {(s.rating || s.schedule) && (
-                    <p className="text-xs text-gray-600">
-                      {s.rating ? `⭐ ${s.rating}` : ''}
-                      {s.rating && s.schedule ? ' • ' : ''}
-                      {s.schedule || ''}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )
-          })}
+          {services.map(renderCard)}
         </div>
+
+        {upcomingServices.length > 0 && (
+          <>
+            <h2 className="text-2xl sm:text-3xl font-bold mt-12 mb-6">{t.upcomingTitle}</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {upcomingServices.map(renderCard)}
+            </div>
+          </>
+        )}
       </main>
     </div>
   )
