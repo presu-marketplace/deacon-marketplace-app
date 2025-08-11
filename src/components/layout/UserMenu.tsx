@@ -20,7 +20,13 @@ export default function UserMenu({ user, locale }: Props) {
     const router = useRouter()
 
     const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || (locale === 'en' ? 'User' : 'Usuario')
-    const avatarUrl = user?.user_metadata?.avatar_url || '/images/user/user-placeholder.png'
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+    const rawAvatarUrl = user?.user_metadata?.avatar_url
+    const avatarUrl = rawAvatarUrl
+        ? rawAvatarUrl.startsWith('http')
+            ? rawAvatarUrl
+            : `${supabaseUrl}${rawAvatarUrl}`
+        : '/images/user/user-placeholder.png'
 
     const activityText = locale === 'en' ? 'Activity' : 'Actividad'
     const activityAlt = locale === 'en' ? 'Activity' : 'Actividad'
