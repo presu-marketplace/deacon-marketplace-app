@@ -49,7 +49,8 @@ export default function ServicesClient() {
   useEffect(() => {
     const fetchServices = async () => {
       const { data } = await supabase
-        .from<Service>('services')
+        .schema('api')
+        .from('services')
         .select('*')
       if (data) setServices(data)
     }

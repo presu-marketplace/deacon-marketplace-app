@@ -1,6 +1,7 @@
 // app/api/request-service/route.ts
 import { NextResponse } from 'next/server'
-import nodemailer, { type Attachment } from 'nodemailer'
+import nodemailer from 'nodemailer'
+import type Mail from 'nodemailer/lib/mailer'
 import { randomUUID } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
 import { createClient } from '@supabase/supabase-js'
@@ -23,7 +24,7 @@ type JsonBody = {
   sistemas?: unknown[]
   lang?: 'es' | 'en'
   userId?: string
-  deadline?: string // yyyy-mm-dd (optional)
+  deadline?: string // yyyy-mm-dd
 }
 
 async function parseBody(req: Request) {
@@ -54,7 +55,19 @@ async function parseBody(req: Request) {
 }
 
 export async function POST(request: Request) {
-  // 0) Supabase (service-role; default schema = api via helper)
+  // Dev: inspect which key/role we’re using
+  const qs = new URL(request.url).searchParams
+  if (qs.get('who') === '1') {
+    try {
+      const k = process.env.SUPABASE_SERVICE_ROLE_KEY!
+      const payload = JSON.parse(Buffer.from(k.split('.')[1], 'base64url').toString())
+      return NextResponse.json({ jwt_role: payload.role, iss: payload.iss })
+    } catch {
+      return NextResponse.json({ error: 'bad key' }, { status: 500 })
+    }
+  }
+
+  // 0) Supabase admin client (service-role; default schema = api via helper)
   let supabase
   try {
     supabase = getSupabaseAdmin()
@@ -78,7 +91,7 @@ export async function POST(request: Request) {
 
   // 2) Upload PDFs
   const invoiceUrls: string[] = []
-  const mailAttachments: Attachment[] = []
+  const mailAttachments: Mail.Attachment[] = []
   for (const file of files) {
     const buffer = Buffer.from(await file.arrayBuffer())
     const filePath = `${randomUUID()}-${file.name}`
@@ -109,7 +122,6 @@ export async function POST(request: Request) {
     }
   } catch (e) {
     if (!isProd) console.error('Service lookup error:', e)
-    // keep null if lookup fails
   }
 
   // 4) Build description + deadline
@@ -122,9 +134,9 @@ export async function POST(request: Request) {
   const deadlineDate =
     deadline && /^\d{4}-\d{2}-\d{2}$/.test(deadline) ? deadline : null
 
-  // 5) Insert (table lives in schema api; client already set to api)
+  // 5) Insert (explicit schema header for safety)
   const insertPayload = {
-    user_id: userId?.trim() || null,          // trigger validates 'client' role if present
+    user_id: userId?.trim() || null,      // your trigger validates client role if present
     service_id,
     nombre: nombre || null,
     email: email || null,
@@ -134,28 +146,28 @@ export async function POST(request: Request) {
     direccion: direccion || null,
     localidad: localidad || null,
     mensaje: mensaje || null,
-    sistemas,                                 // jsonb
-    invoice_urls: invoiceUrls,                 // text[]
+    sistemas,                             // jsonb
+    invoice_urls: invoiceUrls,            // text[]
     description,
     location: localidad || direccion || null,
     deadline: deadlineDate,
-    // provider_id/status use defaults (status='open')
   } as const
 
   const { data: inserted, error: dbErr } = await supabase
+    .schema('api')
     .from('service_requests')
     .insert(insertPayload)
     .select('id')
     .single()
 
-    if (dbErr) {
-      if (!isProd) console.error('Insert failed:', dbErr)
-      const err = dbErr as { details?: string | null; hint?: string | null }
-      return NextResponse.json(
-        { error: 'DB insert failed', code: dbErr.code, message: dbErr.message, details: err.details, hint: err.hint },
-        { status: 500 }
-      )
-    }
+  if (dbErr) {
+    if (!isProd) console.error('Insert failed:', dbErr)
+    const err = dbErr as { details?: string | null; hint?: string | null }
+    return NextResponse.json(
+      { error: 'DB insert failed', code: dbErr.code, message: dbErr.message, details: err.details, hint: err.hint },
+      { status: 500 }
+    )
+  }
 
   // 6) Email notification
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = process.env
@@ -190,4 +202,36 @@ export async function POST(request: Request) {
   })
 
   return NextResponse.json({ ok: true, id: inserted?.id })
+}
+
+// Debug-friendly GETs:
+// - /api/request-service?who=1   → shows JWT role from your service key
+// - /api/request-service?smoke=1 → minimal insert to test DB perms
+export async function GET(request: Request) {
+  const qs = new URL(request.url).searchParams
+
+  if (qs.get('who') === '1') {
+    try {
+      const k = process.env.SUPABASE_SERVICE_ROLE_KEY!
+      const payload = JSON.parse(Buffer.from(k.split('.')[1], 'base64url').toString())
+      return NextResponse.json({ jwt_role: payload.role, iss: payload.iss })
+    } catch {
+      return NextResponse.json({ error: 'bad key' }, { status: 500 })
+    }
+  }
+
+  if (qs.get('smoke') === '1') {
+    const supabase = getSupabaseAdmin()
+    const { error } = await supabase
+      .schema('api')
+      .from('service_requests')
+      .insert({ description: 'smoke', location: 'local', attachments: [] })
+      .select('id')
+      .single()
+    return error
+      ? NextResponse.json({ error: 'DB insert failed', code: error.code, message: error.message }, { status: 500 })
+      : NextResponse.json({ ok: true, mode: 'smoke' })
+  }
+
+  return NextResponse.json({ ok: true })
 }
