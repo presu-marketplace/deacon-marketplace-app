@@ -29,9 +29,18 @@ export default function useUser() {
 
   useEffect(() => {
     const syncAvatar = async () => {
+      if (user && !user.user_metadata?.avatar_url) {
+        await supabase.auth.updateUser({
+          data: { avatar_url: '/images/user/user-placeholder.png' },
+        })
+        await supabase.auth.refreshSession()
+        router.refresh()
+        return
+      }
       if (
         user?.user_metadata?.avatar_url &&
-        !user.user_metadata.avatar_url.includes('/storage/v1/object/public/users-data/')
+        !user.user_metadata.avatar_url.includes('/storage/v1/object/public/users-data/') &&
+        !user.user_metadata.avatar_url.startsWith('/images/')
       ) {
         try {
           const response = await fetch(user.user_metadata.avatar_url)
