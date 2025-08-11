@@ -25,5 +25,5 @@ export default function CallbackPage() {
     recover()
   }, [router])
 
-  return <div className="p-6">Restaurando sesión...</div>
+  return <div className="p-6 text-center text-gray-200">Restaurando sesión...</div>
 }
