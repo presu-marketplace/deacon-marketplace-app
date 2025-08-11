@@ -522,7 +522,7 @@ export default function ServiceFormClient({ service }: Props) {
                     </div>
                   </div>
                 </>
-              ) : !isSeguridad ? (
+              ) : isSeguridad ? (
                 <div>
                   <label className="block text-xs font-medium mb-1" htmlFor="tipoPropiedad">
                     {t.propertyType}
