@@ -271,6 +271,22 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+    </>
+  )
+}
+
+function Row({
+  label,
+  rightEl,
+}: {
+  label: string
+  rightEl: React.ReactNode
+}) {
+  return (
+    <div className="p-6 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
+      <div className="w-40 shrink-0 text-sm text-gray-500">{label}</div>
+      <div className="flex-1">{rightEl}</div>
+      <div className="hidden sm:block text-gray-400">{'›'}</div>
     </div>
     </>
   )
