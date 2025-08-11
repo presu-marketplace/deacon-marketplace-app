@@ -38,15 +38,10 @@ const translations = {
       'Hidrolavado',
       'Tratamiento de residuos patológicos',
       'Limpieza de planta industrial',
-      'Mantenimiento de jardines y espacios verdes',
       'Servicio de pulido de pisos',
       'Plastificado de pisos',
       'Desinfección',
-      'Desratización',
-      'Desinsectación',
-      'Limpieza de ferrocarril/subterráneos',
-      'Mudanzas',
-      'Parquización'
+      'Limpieza de ferrocarril/subterráneos'
     ],
     frequency: 'Frecuencia',
     frequencyOptions: ['Día', 'Semana', 'Mes'],
@@ -102,15 +97,10 @@ const translations = {
       'Pressure washing',
       'Pathological waste treatment',
       'Industrial plant cleaning',
-      'Gardens & green areas maintenance',
       'Floor polishing service',
       'Floor sealing (plasticizing)',
       'Disinfection',
-      'Rodent control',
-      'Insect control',
-      'Rail/Subway cleaning',
-      'Moving services',
-      'Landscaping'
+      'Rail/Subway cleaning'
     ],
     frequency: 'Frequency',
     frequencyOptions: ['Day', 'Week', 'Month'],
