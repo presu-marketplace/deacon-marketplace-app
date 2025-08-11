@@ -159,7 +159,7 @@ export default function SettingsPage() {
       <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
       <div className="bg-white min-h-screen pt-32">
         <div className="max-w-6xl mx-auto px-6 py-8">
-          <h1 className="text-3xl font-extrabold tracking-tight mb-6">
+          <h1 className="text-3xl font-bold text-black tracking-tight mb-6">
             {pageT.personalInfo}
           </h1>
 
@@ -221,11 +221,11 @@ export default function SettingsPage() {
             />
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 flex justify-center">
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-black hover:bg-gray-800 disabled:opacity-60 text-white px-4 py-2 rounded-lg"
+              className="bg-black hover:bg-gray-800 disabled:opacity-60 text-white px-12 py-6 rounded-lg text-lg"
             >
               {saving ? pageT.updating : pageT.update}
             </button>
@@ -244,7 +244,7 @@ function Row({
   value: React.ReactNode
 }) {
   return (
-    <div className="py-4 flex items-center justify-between">
+    <div className="py-2 flex items-center justify-between">
       <div className="flex-1">
         <div className="text-sm font-semibold text-gray-900">{label}</div>
         <div className="mt-1 text-sm text-gray-700">{value}</div>
