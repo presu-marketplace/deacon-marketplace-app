@@ -121,14 +121,14 @@ export default function ServicesClient() {
         <h1 className="text-2xl sm:text-3xl font-bold mb-6">{t.availableTitle}</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {services.map(renderCard)}
+          {services.map((s) => renderCard(s))}
         </div>
 
         {upcomingServices.length > 0 && (
           <>
             <h2 className="text-2xl sm:text-3xl font-bold mt-12 mb-6">{t.upcomingTitle}</h2>
             <div className="flex gap-6 overflow-x-auto pb-2">
-              {upcomingServices.map(s => renderCard(s, 'w-64 flex-shrink-0'))}
+              {upcomingServices.map((s) => renderCard(s, 'w-64 flex-shrink-0'))}
             </div>
           </>
         )}
