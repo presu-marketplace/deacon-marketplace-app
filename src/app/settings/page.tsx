@@ -225,8 +225,8 @@ export default function SettingsPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-black hover:bg-gray-800 disabled:opacity-60 text-white px-12 py-6 rounded-lg text-lg"
-            >
+              className="w-full max-w-xs bg-black hover:bg-gray-800 disabled:opacity-60 text-white font-bold text-lg py-3 rounded-xl transition transform hover:scale-[1.02]"
+              >
               {saving ? pageT.updating : pageT.update}
             </button>
           </div>
@@ -244,7 +244,7 @@ function Row({
   value: React.ReactNode
 }) {
   return (
-    <div className="py-2 flex items-center justify-between">
+    <div className="py-4 flex items-center justify-between">
       <div className="flex-1">
         <div className="text-sm font-semibold text-gray-900">{label}</div>
         <div className="mt-1 text-sm text-gray-700">{value}</div>
