@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { FiEdit2, FiCheckCircle } from 'react-icons/fi'
+import { FiEdit2, FiCheckCircle, FiChevronRight } from 'react-icons/fi'
 import Navbar from '@/components/layout/Navbar'
 import { supabase } from '@/lib/supabaseClient'
 import useUser from '@/features/auth/useUser'
@@ -15,12 +15,8 @@ export default function SettingsPage() {
 
   const [locale, setLocale] = useState<'en' | 'es'>('en')
   useEffect(() => {
-    if (langParam === 'es' || langParam === 'en') {
-      setLocale(langParam)
-    } else {
-      const browserLang = navigator.language.toLowerCase().startsWith('es') ? 'es' : 'en'
-      setLocale(browserLang)
-    }
+    if (langParam === 'es' || langParam === 'en') setLocale(langParam)
+    else setLocale(navigator.language.toLowerCase().startsWith('es') ? 'es' : 'en')
   }, [langParam])
 
   const toggleLocale = () => {
@@ -98,16 +94,13 @@ export default function SettingsPage() {
       const publicPath = `/storage/v1/object/public/users-data/${filePath}`
       setAvatarUrl(publicPath)
       await supabase.auth.updateUser({ data: { avatar_url: publicPath } })
-      await supabase.auth.refreshSession()
-      router.refresh()
     } else {
-      setAvatarUrl('/images/user/user-placeholder.png')
-      await supabase.auth.updateUser({
-        data: { avatar_url: '/images/user/user-placeholder.png' },
-      })
-      await supabase.auth.refreshSession()
-      router.refresh()
+      const placeholder = '/images/user/user-placeholder.png'
+      setAvatarUrl(placeholder)
+      await supabase.auth.updateUser({ data: { avatar_url: placeholder } })
     }
+    await supabase.auth.refreshSession()
+    router.refresh()
     setUploading(false)
   }
 
@@ -125,10 +118,6 @@ export default function SettingsPage() {
     verified: locale === 'es' ? 'Verificado' : 'Verified',
     update: locale === 'es' ? 'Actualizar' : 'Update',
     updating: locale === 'es' ? 'Actualizando...' : 'Updating...',
-    placeholderName: locale === 'es' ? 'Tu nombre completo' : 'Your full name',
-    placeholderPhone: '+549...',
-    placeholderAddress: locale === 'es' ? 'Tu dirección' : 'Your address',
-    placeholderCity: locale === 'es' ? 'Tu ciudad' : 'Your city',
     loading: locale === 'es' ? 'Cargando...' : 'Loading...',
   }
 
@@ -151,7 +140,7 @@ export default function SettingsPage() {
             {pageT.personalInfo}
           </h1>
 
-          {/* Avatar row */}
+          {/* Avatar block */}
           <div className="flex items-center gap-4 mb-6">
             <div className="relative">
               <Image
@@ -179,90 +168,34 @@ export default function SettingsPage() {
               />
             </div>
             <div>
-              <div className="text-sm text-gray-900 font-medium">
-                {fullName || pageT.placeholderName}
+              <div className="text-sm text-gray-900 font-medium">{fullName}</div>
+              <div className="text-xs text-gray-500">
+                {pageT.photoHelp}
               </div>
-              <div className="text-xs text-gray-500">{pageT.photoHelp}</div>
             </div>
           </div>
 
-          {/* Settings list */}
+          {/* Settings list (display style) */}
           <div className="bg-white divide-y divide-gray-200">
-            <Row
-              label={pageT.name}
-              rightEl={
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-0 py-2 border-0 bg-transparent focus:outline-none text-gray-900 placeholder:text-gray-400"
-                  placeholder={pageT.placeholderName}
-                />
-              }
-            />
-
+            <Row label={pageT.name} value={fullName} />
             <Row
               label={pageT.phone}
-              rightEl={
-                <div className="flex items-center gap-2 w-full">
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="flex-1 px-0 py-2 border-0 bg-transparent focus:outline-none"
-                    placeholder={pageT.placeholderPhone}
-                  />
-                  {!!phone && (
-                    <FiCheckCircle
-                      className="text-green-600 shrink-0"
-                      title={pageT.verified}
-                    />
-                  )}
-                </div>
+              value={
+                <span className="inline-flex items-center gap-2">
+                  {phone}
+                  {!!phone && <FiCheckCircle className="text-green-600" title={pageT.verified} />}
+                </span>
               }
             />
-
-            <Row
-              label={pageT.address}
-              rightEl={
-                <input
-                  type="text"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="w-full px-0 py-2 border-0 bg-transparent focus:outline-none"
-                  placeholder={pageT.placeholderAddress}
-                />
-              }
-            />
-
-            <Row
-              label={pageT.city}
-              rightEl={
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full px-0 py-2 border-0 bg-transparent focus:outline-none"
-                  placeholder={pageT.placeholderCity}
-                />
-              }
-            />
-
             <Row
               label={pageT.email}
-              rightEl={
-                <div className="flex items-center gap-2 w-full">
-                  <input
-                    type="text"
-                    value={user.email}
-                    disabled
-                    className="flex-1 px-0 py-2 border-0 bg-transparent text-gray-900"
-                  />
-                  <FiCheckCircle className="text-green-600 shrink-0" title={pageT.verified} />
-                </div>
+              value={
+                <span className="inline-flex items-center gap-2">
+                  {user.email}
+                  <FiCheckCircle className="text-green-600" title={pageT.verified} />
+                </span>
               }
             />
-
           </div>
 
           <div className="mt-6">
@@ -282,16 +215,18 @@ export default function SettingsPage() {
 
 function Row({
   label,
-  rightEl,
+  value,
 }: {
   label: string
-  rightEl: React.ReactNode
+  value: React.ReactNode
 }) {
   return (
-    <div className="py-4 flex items-start sm:items-center gap-3">
-      <div className="w-40 shrink-0 text-sm text-gray-900 font-medium">{label}</div>
-      <div className="flex-1">{rightEl}</div>
-      <div className="text-gray-400">{'›'}</div>
+    <div className="py-4 flex items-center justify-between">
+      <div className="flex-1">
+        <div className="text-sm font-semibold text-gray-900">{label}</div>
+        <div className="mt-1 text-sm text-gray-700">{value}</div>
+      </div>
+      <FiChevronRight className="text-gray-400 shrink-0" aria-hidden />
     </div>
   )
 }
