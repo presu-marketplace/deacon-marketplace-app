@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Navbar from '@/components/layout/Navbar'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { Service, upcomingServices } from '@/lib/serviceCatalog'
 
 export default function ServicesClient() {
   const [locale, setLocale] = useState<'en' | 'es'>('es')
@@ -34,16 +35,6 @@ export default function ServicesClient() {
     schedule: locale === 'es' ? 'Horario estimado' : 'Estimated hours',
   }
 
-  type Service = {
-    slug: string
-    name_es?: string
-    name_en?: string
-    name?: string
-    rating?: string
-    schedule?: string
-    image_url?: string
-  }
-
   const [services, setServices] = useState<Service[]>([])
 
   useEffect(() => {
@@ -52,7 +43,8 @@ export default function ServicesClient() {
         .schema('api')
         .from('services')
         .select('*')
-      if (data) setServices(data)
+      if (data) setServices([...data, ...upcomingServices])
+      else setServices(upcomingServices)
     }
     fetchServices()
   }, [])
@@ -77,23 +69,32 @@ export default function ServicesClient() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {services.map((s) => {
-            const name =
-              locale === 'es'
-                ? s.name_es || s.name
-                : s.name_en || s.name
+            const name = locale === 'es' ? s.name_es : s.name_en
+            const handleClick = () => {
+              if (s.disabled) {
+                router.push(`/under-construction?lang=${locale}`)
+              } else {
+                router.push(`/services/${s.slug}?lang=${locale}`)
+              }
+            }
             return (
               <div
                 key={s.slug}
-                onClick={() => router.push(`/services/${s.slug}?lang=${locale}`)}
-                className="relative rounded-lg overflow-hidden shadow hover:shadow-md transition bg-white cursor-pointer"
+                onClick={handleClick}
+                className={`relative rounded-lg overflow-hidden shadow transition bg-white ${s.disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:shadow-md'}`}
               >
                 <Image
-                  src={s.image_url || `/images/services/${s.slug}.jpg`}
-                  alt={name || s.slug}
+                  src={s.image_url}
+                  alt={name}
                   width={250}
                   height={160}
                   className="w-full h-36 sm:h-40 object-cover"
                 />
+                {s.disabled && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white text-sm font-semibold">
+                    {locale === 'es' ? 'Próximamente' : 'Coming Soon'}
+                  </div>
+                )}
                 <div className="px-3 py-2">
                   <h3 className="font-medium text-sm truncate">{name}</h3>
                   {(s.rating || s.schedule) && (

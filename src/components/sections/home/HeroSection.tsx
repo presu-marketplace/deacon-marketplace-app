@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { Service, upcomingServices } from '@/lib/serviceCatalog'
 
 const heroImages = [
   '/images/hero-section/card-01.jpg',
@@ -21,7 +22,7 @@ interface HeroProps {
 export default function HeroSection({ t, userAddress, locale }: HeroProps) {
   const [currentImage, setCurrentImage] = useState(0)
   const [searchTerm, setSearchTerm] = useState('')
-  const [services, setServices] = useState<{ slug: string; name_en: string; name_es: string }[]>([])
+  const [services, setServices] = useState<Service[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const router = useRouter()
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -40,7 +41,12 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
         .from('services')
         .select('slug, name_en, name_es')
 
-      if (data) setServices(data)
+      if (data) {
+        const enabled = data.map((s) => ({ ...s, image_url: '', disabled: false }))
+        setServices([...enabled, ...upcomingServices])
+      } else {
+        setServices(upcomingServices)
+      }
     }
   }, [services.length])
 
@@ -57,7 +63,11 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
           .toLowerCase() === searchTerm.toLowerCase()
     )
     if (match) {
-      router.push(`/services/${match.slug}?lang=${locale}`)
+      if (match.disabled) {
+        router.push(`/under-construction?lang=${locale}`)
+      } else {
+        router.push(`/services/${match.slug}?lang=${locale}`)
+      }
       return
     }
     const params = new URLSearchParams()
@@ -75,11 +85,15 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
       )
     : []
 
-  const handleSelect = (s: { slug: string; name_en: string; name_es: string }) => {
+  const handleSelect = (s: Service) => {
     const name = locale === 'es' ? s.name_es : s.name_en
     setSearchTerm(name)
     setShowSuggestions(false)
-    router.push(`/services/${s.slug}?lang=${locale}`)
+    if (s.disabled) {
+      router.push(`/under-construction?lang=${locale}`)
+    } else {
+      router.push(`/services/${s.slug}?lang=${locale}`)
+    }
   }
 
   const handleIconClick = async () => {
