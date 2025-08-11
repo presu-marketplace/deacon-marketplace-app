@@ -186,7 +186,9 @@ export async function POST(request: Request) {
 
   mailAttachments.push({
     filename: 'logo.png',
-    path: `${process.cwd()}/public/logo/presu-02.png`,
+    path: isProd
+      ? 'https://payeutapaokdwxqxesyz.supabase.co/storage/v1/object/public/app/presu-02.png'
+      : `${process.cwd()}/public/logo/presu-02.png`,
     cid: 'presu-logo',
   })
 
