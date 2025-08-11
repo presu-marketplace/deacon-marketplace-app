@@ -39,7 +39,7 @@ export default function useUser() {
       }
       if (
         user?.user_metadata?.avatar_url &&
-        !user.user_metadata.avatar_url.includes('/storage/v1/object/public/users-data/') &&
+        !user.user_metadata.avatar_url.startsWith('/storage/v1/object/public/users-data/') &&
         !user.user_metadata.avatar_url.startsWith('/images/')
       ) {
         try {
@@ -51,13 +51,24 @@ export default function useUser() {
             .from('users-data')
             .upload(filePath, blob, { upsert: true })
           if (!error) {
-            const { data } = supabase.storage.from('users-data').getPublicUrl(filePath)
-            await supabase.auth.updateUser({ data: { avatar_url: data.publicUrl } })
+            const publicPath = `/storage/v1/object/public/users-data/${filePath}`
+            await supabase.auth.updateUser({ data: { avatar_url: publicPath } })
+            await supabase.auth.refreshSession()
+            router.refresh()
+          } else {
+            await supabase.auth.updateUser({
+              data: { avatar_url: '/images/user/user-placeholder.png' },
+            })
             await supabase.auth.refreshSession()
             router.refresh()
           }
         } catch (e) {
           console.error('Failed to sync avatar', e)
+          await supabase.auth.updateUser({
+            data: { avatar_url: '/images/user/user-placeholder.png' },
+          })
+          await supabase.auth.refreshSession()
+          router.refresh()
         }
       }
     }

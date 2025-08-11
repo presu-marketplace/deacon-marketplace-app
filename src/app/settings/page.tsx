@@ -95,9 +95,16 @@ export default function SettingsPage() {
       .from('users-data')
       .upload(filePath, file, { upsert: true })
     if (!error) {
-      const { data } = supabase.storage.from('users-data').getPublicUrl(filePath)
-      setAvatarUrl(data.publicUrl)
-      await supabase.auth.updateUser({ data: { avatar_url: data.publicUrl } })
+      const publicPath = `/storage/v1/object/public/users-data/${filePath}`
+      setAvatarUrl(publicPath)
+      await supabase.auth.updateUser({ data: { avatar_url: publicPath } })
+      await supabase.auth.refreshSession()
+      router.refresh()
+    } else {
+      setAvatarUrl('/images/user/user-placeholder.png')
+      await supabase.auth.updateUser({
+        data: { avatar_url: '/images/user/user-placeholder.png' },
+      })
       await supabase.auth.refreshSession()
       router.refresh()
     }
