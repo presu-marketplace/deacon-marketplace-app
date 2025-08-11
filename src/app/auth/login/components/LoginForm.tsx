@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { X } from '@phosphor-icons/react'
 import { FcGoogle } from 'react-icons/fc'
+import { FiMail, FiLock } from 'react-icons/fi'
 
 type LoginComponentProps = {
   locale?: 'en' | 'es'
@@ -81,17 +81,7 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white relative px-4">
-      {/* Close button */}
-      <button
-        className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white"
-        onClick={() => router.push('/')}
-        aria-label="Close"
-      >
-        <X size={20} weight="bold" />
-      </button>
-
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6 border border-gray-200 dark:border-gray-700">
+    <div className="w-full max-w-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 space-y-6 border border-gray-200/60 dark:border-gray-700">
         <h2 className="text-2xl font-extrabold text-center mb-2">
           {t.loginTo}
         </h2>
@@ -126,26 +116,32 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
           <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
             {t.email}
           </label>
-          <input
-            type="email"
-            placeholder={t.email}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
-          />
+          <div className="relative">
+            <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="email"
+              placeholder={t.email}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+            />
+          </div>
         </div>
 
         <div className="text-left">
           <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
             {t.password}
           </label>
-          <input
-            type="password"
-            placeholder={t.password}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
-          />
+          <div className="relative">
+            <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="password"
+              placeholder={t.password}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+            />
+          </div>
         </div>
 
         <div className="text-right text-sm">
@@ -183,6 +179,5 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
           }
         `}</style>
       </div>
-    </div>
   )
 }
