@@ -29,7 +29,9 @@ export default function LoginPageClient() {
       password: 'Password',
       forgotPassword: 'Forgot your password?',
       loggingIn: 'Logging in...',
-      login: 'Log in'
+      login: 'Log in',
+      noAccount: "Don't have an account?",
+      register: 'Sign up'
     },
     es: {
       loginTo: 'Bienvenido nuevamente',
@@ -40,7 +42,9 @@ export default function LoginPageClient() {
       password: 'Contraseña',
       forgotPassword: '¿Olvidaste tu contraseña?',
       loggingIn: 'Iniciando sesión...',
-      login: 'Iniciar sesión'
+      login: 'Iniciar sesión',
+      noAccount: '¿No tienes una cuenta?',
+      register: 'Regístrate'
     }
   }[locale]
 

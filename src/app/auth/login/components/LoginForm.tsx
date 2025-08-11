@@ -18,6 +18,8 @@ type LoginComponentProps = {
     forgotPassword: string
     loggingIn: string
     login: string
+    noAccount: string
+    register: string
   }
 }
 
@@ -30,7 +32,9 @@ const defaultT: LoginComponentProps['t'] = {
   password: 'Password',
   forgotPassword: 'Forgot your password?',
   loggingIn: 'Logging in...',
-  login: 'Login'
+  login: 'Login',
+  noAccount: "Don't have an account?",
+  register: 'Sign up'
 }
 
 export default function LoginComponent({ locale = 'en', t = defaultT }: LoginComponentProps) {
@@ -77,24 +81,33 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white relative px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white relative px-4">
       {/* Close button */}
       <button
-        className="absolute top-4 right-4 text-white hover:text-gray-300"
+        className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white"
         onClick={() => router.push('/')}
         aria-label="Close"
       >
         <X size={20} weight="bold" />
       </button>
 
-      <div className="w-full max-w-sm bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6 border border-gray-700 text-center">
-        <h2 className="text-3xl font-handwritten font-medium tracking-widest mb-6">
+      <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6 border border-gray-200 dark:border-gray-700">
+        <h2 className="text-2xl font-extrabold text-center mb-2">
           {t.loginTo}
         </h2>
+        <p className="text-sm text-center text-gray-600 dark:text-gray-400">
+          {t.noAccount}{' '}
+          <a
+            href={`/auth/register?lang=${lang}`}
+            className="text-red-600 font-semibold hover:underline"
+          >
+            {t.register}
+          </a>
+        </p>
 
         <button
           onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center gap-2 bg-white text-black border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-100 transition disabled:opacity-50 text-sm"
+          className="w-full flex items-center justify-center gap-2 bg-white text-black border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 text-sm font-medium"
           disabled={googleLoading}
         >
           {googleLoading && <span className="loader border-blue-500" />}
@@ -103,29 +116,35 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
         </button>
 
         <div className="relative text-center">
-          <span className="text-xs text-gray-400 px-2 bg-gray-800 z-10 relative">
+          <span className="text-xs text-gray-400 px-2 bg-white dark:bg-gray-800 z-10 relative">
             {t.orLoginWithEmail}
           </span>
-          <div className="absolute top-1/2 left-0 w-full border-t border-gray-600 -z-0 transform -translate-y-1/2" />
+          <div className="absolute top-1/2 left-0 w-full border-t border-gray-300 dark:border-gray-600 -z-0 transform -translate-y-1/2" />
         </div>
 
-        <div>
+        <div className="text-left">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+            {t.email}
+          </label>
           <input
             type="email"
             placeholder={t.email}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
           />
         </div>
 
-        <div>
+        <div className="text-left">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+            {t.password}
+          </label>
           <input
             type="password"
             placeholder={t.password}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
           />
         </div>
 
@@ -143,7 +162,7 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
         <button
           onClick={handleLogin}
           disabled={loading}
-          className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-md font-semibold text-sm transition disabled:opacity-50"
+          className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-semibold text-sm transition disabled:opacity-50 shadow"
         >
           {loading ? t.loggingIn : t.login}
         </button>

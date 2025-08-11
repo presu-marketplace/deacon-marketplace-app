@@ -38,6 +38,13 @@ export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: 
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  useEffect(() => {
+    if (!user) {
+      router.prefetch(`/auth/login?lang=${locale}`)
+      router.prefetch(`/auth/register?lang=${locale}`)
+    }
+  }, [router, locale, user])
+
   if (!mounted) return null
 
   const isLightBg = forceWhite || scrolled
