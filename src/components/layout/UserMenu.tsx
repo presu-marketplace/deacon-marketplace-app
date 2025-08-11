@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import { User } from '@supabase/supabase-js'
@@ -138,10 +139,14 @@ export default function UserMenu({ user, locale }: Props) {
 
                 {/* Settings - Centered */}
                 <div className="px-5 pt-3">
-                    <div className="flex flex-col items-center justify-center hover:bg-gray-100 rounded-xl transition transform hover:scale-105 py-4 cursor-pointer">
+                    <Link
+                        href="/settings"
+                        onClick={() => setOpen(false)}
+                        className="flex flex-col items-center justify-center hover:bg-gray-100 rounded-xl transition transform hover:scale-105 py-4"
+                    >
                         <Image src="/images/user/user-settings.png" alt={settingsAlt} width={28} height={28} />
                         <span className="text-sm font-semibold mt-1">{settingsText}</span>
-                    </div>
+                    </Link>
                 </div>
 
                 {/* Logout */}
