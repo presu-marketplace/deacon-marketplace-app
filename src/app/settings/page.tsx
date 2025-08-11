@@ -200,28 +200,31 @@ export default function SettingsPage() {
 
           {/* Editable settings list */}
           <div className="bg-white divide-y divide-gray-200">
-            <InputRow
+            <EditableRow
               label={pageT.name}
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
             />
-            <InputRow
+            <EditableRow
               label={pageT.phone}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               type="tel"
-              after={
-                !!phone && (
-                  <FiCheckCircle className="text-green-600" title={pageT.verified} />
-                )
+              displayValue={
+                <span className="inline-flex items-center gap-2">
+                  {phone}
+                  {!!phone && (
+                    <FiCheckCircle className="text-green-600" title={pageT.verified} />
+                  )}
+                </span>
               }
             />
-            <InputRow
+            <EditableRow
               label={pageT.address}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
-            <InputRow
+            <EditableRow
               label={pageT.city}
               value={city}
               onChange={(e) => setCity(e.target.value)}
@@ -270,36 +273,44 @@ function Row({
   )
 }
 
-function InputRow({
+function EditableRow({
   label,
   value,
   onChange,
   type = 'text',
-  after,
+  displayValue,
 }: {
   label: string
   value: string
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   type?: string
-  after?: React.ReactNode
+  displayValue?: React.ReactNode
 }) {
+  const [editing, setEditing] = useState(false)
   return (
     <div className="py-4 flex items-center justify-between">
       <div className="flex-1">
-        <label className="text-sm font-semibold text-gray-900" htmlFor={label}>
-          {label}
-        </label>
-        <div className="mt-1 flex items-center gap-2">
+        <label className="text-sm font-semibold text-gray-900">{label}</label>
+        {editing ? (
           <input
-            id={label}
             type={type}
             value={value}
             onChange={onChange}
-            className="text-sm text-gray-900 border border-gray-300 rounded-md w-full p-2"
+            onBlur={() => setEditing(false)}
+            autoFocus
+            className="mt-1 text-sm text-gray-900 border border-gray-300 rounded-md w-full p-2"
           />
-          {after}
-        </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="mt-1 text-sm text-gray-700 text-left w-full"
+          >
+            {displayValue ?? value}
+          </button>
+        )}
       </div>
+      {!editing && <FiChevronRight className="text-gray-400 shrink-0" aria-hidden />}
     </div>
   )
 }
