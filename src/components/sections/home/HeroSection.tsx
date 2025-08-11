@@ -64,7 +64,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
     )
     if (match) {
       if (match.disabled) {
-        router.push(`/under-construction?lang=${locale}`)
+        router.push(`/services?lang=${locale}`)
       } else {
         router.push(`/services/${match.slug}?lang=${locale}`)
       }
@@ -90,7 +90,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
     setSearchTerm(name)
     setShowSuggestions(false)
     if (s.disabled) {
-      router.push(`/under-construction?lang=${locale}`)
+      router.push(`/services?lang=${locale}`)
     } else {
       router.push(`/services/${s.slug}?lang=${locale}`)
     }
