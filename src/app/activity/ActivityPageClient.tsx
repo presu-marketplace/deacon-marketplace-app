@@ -48,7 +48,7 @@ export default function ActivityPage() {
   const pageT = {
     title: locale === 'es' ? 'Actividad' : 'Activity',
     loading: locale === 'es' ? 'Cargando...' : 'Loading...',
-    empty: locale === 'es' ? 'Sin actividad' : 'No activity',
+    empty: locale === 'es' ? 'Sin actividad' : 'No activity yet',
     pending: locale === 'es' ? 'pendiente' : 'pending',
     noDescription: locale === 'es' ? 'Sin descripción' : 'No description',
   }
