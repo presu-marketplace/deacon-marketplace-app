@@ -21,12 +21,38 @@ export default function UserMenu({ user, locale }: Props) {
 
     const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || (locale === 'en' ? 'User' : 'Usuario')
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-    const rawAvatarUrl = user?.user_metadata?.avatar_url
-    const avatarUrl = rawAvatarUrl
-        ? rawAvatarUrl.startsWith('http')
-            ? rawAvatarUrl
-            : `${supabaseUrl}${rawAvatarUrl}`
-        : '/images/user/user-placeholder.png'
+    const [avatarUrl, setAvatarUrl] = useState('/images/user/user-placeholder.png')
+
+    useEffect(() => {
+        const loadAvatar = async () => {
+            const raw = user?.user_metadata?.avatar_url
+            if (!raw) {
+                setAvatarUrl('/images/user/user-placeholder.png')
+                return
+            }
+            if (raw.startsWith('/images/')) {
+                setAvatarUrl(raw)
+                return
+            }
+            if (raw.startsWith('http') && !raw.includes('/storage/v1/object/')) {
+                setAvatarUrl(raw)
+                return
+            }
+            let path = raw
+            const publicPrefix = `/storage/v1/object/public/users-data/`
+            const fullPublicPrefix = `${supabaseUrl}${publicPrefix}`
+            if (path.startsWith(fullPublicPrefix)) {
+                path = path.slice(fullPublicPrefix.length)
+            } else if (path.startsWith(publicPrefix)) {
+                path = path.slice(publicPrefix.length)
+            }
+            const { data } = await supabase.storage
+                .from('users-data')
+                .createSignedUrl(path, 60 * 60)
+            setAvatarUrl(data?.signedUrl || '/images/user/user-placeholder.png')
+        }
+        loadAvatar()
+    }, [user, supabaseUrl])
 
     const activityText = locale === 'en' ? 'Activity' : 'Actividad'
     const activityAlt = locale === 'en' ? 'Activity' : 'Actividad'

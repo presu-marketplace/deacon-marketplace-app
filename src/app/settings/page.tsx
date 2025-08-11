@@ -37,6 +37,7 @@ export default function SettingsPage() {
 
   const user = useUser()
   const [fullName, setFullName] = useState('')
+  const [avatarPath, setAvatarPath] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
@@ -48,7 +49,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const loadProfile = async () => {
       if (!user) return
-      setAvatarUrl(user.user_metadata?.avatar_url || '')
+      setAvatarPath(user.user_metadata?.avatar_url || '')
       const { data } = await supabase
         .from('api.profiles')
         .select('full_name, phone, address, city')
@@ -62,11 +63,29 @@ export default function SettingsPage() {
     loadProfile()
   }, [user])
 
+  useEffect(() => {
+    const loadAvatar = async () => {
+      if (!avatarPath) {
+        setAvatarUrl('')
+        return
+      }
+      if (avatarPath.startsWith('/images/')) {
+        setAvatarUrl(avatarPath)
+        return
+      }
+      const { data } = await supabase.storage
+        .from('users-data')
+        .createSignedUrl(avatarPath, 60 * 60)
+      setAvatarUrl(data?.signedUrl || '/images/user/user-placeholder.png')
+    }
+    loadAvatar()
+  }, [avatarPath])
+
   const handleSave = async () => {
     if (!user) return
     setSaving(true)
     await supabase.auth.updateUser({
-      data: { avatar_url: avatarUrl, name: fullName, phone, address, city },
+      data: { avatar_url: avatarPath, name: fullName, phone, address, city },
     })
     await supabase.from('api.profiles').upsert({
       id: user.id,
@@ -91,11 +110,15 @@ export default function SettingsPage() {
       .from('users-data')
       .upload(filePath, file, { upsert: true })
     if (!error) {
-      const publicPath = `/storage/v1/object/public/users-data/${filePath}`
-      setAvatarUrl(publicPath)
-      await supabase.auth.updateUser({ data: { avatar_url: publicPath } })
+      setAvatarPath(filePath)
+      const { data } = await supabase.storage
+        .from('users-data')
+        .createSignedUrl(filePath, 60 * 60)
+      setAvatarUrl(data?.signedUrl || '/images/user/user-placeholder.png')
+      await supabase.auth.updateUser({ data: { avatar_url: filePath } })
     } else {
       const placeholder = '/images/user/user-placeholder.png'
+      setAvatarPath(placeholder)
       setAvatarUrl(placeholder)
       await supabase.auth.updateUser({ data: { avatar_url: placeholder } })
     }
