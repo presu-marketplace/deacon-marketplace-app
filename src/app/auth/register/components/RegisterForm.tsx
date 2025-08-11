@@ -58,7 +58,8 @@ export default function RegisterComponent({ t = defaultT }: RegisterProps) {
       options: {
         data: {
           full_name: email.split('@')[0],
-          locale: lang
+          locale: lang,
+          avatar_url: '/images/user/user-placeholder.png'
         }
       }
     })
