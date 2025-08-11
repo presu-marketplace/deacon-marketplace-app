@@ -242,8 +242,8 @@ export default function ServiceFormClient({ service }: Props) {
   const [sistemas, setSistemas] = useState<string[]>([])
   const [invoices, setInvoices] = useState<File[]>([])
   const [invoiceError, setInvoiceError] = useState('')
-  const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
+  const [submitted, setSubmitted] = useState(false)
   const user = useUser()
 
   const isSeguridad = service.toLowerCase() === 'seguridad'
@@ -348,7 +348,6 @@ export default function ServiceFormClient({ service }: Props) {
         body: formData
       })
       if (!res.ok) throw new Error('Request failed')
-      setSubmitted(true)
       setNombre('')
       setEmail('')
       setTelefono('')
@@ -360,6 +359,7 @@ export default function ServiceFormClient({ service }: Props) {
       setMensaje('')
       setSistemas([])
       setInvoices([])
+      setSubmitted(true)
     } catch {
       setError(
         locale === 'es'
@@ -641,7 +641,7 @@ export default function ServiceFormClient({ service }: Props) {
         </div>
       </main>
       <Footer t={footerT} />
-        {submitted && (
+      {submitted && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg text-center shadow-lg">
             <span className="text-3xl mb-2 inline-block animate-bounce text-green-500">✓</span>
@@ -654,7 +654,10 @@ export default function ServiceFormClient({ service }: Props) {
                 : 'We will get back to you within 24 hours.'}
             </p>
             <button
-              onClick={() => setSubmitted(false)}
+              onClick={() => {
+                setSubmitted(false)
+                router.push(`/services?lang=${locale}`)
+              }}
               className="bg-black text-white rounded-full px-4 py-2 text-sm hover:bg-gray-900"
             >
               {locale === 'es' ? 'Cerrar' : 'Close'}
