@@ -84,14 +84,14 @@ export default function SideMenu({
           </button>
 
           {/* Additional Options */}
-          <ul className="text-sm space-y-4 font-semibold mt-6">
+          <ul className="space-y-4 font-semibold mt-6">
             <li>
               <button
                 onClick={() => {
                   router.push(`/auth/register?role=pro&lang=${locale}`)
                   onClose()
                 }}
-                className="w-full text-left pl-4"
+                className="w-full text-center text-base py-2"
               >
                 {providerLabel}
               </button>
