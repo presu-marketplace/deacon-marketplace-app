@@ -29,17 +29,23 @@ export default function useUser() {
 
   useEffect(() => {
     const syncAvatar = async () => {
+      const bucket = 'users-data'
+      const placeholderPath = `${user?.id}/user-placeholder.png`
+
       if (user && !user.user_metadata?.avatar_url) {
-        await supabase.auth.updateUser({
-          data: { avatar_url: '/images/user/user-placeholder.png' },
-        })
+        const { data } = supabase.storage
+          .from(bucket)
+          .getPublicUrl(placeholderPath)
+        const avatarUrl = data?.publicUrl || '/images/user/user-placeholder.png'
+        await supabase.auth.updateUser({ data: { avatar_url: avatarUrl } })
         await supabase.auth.refreshSession()
         router.refresh()
         return
       }
+
       if (
         user?.user_metadata?.avatar_url &&
-        !user.user_metadata.avatar_url.startsWith('/storage/v1/object/public/users-data/') &&
+        !user.user_metadata.avatar_url.includes('/storage/v1/object/public/users-data/') &&
         !user.user_metadata.avatar_url.startsWith('/images/')
       ) {
         try {
@@ -48,25 +54,31 @@ export default function useUser() {
           const ext = blob.type.split('/')[1] || 'jpg'
           const filePath = `${user.id}/avatar.${ext}`
           const { error } = await supabase.storage
-            .from('users-data')
+            .from(bucket)
             .upload(filePath, blob, { upsert: true })
-          if (!error) {
-            const publicPath = `/storage/v1/object/public/users-data/${filePath}`
-            await supabase.auth.updateUser({ data: { avatar_url: publicPath } })
-            await supabase.auth.refreshSession()
-            router.refresh()
+
+          const { data } = supabase.storage
+            .from(bucket)
+            .getPublicUrl(filePath)
+          const publicUrl = data?.publicUrl
+
+          if (!error && publicUrl) {
+            await supabase.auth.updateUser({ data: { avatar_url: publicUrl } })
           } else {
-            await supabase.auth.updateUser({
-              data: { avatar_url: '/images/user/user-placeholder.png' },
-            })
-            await supabase.auth.refreshSession()
-            router.refresh()
+            const { data: placeholder } = supabase.storage
+              .from(bucket)
+              .getPublicUrl(placeholderPath)
+            await supabase.auth.updateUser({ data: { avatar_url: placeholder?.publicUrl } })
           }
+
+          await supabase.auth.refreshSession()
+          router.refresh()
         } catch (e) {
           console.error('Failed to sync avatar', e)
-          await supabase.auth.updateUser({
-            data: { avatar_url: '/images/user/user-placeholder.png' },
-          })
+          const { data: placeholder } = supabase.storage
+            .from(bucket)
+            .getPublicUrl(placeholderPath)
+          await supabase.auth.updateUser({ data: { avatar_url: placeholder?.publicUrl } })
           await supabase.auth.refreshSession()
           router.refresh()
         }
