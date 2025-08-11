@@ -35,7 +35,7 @@ export default function UserMenu({ user, locale }: Props) {
 
     const handleLogout = async () => {
         await supabase.auth.signOut()
-        router.push('/') // redirect to homepage after logout
+        router.push('/')
     }
 
     useEffect(() => {

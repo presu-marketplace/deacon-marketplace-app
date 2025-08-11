@@ -45,7 +45,8 @@ export default function RegisterComponent({ t = defaultT }: RegisterProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const lang = searchParams.get('lang') || 'es'
-  const postAuthRedirect = searchParams.get('redirectTo') || '/'  // Added for flexibility, mirroring login
+  // Added for flexibility, mirroring login
+  const postAuthRedirect = searchParams.get('redirectTo') || '/'
 
   const handleRegister = async () => {
     setLoading(true)

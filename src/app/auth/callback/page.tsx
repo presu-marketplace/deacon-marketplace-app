@@ -15,7 +15,7 @@ export default function CallbackPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: data.session.user.id })
         })
-        router.push('/') // 🔄 Now goes to homepage
+        router.push('/')
       } else {
         console.error('Recovery failed:', error?.message)
         router.push('/auth/login')
