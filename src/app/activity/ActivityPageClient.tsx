@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import Navbar from '@/components/layout/Navbar'
 import useUser from '@/features/auth/useUser'
 import { supabase } from '@/lib/supabaseClient'
@@ -159,7 +160,15 @@ export default function ActivityPage() {
                 />
               ))}
             {!hasData && (
-              <div className="py-4 text-sm text-gray-500">{pageT.empty}</div>
+              <div className="py-4">
+                <Image
+                  src="/images/join-us/business-hand-shake.jpg"
+                  alt={pageT.empty}
+                  width={1200}
+                  height={600}
+                  className="mx-auto rounded-lg"
+                />
+              </div>
             )}
           </div>
         </div>
