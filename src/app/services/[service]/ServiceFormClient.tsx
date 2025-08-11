@@ -68,7 +68,7 @@ const translations = {
     message: 'Mensaje',
     messagePlaceholder: 'Escribe tu mensaje',
     invoices:
-      '¿Tienes otra oferta? Compártenos tu facturación actual y te presentaremos una propuesta superadora.',
+      'Subí tu actual facturacion',
     invoicesHint: 'Archivos PDF',
     invoicesTooMany: 'Puedes subir hasta 3 facturas',
     invoicesTypeError: 'Solo se permiten archivos PDF',
@@ -132,7 +132,7 @@ const translations = {
     message: 'Message',
     messagePlaceholder: 'Write your message',
     invoices:
-      "Do you have another offer? Share your current billing and we'll present a superior proposal.",
+      "Upload your current billing.",
     invoicesHint: 'PDF files only',
     invoicesTooMany: 'You can upload up to 3 invoices',
     invoicesTypeError: 'Only PDF files are allowed',

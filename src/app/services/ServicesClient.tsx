@@ -54,13 +54,6 @@ const upcomingServices: Service[] = [
     disabled: true
   },
   {
-    slug: 'painting',
-    name_es: 'Pintura',
-    name_en: 'Painting Services',
-    image_url: '/images/services/painting.jpg',
-    disabled: true
-  },
-  {
     slug: 'phone',
     name_es: 'Telecomunicaciones',
     name_en: 'Telecommunications',
