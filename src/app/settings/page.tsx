@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { FiEdit2, FiCheckCircle } from 'react-icons/fi'
@@ -129,20 +129,20 @@ export default function SettingsPage() {
   }
 
   if (!user)
+      return (
+        <React.Fragment>
+          <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
+          <div className="bg-white min-h-screen pt-32">
+            <div className="max-w-6xl mx-auto px-6 py-8">{pageT.loading}</div>
+          </div>
+        </React.Fragment>
+      )
+
     return (
-      <>
+      <React.Fragment>
         <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
         <div className="bg-white min-h-screen pt-32">
-          <div className="max-w-6xl mx-auto px-6 py-8">{pageT.loading}</div>
-        </div>
-      </>
-    )
-
-  return (
-    <>
-      <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
-      <div className="bg-white min-h-screen pt-32">
-        <div className="max-w-6xl mx-auto px-6 py-8">
+          <div className="max-w-6xl mx-auto px-6 py-8">
           <h1 className="text-3xl font-bold tracking-tight mb-6">{pageT.personalInfo}</h1>
 
           <div className="bg-white rounded-2xl shadow-sm border">
@@ -271,7 +271,8 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-    </>
+    </div>
+    </React.Fragment>
   )
 }
 
@@ -285,23 +286,6 @@ function Row({
   return (
     <div className="p-6 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
       <div className="w-40 shrink-0 text-sm text-gray-500">{label}</div>
-      <div className="flex-1">{rightEl}</div>
-      <div className="hidden sm:block text-gray-400">{'›'}</div>
-    </div>
-    </>
-  )
-}
-
-function Row({
-  label,
-  rightEl,
-}: {
-  label: string
-  rightEl: React.ReactNode
-}) {
-  return (
-    <div className="p-6 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8">
-      <div className="w-40 shrink-0 text-sm text-gray-800">{label}</div>
       <div className="flex-1">{rightEl}</div>
       <div className="hidden sm:block text-gray-400">{'›'}</div>
     </div>
