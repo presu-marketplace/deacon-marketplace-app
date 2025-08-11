@@ -159,10 +159,14 @@ export default function UserMenu({ user, locale }: Props) {
 
                 {/* Icons: Activity + Help */}
                 <div className="grid grid-cols-2 px-5 pb-3 gap-4">
-                    <button className="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-100 hover:bg-gray-200 transition transform hover:scale-105">
+                    <Link
+                        href="/activity"
+                        onClick={() => setOpen(false)}
+                        className="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-100 hover:bg-gray-200 transition transform hover:scale-105"
+                    >
                         <Image src="/images/user/user-activity.png" alt={activityAlt} width={28} height={28} />
                         <span className="text-sm mt-1 font-semibold">{activityText}</span>
-                    </button>
+                    </Link>
                     <button className="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-100 hover:bg-gray-200 transition transform hover:scale-105">
                         <Image src="/images/user/user-help.png" alt={helpAlt} width={28} height={28} />
                         <span className="text-sm mt-1 font-semibold">{helpText}</span>
