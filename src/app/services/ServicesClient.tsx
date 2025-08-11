@@ -56,7 +56,7 @@ export default function ServicesClient() {
     fetchServices()
   }, [])
 
-  const renderCard = (s: Service) => {
+  const renderCard = (s: Service, extraClass = '') => {
     const name = locale === 'es' ? s.name_es : s.name_en
     const handleClick = () => {
       if (s.disabled) {
@@ -72,7 +72,7 @@ export default function ServicesClient() {
         onClick={handleClick}
         className={`relative rounded-lg overflow-hidden shadow transition bg-white ${
           s.disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer hover:shadow-md'
-        }`}
+        } ${extraClass}`}
       >
         <Image
           src={s.image_url}
@@ -127,8 +127,8 @@ export default function ServicesClient() {
         {upcomingServices.length > 0 && (
           <>
             <h2 className="text-2xl sm:text-3xl font-bold mt-12 mb-6">{t.upcomingTitle}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {upcomingServices.map(renderCard)}
+            <div className="flex gap-6 overflow-x-auto pb-2">
+              {upcomingServices.map(s => renderCard(s, 'w-64 flex-shrink-0'))}
             </div>
           </>
         )}
