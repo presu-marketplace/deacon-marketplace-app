@@ -298,8 +298,8 @@ function EditableRow({
             onChange={onChange}
             onBlur={() => setEditing(false)}
             autoFocus
-            className="mt-1 text-sm text-gray-900 border border-gray-300 rounded-md w-full p-2"
-          />
+            className="mt-1 text-sm text-gray-900 border border-white rounded-md w-full p-2 focus:outline-none focus:ring-2 focus:ring-black"
+            />
         ) : (
           <button
             type="button"
