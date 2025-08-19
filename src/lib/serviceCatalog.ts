@@ -66,10 +66,10 @@ export const upcomingServices: Service[] = [
     disabled: true,
   },
   {
-    slug: 'brick',
-    name_es: 'Albañilería',
-    name_en: 'Masonry',
-    image_url: '/images/services/brick.jpg',
+    slug: 'architecture',
+    name_es: 'Arquitectura',
+    name_en: 'Architecture',
+    image_url: '/images/services/architecture.jpg',
     disabled: true,
   },
   {
