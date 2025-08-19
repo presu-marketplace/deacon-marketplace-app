@@ -159,7 +159,7 @@ export default function ActivityPage() {
                 />
               ))}
             {!hasData && (
-              <div className="py-4 text-center text-gray-500">{pageT.empty}</div>
+              <div className="py-4 text-left text-gray-500">{pageT.empty}</div>
             )}
           </div>
         </div>

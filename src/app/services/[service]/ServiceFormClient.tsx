@@ -51,7 +51,7 @@ const translations = {
       'Departamento',
       'Casa',
       'Edificios y condominios',
-      'Country privado',
+      'Barrio privado',
       'Empresa o industria',
       'Comercio',
       'Proyecto en construcción'
@@ -63,7 +63,7 @@ const translations = {
     message: 'Mensaje',
     messagePlaceholder: 'Escribe tu mensaje',
     invoices:
-      'Subí tu actual facturacion',
+      'Subí tu actual facturación',
     invoicesHint: 'Archivos PDF',
     invoicesTooMany: 'Puedes subir hasta 3 facturas',
     invoicesTypeError: 'Solo se permiten archivos PDF',
