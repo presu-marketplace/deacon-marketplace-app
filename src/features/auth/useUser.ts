@@ -5,14 +5,41 @@ import { supabase } from '@/lib/supabaseClient'
 import { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 
+const COOKIE_NAME = 'user'
+
+function readUserCookie(): User | null | undefined {
+  if (typeof document === 'undefined') return undefined
+  const match = document.cookie.match(new RegExp(`(?:^|; )${COOKIE_NAME}=([^;]*)`))
+  if (!match) return null
+  try {
+    return JSON.parse(decodeURIComponent(match[1])) as User
+  } catch {
+    return null
+  }
+}
+
+function writeUserCookie(value: User | null) {
+  if (typeof document === 'undefined') return
+  if (value) {
+    document.cookie = `${COOKIE_NAME}=${encodeURIComponent(JSON.stringify(value))}; path=/`
+  } else {
+    document.cookie = `${COOKIE_NAME}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
+  }
+}
+
+function updateUserState(setUser: (u: User | null | undefined) => void, value: User | null) {
+  setUser(value)
+  writeUserCookie(value)
+}
+
 export default function useUser() {
-  const [user, setUser] = useState<User | null | undefined>(undefined)
+  const [user, setUser] = useState<User | null | undefined>(() => readUserCookie())
   const router = useRouter()
 
   useEffect(() => {
     const getUser = async () => {
       const { data } = await supabase.auth.getSession()
-      setUser(data.session?.user ?? null)
+      updateUserState(setUser, data.session?.user ?? null)
     }
 
     getUser()
@@ -20,7 +47,7 @@ export default function useUser() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      updateUserState(setUser, session?.user ?? null)
       router.refresh()
     })
 
@@ -38,7 +65,7 @@ export default function useUser() {
         await supabase.auth.updateUser({ data: { avatar_url: placeholderUrl } })
         await supabase.auth.refreshSession()
         const { data: fresh } = await supabase.auth.getUser()
-        if (fresh?.user) setUser(fresh.user)
+        if (fresh?.user) updateUserState(setUser, fresh.user)
         router.refresh()
         return
       }
@@ -52,7 +79,7 @@ export default function useUser() {
         await supabase.auth.updateUser({ data: { avatar_url: filePath } })
         await supabase.auth.refreshSession()
         const { data: fresh } = await supabase.auth.getUser()
-        if (fresh?.user) setUser(fresh.user)
+        if (fresh?.user) updateUserState(setUser, fresh.user)
         router.refresh()
         return
       }
@@ -80,7 +107,7 @@ export default function useUser() {
       }
       await supabase.auth.refreshSession()
       const { data: fresh } = await supabase.auth.getUser()
-      if (fresh?.user) setUser(fresh.user)
+      if (fresh?.user) updateUserState(setUser, fresh.user)
       router.refresh()
     }
     syncAvatar()
