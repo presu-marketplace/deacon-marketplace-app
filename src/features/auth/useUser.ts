@@ -6,13 +6,13 @@ import { User } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 
 export default function useUser() {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<User | null | undefined>(undefined)
   const router = useRouter()
 
   useEffect(() => {
     const getUser = async () => {
-      const { data } = await supabase.auth.getUser()
-      if (data?.user) setUser(data.user)
+      const { data } = await supabase.auth.getSession()
+      setUser(data.session?.user ?? null)
     }
 
     getUser()
