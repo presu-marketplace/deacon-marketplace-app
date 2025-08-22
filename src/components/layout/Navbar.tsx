@@ -39,13 +39,13 @@ export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: 
   }, [])
 
   useEffect(() => {
-    if (!user) {
+    if (user === null) {
       router.prefetch(`/auth/login?lang=${locale}`)
       router.prefetch(`/auth/register?lang=${locale}`)
     }
   }, [router, locale, user])
 
-  if (!mounted) return null
+  if (!mounted || user === undefined) return null
 
   const isLightBg = forceWhite || scrolled
   const isLightText = forceWhite || (!scrolled && !forceWhite)
