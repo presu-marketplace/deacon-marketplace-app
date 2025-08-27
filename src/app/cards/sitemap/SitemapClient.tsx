@@ -39,8 +39,44 @@ export default function SitemapClient() {
     title: locale === 'es' ? 'Mapa del sitio' : 'Sitemap',
     body:
       locale === 'es'
-        ? 'Explorá todas las secciones de nuestro sitio.'
-        : 'Browse all sections of our site.',
+        ? `Bienvenido al mapa del sitio de [Nombre de la empresa]. A continuación, encontrarás una guía rápida de las principales secciones de nuestro sitio web:
+
+Inicio – Introducción a nuestros servicios
+
+Sobre nosotros – Misión, valores y equipo de la empresa
+
+Servicios – Resumen de las soluciones ofrecidas
+
+Blog / Recursos – Artículos, información y novedades
+
+Contacto – Ponete en contacto con nosotros
+
+Legal
+
+Términos de uso
+
+Política de privacidad
+
+Herramientas de accesibilidad`
+        : `Welcome to the Sitemap of [Your Company Name]. Below is a quick guide to all main sections of our website:
+
+Home – Introduction to our services
+
+About Us – Company mission, values, and team
+
+Services – Overview of solutions offered
+
+Blog / Resources – Articles, insights, and updates
+
+Contact – Get in touch with us
+
+Legal
+
+Terms of Use
+
+Privacy Policy
+
+Accessibility Tools`,
   }
 
   return (
