@@ -167,10 +167,14 @@ export default function UserMenu({ user, locale }: Props) {
                         <Image src="/images/user/user-activity.png" alt={activityAlt} width={28} height={28} />
                         <span className="text-sm mt-1 font-semibold">{activityText}</span>
                     </Link>
-                    <button className="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-100 hover:bg-gray-200 transition transform hover:scale-105">
+                    <Link
+                        href="/help"
+                        onClick={() => setOpen(false)}
+                        className="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-100 hover:bg-gray-200 transition transform hover:scale-105"
+                    >
                         <Image src="/images/user/user-help.png" alt={helpAlt} width={28} height={28} />
                         <span className="text-sm mt-1 font-semibold">{helpText}</span>
-                    </button>
+                    </Link>
                 </div>
 
                 {/* Settings - Centered */}
