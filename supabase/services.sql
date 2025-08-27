@@ -3,7 +3,8 @@ create schema if not exists reference;
 
 -- Services table storing catalog information
 create table if not exists reference.services (
-  slug text primary key,
+  id uuid primary key default gen_random_uuid(),
+  slug text unique,
   name_es text,
   name_en text,
   rating numeric,
@@ -30,7 +31,7 @@ insert into reference.services (slug, name_es, name_en, rating, image_url) value
 -- Exposed view in the api schema
 create schema if not exists api;
 create or replace view api.services as
-  select slug, name_es, name_en, rating, schedule, image_url
+  select id, slug, name_es, name_en, rating, schedule, image_url
   from reference.services;
 
 -- Allow read access to the view for anonymous and authenticated users

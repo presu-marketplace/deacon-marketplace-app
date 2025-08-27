@@ -4,7 +4,6 @@ import nodemailer from 'nodemailer'
 import type Mail from 'nodemailer/lib/mailer'
 import { randomUUID } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { createClient } from '@supabase/supabase-js'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -109,16 +108,17 @@ export async function POST(request: Request) {
     mailAttachments.push({ filename: file.name, content: buffer })
   }
 
-  // 3) Resolve service_id from reference.services (slug, fallback to name)
+  // 3) Resolve service_id from api.services view (slug or name)
   let service_id: string | null = null
   try {
     if (service?.trim()) {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-      const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
-      const ref = createClient(url, key, { auth: { persistSession: false }, db: { schema: 'reference' } })
-      let q = await ref.from('services').select('id,slug').eq('slug', service).maybeSingle()
+      let q = await supabase.from('services').select('id,slug').eq('slug', service).maybeSingle()
       if (!q.data && !q.error) {
-        q = await ref.from('services').select('id').or(`name_en.eq.${service},name_es.eq.${service}`).maybeSingle()
+        q = await supabase
+          .from('services')
+          .select('id')
+          .or(`name_en.eq.${service},name_es.eq.${service}`)
+          .maybeSingle()
       }
       if (q?.data?.id) service_id = q.data.id
     }
