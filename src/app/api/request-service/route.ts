@@ -126,7 +126,22 @@ export async function POST(request: Request) {
     if (!isProd) console.error('Service lookup error:', e)
   }
 
-  // 4) Build description + deadline
+  // 4) Resolve user_id from profiles by email if not provided
+  let user_id = userId?.trim() || null
+  if (!user_id && email?.trim()) {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle()
+      if (profile?.id) user_id = profile.id
+    } catch (e) {
+      if (!isProd) console.error('User lookup error:', e)
+    }
+  }
+
+  // 5) Build description + deadline
   const description =
     (mensaje?.trim() || '') ||
     `[${service || 'Servicio'}] ${tipoPropiedad || ''} ${cleaningType || ''} ${Array.isArray(frequency) ? frequency.join('/') : ''} — ${direccion || ''} ${localidad || ''}`
@@ -136,9 +151,9 @@ export async function POST(request: Request) {
   const deadlineDate =
     deadline && /^\d{4}-\d{2}-\d{2}$/.test(deadline) ? deadline : null
 
-  // 5) Insert (explicit schema header for safety)
+  // 6) Insert (explicit schema header for safety)
   const insertPayload = {
-    user_id: userId?.trim() || null,      // your trigger validates client role if present
+    user_id,      // your trigger validates client role if present
     service_id,
     service_description: description,
     service_location: localidad || direccion || null,
@@ -172,7 +187,7 @@ export async function POST(request: Request) {
     )
   }
 
-  // 6) Email notification
+  // 7) Email notification
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = process.env
   if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !SMTP_FROM)
     return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
