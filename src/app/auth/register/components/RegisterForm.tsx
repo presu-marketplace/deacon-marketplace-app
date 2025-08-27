@@ -8,6 +8,7 @@ import { FiMail, FiLock } from 'react-icons/fi'
 
 export type RegisterProps = {
   locale?: 'en' | 'es'
+  role?: 'client' | 'provider'
   t: {
     createAccount: string
     continueWithGoogle: string
@@ -35,7 +36,7 @@ const defaultT: RegisterProps['t'] = {
   login: 'Log in'
 }
 
-export default function RegisterComponent({ t = defaultT }: RegisterProps) {
+export default function RegisterComponent({ t = defaultT, role = 'client' }: RegisterProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -52,19 +53,27 @@ export default function RegisterComponent({ t = defaultT }: RegisterProps) {
     setLoading(true)
     setError(null)
 
+    const emailRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(postAuthRedirect)}${lang ? `&lang=${lang}` : ''}`
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo,
         data: {
           full_name: email.split('@')[0],
           locale: lang,
-          avatar_url: '/images/user/user-placeholder.png'
+          avatar_url: '/images/user/user-placeholder.png',
+          role,
         }
       }
     })
 
     if (!error && data?.user) {
+      await supabase.from('api.profiles').upsert({
+        id: data.user.id,
+        full_name: email.split('@')[0],
+        role,
+      })
       await fetch('/api/create-user-folder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
