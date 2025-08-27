@@ -78,7 +78,6 @@ export default function SitemapClient() {
             links: [
               { href: '/auth/login', label: 'Iniciar sesión' },
               { href: '/auth/register', label: 'Crear cuenta' },
-              { href: '/dashboard', label: 'Panel' },
               { href: '/activity', label: 'Actividad' },
               { href: '/settings', label: 'Configuración' },
             ],
@@ -115,7 +114,6 @@ export default function SitemapClient() {
           links: [
             { href: '/auth/login', label: 'Log in' },
             { href: '/auth/register', label: 'Sign up' },
-            { href: '/dashboard', label: 'Dashboard' },
             { href: '/activity', label: 'Activity' },
             { href: '/settings', label: 'Settings' },
           ],
