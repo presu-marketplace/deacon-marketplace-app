@@ -105,7 +105,9 @@ export default function ActivityPage() {
       if (userRole === 'client') {
         const { data } = await supabase
           .from('api.service_requests')
-          .select('id, service_description, request_created_at, request_status, service:service_id(slug)')
+          .select(
+            'id, service_description, request_created_at, request_status, service:services!inner(slug)'
+          )
           .eq('user_id', user.id)
           .order('request_created_at', { ascending: false })
         const rows =
