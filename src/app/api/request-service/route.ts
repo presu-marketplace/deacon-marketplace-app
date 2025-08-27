@@ -4,7 +4,6 @@ import nodemailer from 'nodemailer'
 import type Mail from 'nodemailer/lib/mailer'
 import { randomUUID } from 'crypto'
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin'
-import { createClient } from '@supabase/supabase-js'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -18,7 +17,7 @@ type JsonBody = {
   telefono?: string
   tipoPropiedad?: string
   cleaningType?: string
-  frequency?: unknown[]
+  frequency?: string[]
   direccion?: string
   localidad?: string
   mensaje?: string
@@ -109,16 +108,17 @@ export async function POST(request: Request) {
     mailAttachments.push({ filename: file.name, content: buffer })
   }
 
-  // 3) Resolve service_id from reference.services (slug, fallback to name)
+  // 3) Resolve service_id from api.services view (slug or name)
   let service_id: string | null = null
   try {
     if (service?.trim()) {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-      const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
-      const ref = createClient(url, key, { auth: { persistSession: false }, db: { schema: 'reference' } })
-      let q = await ref.from('services').select('id,slug').eq('slug', service).maybeSingle()
+      let q = await supabase.from('services').select('id,slug').eq('slug', service).maybeSingle()
       if (!q.data && !q.error) {
-        q = await ref.from('services').select('id').or(`name_en.eq.${service},name_es.eq.${service}`).maybeSingle()
+        q = await supabase
+          .from('services')
+          .select('id')
+          .or(`name_en.eq.${service},name_es.eq.${service}`)
+          .maybeSingle()
       }
       if (q?.data?.id) service_id = q.data.id
     }
@@ -126,7 +126,22 @@ export async function POST(request: Request) {
     if (!isProd) console.error('Service lookup error:', e)
   }
 
-  // 4) Build description + deadline
+  // 4) Resolve user_id from profiles by email if not provided
+  let user_id = userId?.trim() || null
+  if (!user_id && email?.trim()) {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle()
+      if (profile?.id) user_id = profile.id
+    } catch (e) {
+      if (!isProd) console.error('User lookup error:', e)
+    }
+  }
+
+  // 5) Build description + deadline
   const description =
     (mensaje?.trim() || '') ||
     `[${service || 'Servicio'}] ${tipoPropiedad || ''} ${cleaningType || ''} ${Array.isArray(frequency) ? frequency.join('/') : ''} — ${direccion || ''} ${localidad || ''}`
@@ -136,24 +151,24 @@ export async function POST(request: Request) {
   const deadlineDate =
     deadline && /^\d{4}-\d{2}-\d{2}$/.test(deadline) ? deadline : null
 
-  // 5) Insert (explicit schema header for safety)
+  // 6) Insert (explicit schema header for safety)
   const insertPayload = {
-    user_id: userId?.trim() || null,      // your trigger validates client role if present
+    user_id,      // your trigger validates client role if present
     service_id,
-    nombre: nombre || null,
-    email: email || null,
-    telefono: telefono || null,
-    tipo_propiedad: tipoPropiedad || null,
-    cleaning_type: cleaningType || null,
-    frequency,
-    direccion: direccion || null,
-    localidad: localidad || null,
-    mensaje: mensaje || null,
-    sistemas,                             // jsonb
-    invoice_urls: invoiceUrls,            // text[]
-    description,
-    location: localidad || direccion || null,
-    deadline: deadlineDate,
+    service_description: description,
+    service_location: localidad || direccion || null,
+    service_deadline: deadlineDate,
+    user_name: nombre || null,
+    user_email: email || null,
+    user_telephone: telefono || null,
+    user_address: direccion || null,
+    user_city: localidad || null,
+    request_property_type: tipoPropiedad || null,
+    request_cleaning_type: cleaningType || null,
+    request_cleaning_frequency: Array.isArray(frequency) ? frequency.join('/') : null,
+    request_message: mensaje || null,
+    request_systems: sistemas,             // jsonb
+    request_invoice_urls: invoiceUrls,     // text[]
   } as const
 
   const { data: inserted, error: dbErr } = await supabase
@@ -172,7 +187,7 @@ export async function POST(request: Request) {
     )
   }
 
-  // 6) Email notification
+  // 7) Email notification
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM } = process.env
   if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !SMTP_FROM)
     return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
@@ -285,7 +300,12 @@ export async function GET(request: Request) {
     const { error } = await supabase
       .schema('api')
       .from('service_requests')
-      .insert({ description: 'smoke', location: 'local', attachments: [] })
+      .insert({
+        service_description: 'smoke',
+        service_location: 'local',
+        request_systems: [],
+        request_invoice_urls: [],
+      })
       .select('id')
       .single()
     return error

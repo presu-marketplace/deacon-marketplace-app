@@ -46,14 +46,39 @@ create table if not exists api.provider_services (
 
 -- Service requests placed by users
 create table if not exists api.service_requests (
-  id uuid primary key default gen_random_uuid(),
   user_id uuid references api.profiles(id) on delete set null,
-  description text,
-  location text,
-  deadline date,
-  attachments text[],
-  created_at timestamptz default now()
+  service_id uuid references reference.services(id) on delete set null,
+  provider_id uuid references api.profiles(id) on delete set null,
+  id uuid not null default gen_random_uuid(),
+  service_description text,
+  service_location text,
+  service_deadline date,
+  user_name text,
+  user_email text,
+  user_telephone text,
+  user_address text,
+  user_city text,
+  request_property_type text,
+  request_cleaning_type text,
+  request_cleaning_frequency text,
+  request_message text,
+  provider_assigned_at timestamptz,
+  request_closed_at timestamptz,
+  request_updated_at timestamptz,
+  request_systems jsonb default '[]'::jsonb,
+  request_invoice_urls text[] default array[]::text[],
+  request_status request_status not null default 'open'::request_status,
+  request_created_at timestamptz default now(),
+  constraint service_requests_pkey primary key (id)
 );
+
+-- automatically track updates
+create extension if not exists moddatetime schema extensions;
+drop trigger if exists handle_updated_at on api.service_requests;
+drop trigger if exists set_updated_at on api.service_requests;
+create trigger set_request_updated_at
+  before insert or update on api.service_requests
+  for each row execute procedure moddatetime(request_updated_at);
 
 -- Ensure service requests come only from client profiles
 create function if not exists api.ensure_client_role()

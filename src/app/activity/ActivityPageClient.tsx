@@ -8,9 +8,9 @@ import { supabase } from '@/lib/supabaseClient'
 
 interface ServiceRequest {
   id: string
-  description: string | null
-  created_at: string
-  status?: string | null
+  service_description: string | null
+  request_created_at: string
+  request_status?: string | null
   service_slug?: string | null
 }
 
@@ -66,11 +66,9 @@ export default function ActivityPage() {
 
   useEffect(() => {
     const fetchServices = async () => {
-      const { data } = await supabase
-        .from('api.services')
-        .select('slug, name_en, name_es')
+      const { data } = await supabase.from('services').select('id, slug, name_en, name_es')
       const map = Object.fromEntries(
-        ((data as { slug: string; name_en: string; name_es: string }[]) || []).map((s) => [s.slug, { name_en: s.name_en, name_es: s.name_es }])
+        ((data as { id: string; slug: string; name_en: string; name_es: string }[]) || []).map((s) => [s.slug, { name_en: s.name_en, name_es: s.name_es }])
       )
       setServiceNames(map)
     }
@@ -107,10 +105,26 @@ export default function ActivityPage() {
       if (userRole === 'client') {
         const { data } = await supabase
           .from('api.service_requests')
-          .select('id, description, created_at, status, service_slug')
+          .select('id, service_description, request_created_at, request_status, service:service_id(slug)')
           .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-        setRequests((data as ServiceRequest[]) || [])
+          .order('request_created_at', { ascending: false })
+        const rows =
+          (data as {
+            id: string
+            service_description: string | null
+            request_created_at: string
+            request_status?: string | null
+            service?: { slug?: string | null }
+          }[]) || []
+        setRequests(
+          rows.map((r) => ({
+            id: r.id,
+            service_description: r.service_description,
+            request_created_at: r.request_created_at,
+            request_status: r.request_status,
+            service_slug: r.service?.slug ?? null,
+          }))
+        )
       } else if (userRole === 'provider') {
         const { data: offerRows, error } = await supabase
           .from('api.service_request_services')
@@ -131,12 +145,16 @@ export default function ActivityPage() {
         if (ids.length) {
           const { data: reqs } = await supabase
             .from('api.service_requests')
-            .select('id, description, created_at')
+            .select('id, service_description, request_created_at')
             .in('id', ids)
           const reqEntries =
-            (reqs as { id: string; description: string | null; created_at: string }[]) || []
+            (reqs as {
+              id: string
+              service_description: string | null
+              request_created_at: string
+            }[]) || []
           reqData = Object.fromEntries(
-            reqEntries.map((r) => [r.id, { description: r.description, created_at: r.created_at }])
+            reqEntries.map((r) => [r.id, { description: r.service_description, created_at: r.request_created_at }])
           )
         }
         setOffers(
@@ -181,9 +199,9 @@ export default function ActivityPage() {
                 <ActivityCard
                   key={r.id}
                   serviceName={getServiceName(r.service_slug)}
-                  description={r.description || pageT.noDescription}
-                  createdAt={new Date(r.created_at).toLocaleDateString()}
-                  status={getStatusText(r.status)}
+                  description={r.service_description || pageT.noDescription}
+                  createdAt={new Date(r.request_created_at).toLocaleDateString()}
+                  status={getStatusText(r.request_status)}
                 />
               ))}
             {role === 'provider' &&
