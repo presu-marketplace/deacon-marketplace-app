@@ -72,6 +72,14 @@ create table if not exists api.service_requests (
   constraint service_requests_pkey primary key (id)
 );
 
+-- automatically track updates
+create extension if not exists moddatetime schema extensions;
+drop trigger if exists handle_updated_at on api.service_requests;
+drop trigger if exists set_updated_at on api.service_requests;
+create trigger set_request_updated_at
+  before insert or update on api.service_requests
+  for each row execute procedure moddatetime(request_updated_at);
+
 -- Ensure service requests come only from client profiles
 create function if not exists api.ensure_client_role()
 returns trigger as $$
