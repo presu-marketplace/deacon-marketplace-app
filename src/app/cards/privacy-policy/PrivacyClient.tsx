@@ -1,150 +1,254 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Navbar from '@/components/layout/Navbar'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+
+const SUPPORTED_LOCALES = ['en', 'es'] as const
+type Locale = (typeof SUPPORTED_LOCALES)[number]
+const isLocale = (v: string | null): v is Locale => v === 'en' || v === 'es'
 
 export default function PrivacyClient() {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
-  const langParam = searchParams.get('lang')
 
-  const [locale, setLocale] = useState<'en' | 'es'>('es')
-
-  useEffect(() => {
-    if (langParam === 'es' || langParam === 'en') {
-      setLocale(langParam)
-    } else {
-      const browserLang = navigator.language.startsWith('es') ? 'es' : 'en'
-      setLocale(browserLang)
+  // Resolve initial locale (URL param > browser)
+  const initialLocale: Locale = useMemo(() => {
+    const param = searchParams.get('lang')
+    if (isLocale(param)) return param
+    if (typeof navigator !== 'undefined') {
+      return navigator.language?.toLowerCase().startsWith('es') ? 'es' : 'en'
     }
-  }, [langParam])
+    return 'en'
+  }, [searchParams])
 
+  const [locale, setLocale] = useState<Locale>(initialLocale)
+
+  // Sync locale if user navigates (back/forward) and lang changes
+  useEffect(() => {
+    const param = searchParams.get('lang')
+    if (isLocale(param) && param !== locale) setLocale(param)
+  }, [searchParams, locale])
+
+  // URL helper to keep other params
+  const pushWithLang = (newLocale: Locale) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('lang', newLocale)
+    router.push(`${pathname}?${params.toString()}`)
+  }
+
+  // Exposed for Navbar (if it calls toggleLocale)
   const toggleLocale = () => {
-    const newLocale = locale === 'en' ? 'es' : 'en'
-    setLocale(newLocale)
-    router.push(`?lang=${newLocale}`)
+    const next: Locale = locale === 'en' ? 'es' : 'en'
+    setLocale(next)
+    pushWithLang(next)
   }
 
-  const t = {
-    login: locale === 'es' ? 'Iniciar sesión' : 'Log in',
-    signup: locale === 'es' ? 'Crear cuenta' : 'Sign up',
-    searchPlaceholder: locale === 'es' ? 'Buscar servicio...' : 'Search service...',
-    language: locale === 'es' ? 'Español' : 'English',
-    joinAsPro: locale === 'es' ? 'Unirse como proveedor' : 'Join as provider',
-    howItWorks: locale === 'es' ? 'Cómo funciona Presu' : 'How Presu Works',
-  }
+  const t = useMemo(
+    () => ({
+      login: locale === 'es' ? 'Iniciar sesión' : 'Log in',
+      signup: locale === 'es' ? 'Crear cuenta' : 'Sign up',
+      searchPlaceholder: locale === 'es' ? 'Buscar servicio...' : 'Search service...',
+      language: locale === 'es' ? 'Español' : 'English',
+      joinAsPro: locale === 'es' ? 'Unirse como proveedor' : 'Join as provider',
+      howItWorks: locale === 'es' ? 'Cómo funciona Presu' : 'How Presu Works',
+      home: locale === 'es' ? 'Inicio' : 'Home',
+      legal: locale === 'es' ? 'Legal' : 'Legal',
+    }),
+    [locale]
+  )
 
-  const content = {
-    title: locale === 'es' ? 'Política de privacidad' : 'Privacy Policy',
-    body:
-      locale === 'es'
-        ? `Fecha de vigencia: [Inserte fecha]
+  const content = useMemo(() => {
+    if (locale === 'es') {
+      return {
+        title: 'Política de privacidad',
+        lastUpdated: 'Actualizado el 27 de agosto de 2025',
+        md: `> **Presu**  
+> **Fecha de vigencia:** 27 de agosto de 2025
 
-Tu privacidad es importante para nosotros. Esta Política de Privacidad explica cómo [Nombre de la empresa] recopila, utiliza y protege tu información personal.
+---
 
-1. Información que recopilamos
+### 1. Información que recopilamos
+- **Datos personales** que proporcionás: nombre, correo electrónico, teléfono.  
+- **Datos técnicos**: dirección IP, navegador, sistema operativo y tipo de dispositivo.  
+- **Datos de uso**: páginas visitadas, interacciones, tiempo de permanencia y referencias.
 
-Datos personales que proporcionás (nombre, correo electrónico, teléfono).
+### 2. Cómo usamos tus datos
+- **Proveer y mejorar** nuestros Servicios.  
+- **Personalizar** tu experiencia (por ejemplo, idioma o contenido relevante).  
+- **Comunicaciones** operativas, avisos importantes y novedades (podés darte de baja).  
+- **Cumplimiento legal** y **seguridad**, incluyendo prevención de fraude.
 
-Datos técnicos (dirección IP, navegador, información del dispositivo).
+### 3. Base legal para el tratamiento
+Tratamos datos sobre la base de: **ejecución del contrato**, **interés legítimo**, **consentimiento** (cuando aplique) y **obligaciones legales** de acuerdo con las leyes de **Argentina**.
 
-Datos de uso (páginas visitadas, tiempo de permanencia).
+### 4. Compartir la información
+No **vendemos** tus datos. Podemos compartirlos con:
+- **Proveedores de servicios** (por ejemplo, hosting, analítica) bajo **acuerdos de confidencialidad**.  
+- **Autoridades** cuando la ley lo requiera o para proteger nuestros derechos.
 
-2. Cómo usamos tus datos
+### 5. Seguridad de los datos
+Aplicamos **medidas de seguridad** razonables y alineadas con la industria. Si bien nos esforzamos por proteger la información, **ningún sistema es 100% seguro**.
 
-Para ofrecer y mejorar nuestros Servicios.
+### 6. Retención
+Conservamos la información por el **tiempo necesario** para los fines descriptos y según **requisitos legales o regulatorios**.
 
-Para personalizar tu experiencia.
+### 7. Tus derechos
+Dependiendo de tu jurisdicción y sujeto a la normativa aplicable, podés:
+- **Acceder**, **actualizar** o **eliminar** tus datos.  
+- **Oponerte** o **restringir** ciertos tratamientos.  
+- **Retirar tu consentimiento** cuando el tratamiento se base en él.  
+- **Solicitar portabilidad** de tus datos.
 
-Para enviar actualizaciones, promociones o avisos importantes.
+Para ejercerlos, escribinos a **info@presu.com.ar**. Es posible que solicitemos **verificación de identidad**.
 
-Para cumplir con obligaciones legales.
+### 8. Menores
+Nuestros Servicios no están dirigidos a **menores de 18 años**. Si detectamos datos de menores, **los eliminaremos** razonablemente.
 
-3. Compartir la información
+### 9. Transferencias internacionales
+Si transferimos datos fuera de tu país, aplicaremos **salvaguardas adecuadas** (por ejemplo, cláusulas contractuales).
 
-No vendemos tus datos. Podemos compartirlos con:
+### 10. Cambios a esta política
+Podemos **actualizar** esta Política. Publicaremos la versión vigente con la **fecha de actualización**.
 
-Proveedores de servicios bajo estricta confidencialidad.
+---
 
-Autoridades cuando la ley lo requiera.
+¿Dudas o solicitudes? Escribinos a **info@presu.com.ar**.`,
+      }
+    }
+    return {
+      title: 'Privacy Policy',
+      lastUpdated: 'Last updated August 27, 2025',
+      md: `> **Presu**  
+> **Effective Date:** August 27, 2025
 
-4. Seguridad de los datos
+---
 
-Implementamos medidas de seguridad estándar de la industria para proteger tus datos, pero no podemos garantizar seguridad absoluta.
+### 1. Information We Collect
+- **Personal data** you provide: name, email, phone.  
+- **Technical data**: IP address, browser, OS, device type.  
+- **Usage data**: pages viewed, interactions, session duration, referrals.
 
-5. Tus derechos
+### 2. How We Use Your Data
+- To **provide and improve** our Services.  
+- To **personalize** your experience (e.g., language, relevant content).  
+- For **operational communications**, important notices, and updates (you can opt out).  
+- For **legal compliance** and **security**, including fraud prevention.
 
-Según tu jurisdicción, podés tener derecho a:
+### 3. Legal Bases
+We process data based on **contract performance**, **legitimate interests**, **consent** (where applicable), and **legal obligations** under the laws of **Argentina**.
 
-Acceder, actualizar o eliminar tus datos.
+### 4. Sharing of Information
+We do **not sell** your data. We may share it with:  
+- **Service providers** (e.g., hosting, analytics) under **confidentiality agreements**.  
+- **Authorities** where required by law or to protect our rights.
 
-Optar por no recibir comunicaciones de marketing.
+### 5. Data Security
+We implement **industry-standard safeguards**. While we strive to protect information, **no system is 100% secure**.
 
-Solicitar una copia de tus datos personales.
+### 6. Data Retention
+We keep information for as long as **necessary** to fulfill the purposes described and to meet **legal/regulatory** requirements.
 
-6. Contacto
+### 7. Your Rights
+Subject to applicable law, you may:  
+- **Access**, **update**, or **delete** your data.  
+- **Object to** or **restrict** certain processing.  
+- **Withdraw consent** where processing relies on it.  
+- **Request data portability**.
 
-Para consultas sobre esta Política de Privacidad, escribinos a: [Insert Contact Email]`
-        : `Effective Date: [Insert Date]
+To exercise your rights, contact **info@presu.com.ar**. We may ask for **identity verification**.
 
-Your privacy is important to us. This Privacy Policy explains how [Your Company Name] collects, uses, and protects your personal information.
+### 8. Children
+The Services are not directed to **children under 18**. If we become aware of such data, we will **delete** it within a reasonable time.
 
-1. Information We Collect
+### 9. International Transfers
+Where we transfer data across borders, we apply **appropriate safeguards** (e.g., contractual clauses).
 
-Personal data you provide (name, email, phone).
+### 10. Changes to This Policy
+We may **update** this Policy from time to time. We will post the current version with the **last updated** date.
 
-Technical data (IP address, browser, device info).
+---
 
-Usage data (pages visited, time spent).
-
-2. How We Use Your Data
-
-To provide and improve our Services.
-
-To personalize your experience.
-
-To send updates, promotions, or important notices.
-
-To comply with legal obligations.
-
-3. Sharing of Information
-
-We do not sell your data. We may share with:
-
-Service providers under strict confidentiality.
-
-Authorities when required by law.
-
-4. Data Security
-
-We implement industry-standard safeguards to protect your data but cannot guarantee absolute security.
-
-5. Your Rights
-
-Depending on your jurisdiction, you may have rights to:
-
-Access, update, or delete your data.
-
-Opt-out of marketing communications.
-
-Request a copy of your personal data.
-
-6. Contact
-
-For questions about this Privacy Policy, contact us at: [Insert Contact Email]`,
-  }
+Questions or requests? Contact **info@presu.com.ar**.`,
+    }
+  }, [locale])
 
   return (
     <>
       <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
-      <main className="bg-black text-white w-full pt-32 pb-24">
-        <section className="max-w-4xl mx-auto px-6 sm:px-12">
-          <h1 className="text-3xl sm:text-5xl font-extrabold mb-6 leading-tight">{content.title}</h1>
-          <p className="text-gray-300 whitespace-pre-line">{content.body}</p>
+      <main className="min-h-screen w-full bg-gradient-to-b from-neutral-950 via-black to-neutral-950 text-white pt-28 pb-24">
+        {/* Breadcrumb */}
+        <nav className="mx-auto mb-6 max-w-5xl px-6 sm:px-10 text-sm text-gray-400">
+          <ol className="flex items-center gap-2">
+            <li>
+              <a href="/" className="hover:text-gray-200 transition-colors">
+                {t.home}
+              </a>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li>
+              <span className="text-gray-300">{t.legal}</span>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li>
+              <span className="text-gray-100">{content.title}</span>
+            </li>
+          </ol>
+        </nav>
+
+        <section className="mx-auto max-w-5xl px-6 sm:px-10">
+          {/* Header Card */}
+          <header className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+                  {content.title}
+                </h1>
+                <p className="mt-2 inline-flex items-center gap-2 text-sm text-gray-300">
+                  <span className="inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-0.5">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 mr-2" />
+                    {content.lastUpdated}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </header>
+
+        {/* Markdown Body */}
+          <article className="prose prose-invert prose-h1:mt-0 prose-headings:scroll-m-20 max-w-none">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                h2: ({ node, ...props }) => (
+                  <h2 className="mt-8 text-2xl font-bold tracking-tight" {...props} />
+                ),
+                h3: ({ node, ...props }) => (
+                  <h3 className="mt-6 text-xl font-semibold tracking-tight" {...props} />
+                ),
+                p: ({ node, ...props }) => (
+                  <p className="leading-relaxed text-gray-200" {...props} />
+                ),
+                li: ({ node, ...props }) => <li className="my-1" {...props} />,
+                blockquote: ({ node, ...props }) => (
+                  <blockquote className="border-l-4 border-emerald-400/50 pl-4 text-gray-200/90" {...props} />
+                ),
+                hr: () => <hr className="my-8 border-white/10" />,
+                a: ({ node, ...props }) => (
+                  <a className="underline decoration-emerald-400/50 underline-offset-4 hover:decoration-emerald-300" {...props} />
+                ),
+                strong: ({ node, ...props }) => <strong className="text-white" {...props} />,
+                ul: ({ node, ...props }) => <ul className="list-disc pl-6" {...props} />,
+                ol: ({ node, ...props }) => <ol className="list-decimal pl-6" {...props} />,
+              }}
+            >
+              {content.md}
+            </ReactMarkdown>
+          </article>
         </section>
       </main>
     </>
   )
 }
-
