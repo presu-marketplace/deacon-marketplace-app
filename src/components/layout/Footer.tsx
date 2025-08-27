@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 
 type FooterProps = {
   t: {
@@ -9,9 +10,10 @@ type FooterProps = {
     footerNote: string
     copyright: string
   }
+  locale: 'en' | 'es'
 }
 
-export default function Footer({ t }: FooterProps) {
+export default function Footer({ t, locale }: FooterProps) {
   return (
     <footer className="bg-gray-50 border-t text-gray-600 text-sm px-6 py-10">
       <div className="max-w-3xl mx-auto flex flex-col items-center text-center gap-4">
@@ -31,13 +33,29 @@ export default function Footer({ t }: FooterProps) {
 
         {/* Legal links */}
         <ul className="flex flex-wrap justify-center items-center gap-3 text-xs text-gray-600">
-          <li><a href="#" className="hover:underline">{t.terms}</a></li>
+          <li>
+            <Link href={`/cards/terms-of-use?lang=${locale}`} className="hover:underline">
+              {t.terms}
+            </Link>
+          </li>
           <li>|</li>
-          <li><a href="#" className="hover:underline">{t.privacy}</a></li>
+          <li>
+            <Link href={`/cards/privacy-policy?lang=${locale}`} className="hover:underline">
+              {t.privacy}
+            </Link>
+          </li>
           <li>|</li>
-          <li><a href="#" className="hover:underline">{t.sitemap}</a></li>
+          <li>
+            <Link href={`/cards/sitemap?lang=${locale}`} className="hover:underline">
+              {t.sitemap}
+            </Link>
+          </li>
           <li>|</li>
-          <li><a href="#" className="hover:underline">{t.accessibility}</a></li>
+          <li>
+            <Link href={`/cards/accessibility-tools?lang=${locale}`} className="hover:underline">
+              {t.accessibility}
+            </Link>
+          </li>
         </ul>
 
         {/* Social Icons */}
