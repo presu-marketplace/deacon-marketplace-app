@@ -632,7 +632,7 @@ export default function ServiceFormClient({ service }: Props) {
         </div>
         </div>
       </main>
-      <Footer t={footerT} />
+      <Footer t={footerT} locale={locale} />
       {submitted && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg text-center shadow-lg">
