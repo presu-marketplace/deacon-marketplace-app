@@ -53,10 +53,12 @@ export default function RegisterComponent({ t = defaultT, role = 'client' }: Reg
     setLoading(true)
     setError(null)
 
+    const emailRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(postAuthRedirect)}${lang ? `&lang=${lang}` : ''}`
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo,
         data: {
           full_name: email.split('@')[0],
           locale: lang,
