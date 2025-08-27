@@ -7,6 +7,7 @@ import RegisterComponent from './RegisterForm'
 export default function RegisterPageClient() {
   const searchParams = useSearchParams()
   const langParam = searchParams.get('lang')
+  const roleParam = searchParams.get('role')
 
   const [locale, setLocale] = useState<'en' | 'es'>('en')
 
@@ -46,5 +47,7 @@ export default function RegisterPageClient() {
     }
   }[locale]
 
-  return <RegisterComponent locale={locale} t={t} />
+  const role = roleParam === 'pro' ? 'provider' : 'client'
+
+  return <RegisterComponent locale={locale} role={role} t={t} />
 }
