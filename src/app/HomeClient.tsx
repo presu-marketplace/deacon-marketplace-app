@@ -96,7 +96,7 @@ export default function HomeClient() {
       </div>
       <div className="w-full">
         <CardSection locale={locale} t={t} />
-        <Footer t={t} />
+        <Footer t={t} locale={locale} />
       </div>
     </div>
   )
