@@ -38,7 +38,7 @@ export const HELP_DICT = {
       },
       {
         question: 'Where can I view my activity?',
-        answer: 'Navigate to your dashboard and select the activity tab.',
+        answer: 'Visit the activity page.',
       },
     ],
     quickLinksHeading: 'Quick Links',
@@ -65,7 +65,7 @@ export const HELP_DICT = {
       },
       {
         question: '¿Dónde puedo ver mi actividad?',
-        answer: 'Ingresá a tu panel y seleccioná la pestaña de actividad.',
+        answer: 'Ingresá a la página de actividad.',
       },
     ],
     quickLinksHeading: 'Enlaces rápidos',
