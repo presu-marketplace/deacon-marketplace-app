@@ -10,6 +10,8 @@ interface ServiceRequest {
   id: string
   description: string | null
   created_at: string
+  status?: string | null
+  service_slug?: string | null
 }
 
 interface Offer {
@@ -17,6 +19,7 @@ interface Offer {
   service_slug: string
   description?: string | null
   status?: string | null
+  created_at?: string
 }
 
 export default function ActivityPage() {
@@ -50,6 +53,7 @@ export default function ActivityPage() {
     loading: locale === 'es' ? 'Cargando...' : 'Loading...',
     empty: locale === 'es' ? 'Sin actividad' : 'No activity yet',
     pending: locale === 'es' ? 'pendiente' : 'pending',
+    assigned: locale === 'es' ? 'asignado' : 'assigned',
     noDescription: locale === 'es' ? 'Sin descripción' : 'No description',
   }
 
@@ -58,6 +62,34 @@ export default function ActivityPage() {
   const [requests, setRequests] = useState<ServiceRequest[]>([])
   const [offers, setOffers] = useState<Offer[]>([])
   const [loading, setLoading] = useState(true)
+  const [serviceNames, setServiceNames] = useState<Record<string, { name_en: string; name_es: string }>>({})
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      const { data } = await supabase
+        .from('api.services')
+        .select('slug, name_en, name_es')
+      const map = Object.fromEntries(
+        ((data as { slug: string; name_en: string; name_es: string }[]) || []).map((s) => [s.slug, { name_en: s.name_en, name_es: s.name_es }])
+      )
+      setServiceNames(map)
+    }
+    fetchServices()
+  }, [])
+
+  const getServiceName = (slug?: string | null) => {
+    if (!slug) return ''
+    const entry = serviceNames[slug]
+    return entry ? (locale === 'es' ? entry.name_es : entry.name_en) : slug
+  }
+
+  const getStatusText = (status?: string | null) => {
+    if (!status) return pageT.pending
+    const s = status.toLowerCase()
+    if (s === 'pending') return pageT.pending
+    if (s === 'assigned') return pageT.assigned
+    return status
+  }
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,7 +107,7 @@ export default function ActivityPage() {
       if (userRole === 'client') {
         const { data } = await supabase
           .from('api.service_requests')
-          .select('id, description, created_at')
+          .select('id, description, created_at, status, service_slug')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false })
         setRequests((data as ServiceRequest[]) || [])
@@ -95,19 +127,23 @@ export default function ActivityPage() {
             (fallback as { request_id: string; service_slug: string; status?: string | null }[]) || []
         }
         const ids = rows.map((r) => r.request_id)
-        let descriptions: Record<string, string | null> = {}
+        let reqData: Record<string, { description: string | null; created_at: string }> = {}
         if (ids.length) {
           const { data: reqs } = await supabase
             .from('api.service_requests')
-            .select('id, description')
+            .select('id, description, created_at')
             .in('id', ids)
-          const reqEntries = (reqs as { id: string; description: string | null }[]) || []
-          descriptions = Object.fromEntries(reqEntries.map((r) => [r.id, r.description]))
+          const reqEntries =
+            (reqs as { id: string; description: string | null; created_at: string }[]) || []
+          reqData = Object.fromEntries(
+            reqEntries.map((r) => [r.id, { description: r.description, created_at: r.created_at }])
+          )
         }
         setOffers(
           rows.map((r) => ({
             ...r,
-            description: descriptions[r.request_id] || null,
+            description: reqData[r.request_id]?.description || null,
+            created_at: reqData[r.request_id]?.created_at,
           }))
         )
       }
@@ -139,23 +175,29 @@ export default function ActivityPage() {
             {pageT.title}
           </h1>
 
-          <div className="bg-white divide-y divide-gray-200">
+          <div className="bg-white">
             {role === 'client' &&
               requests.map((r) => (
-                <Row
+                <ActivityCard
                   key={r.id}
-                  label={r.description || pageT.noDescription}
-                  value={new Date(r.created_at).toLocaleDateString()}
+                  serviceName={getServiceName(r.service_slug)}
+                  description={r.description || pageT.noDescription}
+                  createdAt={new Date(r.created_at).toLocaleDateString()}
+                  status={getStatusText(r.status)}
                 />
               ))}
             {role === 'provider' &&
               offers.map((o) => (
-                <Row
+                <ActivityCard
                   key={`${o.request_id}-${o.service_slug}`}
-                  label={o.description || pageT.noDescription}
-                  value={
-                    o.status ? `${o.service_slug} – ${o.status}` : o.service_slug
+                  serviceName={getServiceName(o.service_slug)}
+                  description={o.description || pageT.noDescription}
+                  createdAt={
+                    o.created_at
+                      ? new Date(o.created_at).toLocaleDateString()
+                      : ''
                   }
+                  status={getStatusText(o.status)}
                 />
               ))}
             {!hasData && (
@@ -168,12 +210,24 @@ export default function ActivityPage() {
   )
 }
 
-function Row({ label, value }: { label: string; value: React.ReactNode }) {
+function ActivityCard({
+  serviceName,
+  description,
+  createdAt,
+  status,
+}: {
+  serviceName: string
+  description: string
+  createdAt: string
+  status: string
+}) {
   return (
-    <div className="py-4 flex items-center justify-between">
-      <div className="flex-1">
-        <div className="text-sm font-semibold text-gray-900">{label}</div>
-        <div className="mt-1 text-sm text-gray-700">{value}</div>
+    <div className="mb-4 p-4 border rounded-lg shadow-sm">
+      <h2 className="text-lg font-semibold text-gray-900">{serviceName}</h2>
+      <p className="mt-1 text-sm text-gray-700">{description}</p>
+      <div className="mt-2 flex justify-between text-sm text-gray-500">
+        <span>{createdAt}</span>
+        <span className="font-medium text-gray-900">{status}</span>
       </div>
     </div>
   )
