@@ -30,7 +30,14 @@ insert into reference.services (slug, name_es, name_en, rating, image_url) value
 -- Exposed view in the api schema
 create schema if not exists api;
 create or replace view api.services as
-  select slug, name_es, name_en, rating, schedule, image_url
+  select 
+    services.id,
+    services.slug,
+    services.name_en,
+    services.name_es,
+    services.rating,
+    services.schedule,
+    services.image_url
   from reference.services;
 
 -- Allow read access to the view for anonymous and authenticated users
