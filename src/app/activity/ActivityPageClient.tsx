@@ -66,11 +66,9 @@ export default function ActivityPage() {
 
   useEffect(() => {
     const fetchServices = async () => {
-      const { data } = await supabase
-        .from('api.services')
-        .select('slug, name_en, name_es')
+      const { data } = await supabase.from('services').select('id, slug, name_en, name_es')
       const map = Object.fromEntries(
-        ((data as { slug: string; name_en: string; name_es: string }[]) || []).map((s) => [s.slug, { name_en: s.name_en, name_es: s.name_es }])
+        ((data as { id: string; slug: string; name_en: string; name_es: string }[]) || []).map((s) => [s.slug, { name_en: s.name_en, name_es: s.name_es }])
       )
       setServiceNames(map)
     }

@@ -3,7 +3,8 @@ create schema if not exists reference;
 
 -- Services table storing catalog information
 create table if not exists reference.services (
-  slug text primary key,
+  id uuid primary key default gen_random_uuid(),
+  slug text unique,
   name_es text,
   name_en text,
   rating numeric,
