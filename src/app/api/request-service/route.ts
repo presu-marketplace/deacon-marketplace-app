@@ -18,7 +18,7 @@ type JsonBody = {
   telefono?: string
   tipoPropiedad?: string
   cleaningType?: string
-  frequency?: unknown[]
+  frequency?: string[]
   direccion?: string
   localidad?: string
   mensaje?: string
@@ -140,20 +140,20 @@ export async function POST(request: Request) {
   const insertPayload = {
     user_id: userId?.trim() || null,      // your trigger validates client role if present
     service_id,
-    nombre: nombre || null,
-    email: email || null,
-    telefono: telefono || null,
-    tipo_propiedad: tipoPropiedad || null,
-    cleaning_type: cleaningType || null,
-    frequency,
-    direccion: direccion || null,
-    localidad: localidad || null,
-    mensaje: mensaje || null,
-    sistemas,                             // jsonb
-    invoice_urls: invoiceUrls,            // text[]
-    description,
-    location: localidad || direccion || null,
-    deadline: deadlineDate,
+    service_description: description,
+    service_location: localidad || direccion || null,
+    service_deadline: deadlineDate,
+    user_name: nombre || null,
+    user_email: email || null,
+    user_telephone: telefono || null,
+    user_address: direccion || null,
+    user_city: localidad || null,
+    request_property_type: tipoPropiedad || null,
+    request_cleaning_type: cleaningType || null,
+    request_cleaning_frequency: Array.isArray(frequency) ? frequency.join('/') : null,
+    request_message: mensaje || null,
+    request_systems: sistemas,             // jsonb
+    request_invoice_urls: invoiceUrls,     // text[]
   } as const
 
   const { data: inserted, error: dbErr } = await supabase
@@ -285,7 +285,12 @@ export async function GET(request: Request) {
     const { error } = await supabase
       .schema('api')
       .from('service_requests')
-      .insert({ description: 'smoke', location: 'local', attachments: [] })
+      .insert({
+        service_description: 'smoke',
+        service_location: 'local',
+        request_systems: [],
+        request_invoice_urls: [],
+      })
       .select('id')
       .single()
     return error
