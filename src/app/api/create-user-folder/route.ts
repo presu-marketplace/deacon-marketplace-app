@@ -7,12 +7,21 @@ export const runtime = 'nodejs'
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await req.json()
+    const { userId, role = 'client', fullName = '' } = await req.json()
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     }
 
     const supabase = getSupabaseAdmin()
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({ id: userId, full_name: fullName, role })
+
+    if (profileError) {
+      return NextResponse.json({ error: profileError.message }, { status: 500 })
+    }
+
     // All user uploads live in the public "users-data" bucket so
     // ensure that bucket and a folder for this user exist.
     const bucket = 'users-data'

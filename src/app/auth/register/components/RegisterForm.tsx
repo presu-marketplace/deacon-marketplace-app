@@ -69,15 +69,14 @@ export default function RegisterComponent({ t = defaultT, role = 'client' }: Reg
     })
 
     if (!error && data?.user) {
-      await supabase.from('api.profiles').upsert({
-        id: data.user.id,
-        full_name: email.split('@')[0],
-        role,
-      })
       await fetch('/api/create-user-folder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: data.user.id })
+        body: JSON.stringify({
+          userId: data.user.id,
+          fullName: email.split('@')[0],
+          role,
+        }),
       })
     }
 
