@@ -99,7 +99,14 @@ export default function Navbar({ locale, toggleLocale, t, forceWhite = false }: 
           {/* Right: Language switch + Auth */}
           <div className="hidden md:flex items-center text-sm pr-14 gap-5 relative">
             <button
+              type="button"
               onClick={toggleLocale}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  toggleLocale()
+                }
+              }}
               className={`flex items-center gap-1 transition-colors ${isLightText ? 'text-black hover:text-gray-700' : 'text-white hover:text-gray-300'
                 }`}
               aria-label="Toggle Language"
