@@ -298,6 +298,16 @@ function ActivityCard({
   createdAt: string
   statuses: { label: string; className: string }[]
 }) {
+  const statusStyles: Record<string, string> = {
+    pending: 'bg-yellow-100 text-yellow-700',
+    pendiente: 'bg-yellow-100 text-yellow-700',
+    assigned: 'bg-green-100 text-green-700',
+    asignado: 'bg-green-100 text-green-700',
+  }
+
+  const statusClass =
+    statusStyles[status.toLowerCase()] || 'bg-gray-100 text-gray-700'
+
   return (
     <div className="w-full rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between">
