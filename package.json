@@ -12,6 +12,7 @@
     "@phosphor-icons/react": "^2.1.8",
     "@supabase/supabase-js": "^2.49.5",
     "@vercel/analytics": "^1.5.0",
+    "framer-motion": "^12.23.12",
     "next": "15.3.2",
     "nodemailer": "^6.9.10",
     "react": "^19.0.0",
