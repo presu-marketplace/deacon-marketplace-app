@@ -17,8 +17,7 @@ create table if not exists api.providers (
   coverage_area text[]
 );
 
--- Ensure provider entries are tied to profiles with provider role
-create function if not exists api.ensure_provider_role()
+create or replace function api.ensure_provider_role()
 returns trigger as $$
 begin
   if exists (
@@ -30,6 +29,7 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists providers_role_check on api.providers;
 create trigger providers_role_check
   before insert or update on api.providers
   for each row execute function api.ensure_provider_role();
