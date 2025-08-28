@@ -52,6 +52,8 @@ export default function ActivityPage() {
     title: locale === 'es' ? 'Actividad' : 'Activity',
     loading: locale === 'es' ? 'Cargando...' : 'Loading...',
     empty: locale === 'es' ? 'Sin actividad' : 'No activity yet',
+    open: locale === 'es' ? 'abierto' : 'open',
+    closed: locale === 'es' ? 'cerrado' : 'closed',
     pending: locale === 'es' ? 'pendiente' : 'pending',
     assigned: locale === 'es' ? 'asignado' : 'assigned',
     noDescription: locale === 'es' ? 'Sin descripción' : 'No description',
@@ -120,12 +122,16 @@ export default function ActivityPage() {
     return (locale === 'es' ? entry.name_es : entry.name_en) || entry.slug
   }
 
-  const getStatusText = (status?: string | null) => {
-    if (!status) return pageT.pending
-    const s = status.toLowerCase()
-    if (s === 'pending') return pageT.pending
-    if (s === 'assigned') return pageT.assigned
-    return status
+  const getStatusBadges = (status?: string | null) => {
+    const s = status?.toLowerCase()
+    if (s === 'open')
+      return [{ label: pageT.open, className: 'bg-yellow-100 text-yellow-700' }]
+    if (s === 'assigned')
+      return [
+        { label: pageT.closed, className: 'bg-green-100 text-green-700' },
+        { label: pageT.assigned, className: 'bg-blue-100 text-blue-700' },
+      ]
+    return [{ label: pageT.closed, className: 'bg-green-100 text-green-700' }]
   }
 
   useEffect(() => {
@@ -244,31 +250,34 @@ export default function ActivityPage() {
           </h1>
 
           <div className="bg-white">
-            {role === 'client' &&
-              requests.map((r) => (
-                <ActivityCard
-                  key={r.id}
-                  serviceName={getServiceName(r.service_id)}
-                  description={r.service_description || pageT.noDescription}
-                  createdAt={new Date(r.request_created_at).toLocaleDateString()}
-                  status={getStatusText(r.request_status)}
-                />
-              ))}
-            {role === 'provider' &&
-              offers.map((o) => (
-                <ActivityCard
-                  key={`${o.request_id}-${o.service_slug}`}
-                  serviceName={getServiceName(o.service_slug)}
-                  description={o.description || pageT.noDescription}
-                  createdAt={
-                    o.created_at
-                      ? new Date(o.created_at).toLocaleDateString()
-                      : ''
-                  }
-                  status={getStatusText(o.status)}
-                />
-              ))}
-            {!hasData && (
+            {hasData ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {role === 'client' &&
+                  requests.map((r) => (
+                    <ActivityCard
+                      key={r.id}
+                      serviceName={getServiceName(r.service_id)}
+                      description={r.service_description || pageT.noDescription}
+                      createdAt={new Date(r.request_created_at).toLocaleDateString()}
+                      statuses={getStatusBadges(r.request_status)}
+                    />
+                  ))}
+                {role === 'provider' &&
+                  offers.map((o) => (
+                    <ActivityCard
+                      key={`${o.request_id}-${o.service_slug}`}
+                      serviceName={getServiceName(o.service_slug)}
+                      description={o.description || pageT.noDescription}
+                      createdAt={
+                        o.created_at
+                          ? new Date(o.created_at).toLocaleDateString()
+                          : ''
+                      }
+                      statuses={getStatusBadges(o.status)}
+                    />
+                  ))}
+              </div>
+            ) : (
               <div className="py-4 text-left text-gray-500">{pageT.empty}</div>
             )}
           </div>
@@ -282,21 +291,30 @@ function ActivityCard({
   serviceName,
   description,
   createdAt,
-  status,
+  statuses,
 }: {
   serviceName: string
   description: string
   createdAt: string
-  status: string
+  statuses: { label: string; className: string }[]
 }) {
   return (
-    <div className="mb-4 p-4 border rounded-lg shadow-sm">
-      <h2 className="text-lg font-semibold text-gray-900">{serviceName}</h2>
-      <p className="mt-1 text-sm text-gray-700">{description}</p>
-      <div className="mt-2 flex justify-between text-sm text-gray-500">
-        <span>{createdAt}</span>
-        <span className="font-medium text-gray-900">{status}</span>
+    <div className="w-full rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+      <div className="flex items-start justify-between">
+        <h2 className="text-lg font-semibold text-gray-900">{serviceName}</h2>
+        <div className="flex gap-2">
+          {statuses.map((s) => (
+            <span
+              key={s.label}
+              className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${s.className}`}
+            >
+              {s.label}
+            </span>
+          ))}
+        </div>
       </div>
+      <p className="mt-2 text-sm text-gray-700">{description}</p>
+      <div className="mt-4 text-sm text-gray-500">{createdAt}</div>
     </div>
   )
 }
