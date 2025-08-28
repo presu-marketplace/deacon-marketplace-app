@@ -102,7 +102,7 @@ export default function ActivityPage() {
       setLoading(true)
 
       const { data: profile } = await supabase
-        .from('api.profiles')
+        .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
@@ -111,7 +111,7 @@ export default function ActivityPage() {
 
       if (userRole === 'client') {
         const { data } = await supabase
-          .from('api.service_requests')
+          .from('service_requests')
           .select(
             'id, service_id, service_description, request_created_at, request_status'
           )
@@ -136,14 +136,14 @@ export default function ActivityPage() {
         )
       } else if (userRole === 'provider') {
         const { data: offerRows, error } = await supabase
-          .from('api.service_request_services')
+          .from('service_request_services')
           .select('request_id, service_slug, status')
           .eq('provider_id', user.id)
         let rows: { request_id: string; service_slug: string; status?: string | null }[] =
           (offerRows as { request_id: string; service_slug: string; status?: string | null }[]) || []
         if (error) {
           const { data: fallback } = await supabase
-            .from('api.service_request_services')
+            .from('service_request_services')
             .select('request_id, service_slug')
             .eq('provider_id', user.id)
           rows =
@@ -153,7 +153,7 @@ export default function ActivityPage() {
         let reqData: Record<string, { description: string | null; created_at: string }> = {}
         if (ids.length) {
           const { data: reqs } = await supabase
-            .from('api.service_requests')
+            .from('service_requests')
             .select('id, service_description, request_created_at')
             .in('id', ids)
           const reqEntries =
