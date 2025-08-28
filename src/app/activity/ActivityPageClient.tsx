@@ -244,31 +244,34 @@ export default function ActivityPage() {
           </h1>
 
           <div className="bg-white">
-            {role === 'client' &&
-              requests.map((r) => (
-                <ActivityCard
-                  key={r.id}
-                  serviceName={getServiceName(r.service_id)}
-                  description={r.service_description || pageT.noDescription}
-                  createdAt={new Date(r.request_created_at).toLocaleDateString()}
-                  status={getStatusText(r.request_status)}
-                />
-              ))}
-            {role === 'provider' &&
-              offers.map((o) => (
-                <ActivityCard
-                  key={`${o.request_id}-${o.service_slug}`}
-                  serviceName={getServiceName(o.service_slug)}
-                  description={o.description || pageT.noDescription}
-                  createdAt={
-                    o.created_at
-                      ? new Date(o.created_at).toLocaleDateString()
-                      : ''
-                  }
-                  status={getStatusText(o.status)}
-                />
-              ))}
-            {!hasData && (
+            {hasData ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {role === 'client' &&
+                  requests.map((r) => (
+                    <ActivityCard
+                      key={r.id}
+                      serviceName={getServiceName(r.service_id)}
+                      description={r.service_description || pageT.noDescription}
+                      createdAt={new Date(r.request_created_at).toLocaleDateString()}
+                      status={getStatusText(r.request_status)}
+                    />
+                  ))}
+                {role === 'provider' &&
+                  offers.map((o) => (
+                    <ActivityCard
+                      key={`${o.request_id}-${o.service_slug}`}
+                      serviceName={getServiceName(o.service_slug)}
+                      description={o.description || pageT.noDescription}
+                      createdAt={
+                        o.created_at
+                          ? new Date(o.created_at).toLocaleDateString()
+                          : ''
+                      }
+                      status={getStatusText(o.status)}
+                    />
+                  ))}
+              </div>
+            ) : (
               <div className="py-4 text-left text-gray-500">{pageT.empty}</div>
             )}
           </div>
@@ -289,14 +292,26 @@ function ActivityCard({
   createdAt: string
   status: string
 }) {
+  const statusStyles: Record<string, string> = {
+    pending: 'bg-yellow-100 text-yellow-700',
+    pendiente: 'bg-yellow-100 text-yellow-700',
+    assigned: 'bg-green-100 text-green-700',
+    asignado: 'bg-green-100 text-green-700',
+  }
+
+  const statusClass =
+    statusStyles[status.toLowerCase()] || 'bg-gray-100 text-gray-700'
+
   return (
-    <div className="mb-4 p-4 border rounded-lg shadow-sm">
-      <h2 className="text-lg font-semibold text-gray-900">{serviceName}</h2>
-      <p className="mt-1 text-sm text-gray-700">{description}</p>
-      <div className="mt-2 flex justify-between text-sm text-gray-500">
-        <span>{createdAt}</span>
-        <span className="font-medium text-gray-900">{status}</span>
+    <div className="w-full rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+      <div className="flex items-start justify-between">
+        <h2 className="text-lg font-semibold text-gray-900">{serviceName}</h2>
+        <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${statusClass}`}>
+          {status}
+        </span>
       </div>
+      <p className="mt-2 text-sm text-gray-700">{description}</p>
+      <div className="mt-4 text-sm text-gray-500">{createdAt}</div>
     </div>
   )
 }
