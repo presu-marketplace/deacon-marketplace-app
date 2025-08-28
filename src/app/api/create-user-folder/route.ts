@@ -22,7 +22,10 @@ export async function POST(req: Request) {
 
     const { error: profileError } = await supabase
       .from('profiles')
-      .upsert({ id: userId, full_name: fullName, role })
+      .upsert(
+        { id: userId, full_name: fullName, role },
+        { onConflict: 'id', ignoreDuplicates: true }
+      )
 
     if (profileError) {
       return NextResponse.json({ error: profileError.message }, { status: 500 })
@@ -38,7 +41,7 @@ export async function POST(req: Request) {
             tax_id: null,
             coverage_area: [],
           },
-          { onConflict: 'id' }
+          { onConflict: 'id', ignoreDuplicates: true }
         )
 
       if (providerError) {
