@@ -106,9 +106,9 @@ alter table api.service_requests drop column if exists category;
 -- Each requested service may be resolved by exactly one provider
 create table if not exists api.service_request_services (
   request_id uuid not null references api.service_requests(id) on delete cascade,
-  service_slug text not null references reference.services(slug) on delete cascade,
+  service_id uuid not null references reference.services(id) on delete cascade,
   provider_id uuid references api.providers(id) on delete set null,
-  primary key (request_id, service_slug)
+  primary key (request_id, service_id)
 );
 
 -- Grant API schema privileges to service_role
