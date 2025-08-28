@@ -75,13 +75,26 @@ export default function ActivityPage() {
     } = await supabase.auth.getSession()
     if (!session) return null
     const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/${path}?${params.toString()}`
-    const res = await fetch(url, {
-      headers: {
-        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    })
-    if (!res.ok) return null
+    const headers = {
+      apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      Authorization: `Bearer ${session.access_token}`,
+    }
+    let res = await fetch(url, { headers })
+    if (res.status === 403) {
+      const { data: refreshed } = await supabase.auth.refreshSession()
+      if (refreshed.session) {
+        res = await fetch(url, {
+          headers: {
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            Authorization: `Bearer ${refreshed.session.access_token}`,
+          },
+        })
+      }
+    }
+    if (!res.ok) {
+      console.error('API request failed', res.status, await res.text())
+      return null
+    }
     return (await res.json()) as T
   }
 
