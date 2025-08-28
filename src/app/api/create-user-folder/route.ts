@@ -22,6 +22,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: profileError.message }, { status: 500 })
     }
 
+    if (role === 'provider') {
+      const { error: providerError } = await supabase
+        .from('providers')
+        .upsert({ id: userId })
+      if (providerError) {
+        return NextResponse.json({ error: providerError.message }, { status: 500 })
+      }
+    }
+
     // All user uploads live in the public "users-data" bucket so
     // ensure that bucket and a folder for this user exist.
     const bucket = 'users-data'

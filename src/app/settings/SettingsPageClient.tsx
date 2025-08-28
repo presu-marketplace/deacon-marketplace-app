@@ -42,6 +42,11 @@ export default function SettingsPage() {
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
   const [city, setCity] = useState('')
+  const [role, setRole] = useState<'client' | 'provider' | 'admin'>('client')
+  const [companyName, setCompanyName] = useState('')
+  const [taxId, setTaxId] = useState('')
+  const [services, setServices] = useState<{ id: string; name_en: string; name_es: string }[]>([])
+  const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -52,13 +57,32 @@ export default function SettingsPage() {
       setAvatarPath(user.user_metadata?.avatar_url || '')
       const { data } = await supabase
         .from('profiles')
-        .select('full_name, phone, address, city')
+        .select('full_name, phone, address, city, role')
         .eq('id', user.id)
         .single()
       setFullName(data?.full_name || user.user_metadata?.name || '')
       setPhone(data?.phone || user.user_metadata?.phone || '')
       setAddress(data?.address || user.user_metadata?.address || '')
       setCity(data?.city || user.user_metadata?.city || '')
+      setRole((data?.role as 'client' | 'provider' | 'admin') || 'client')
+      if (data?.role === 'provider') {
+        const { data: provider } = await supabase
+          .from('providers')
+          .select('company_name, tax_id, coverage_area')
+          .eq('id', user.id)
+          .single()
+        setCompanyName(provider?.company_name || '')
+        setTaxId(provider?.tax_id || '')
+        const { data: providerServices } = await supabase
+          .from('provider_services')
+          .select('service_id')
+          .eq('provider_id', user.id)
+        setSelectedServices(providerServices?.map((ps: { service_id: string }) => ps.service_id) || [])
+        const { data: allServices } = await supabase
+          .from('services')
+          .select('id, name_en, name_es')
+        setServices(allServices || [])
+      }
     }
     loadProfile()
   }, [user])
@@ -94,6 +118,22 @@ export default function SettingsPage() {
       address,
       city,
     })
+    if (role === 'provider') {
+      await supabase.from('providers').upsert({
+        id: user.id,
+        company_name: companyName,
+        tax_id: taxId,
+        coverage_area: city ? [city] : [],
+      })
+      await supabase.from('provider_services').delete().eq('provider_id', user.id)
+      if (selectedServices.length > 0) {
+        const rows = selectedServices.map((service_id) => ({
+          provider_id: user.id,
+          service_id,
+        }))
+        await supabase.from('provider_services').insert(rows)
+      }
+    }
     await supabase.auth.refreshSession()
     router.refresh()
     setSaving(false)
@@ -139,6 +179,9 @@ export default function SettingsPage() {
     city: locale === 'es' ? 'Ciudad' : 'City',
     email: locale === 'es' ? 'Correo electrónico' : 'Email',
     verified: locale === 'es' ? 'Verificado' : 'Verified',
+    companyName: locale === 'es' ? 'Nombre de la empresa' : 'Company name',
+    taxId: locale === 'es' ? 'CUIT' : 'Tax ID',
+    services: locale === 'es' ? 'Servicios ofrecidos' : 'Services offered',
     update: locale === 'es' ? 'Actualizar' : 'Update',
     updating: locale === 'es' ? 'Actualizando...' : 'Updating...',
     loading: locale === 'es' ? 'Cargando...' : 'Loading...',
@@ -222,16 +265,53 @@ export default function SettingsPage() {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
-            <EditableRow
-              label={pageT.city}
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-            />
-            <Row
-              label={pageT.email}
-              value={
-                <span className="inline-flex items-center gap-2">
-                  {user.email}
+              <EditableRow
+                label={pageT.city}
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
+              {role === 'provider' && (
+                <>
+                  <EditableRow
+                    label={pageT.companyName}
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                  />
+                  <EditableRow
+                    label={pageT.taxId}
+                    value={taxId}
+                    onChange={(e) => setTaxId(e.target.value)}
+                  />
+                  <div className="py-4">
+                    <div className="text-sm font-semibold text-gray-900">
+                      {pageT.services}
+                    </div>
+                    <div className="mt-1 text-sm text-gray-700 space-y-1">
+                      {services.map((s) => (
+                        <label key={s.id} className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={selectedServices.includes(s.id)}
+                            onChange={() =>
+                              setSelectedServices((prev) =>
+                                prev.includes(s.id)
+                                  ? prev.filter((id) => id !== s.id)
+                                  : [...prev, s.id]
+                              )
+                            }
+                          />
+                          {locale === 'es' ? s.name_es : s.name_en}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+              <Row
+                label={pageT.email}
+                value={
+                  <span className="inline-flex items-center gap-2">
+                    {user.email}
                   <FiCheckCircle className="text-green-600" title={pageT.verified} />
                 </span>
               }
