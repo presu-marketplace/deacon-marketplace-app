@@ -7,10 +7,16 @@ export const runtime = 'nodejs'
 
 export async function POST(req: Request) {
   try {
-    const { userId, role = 'client', fullName = '' } = await req.json()
+    const {
+      userId,
+      role: rawRole = 'client',
+      fullName = '',
+    } = await req.json()
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     }
+
+    const role = rawRole === 'pro' ? 'provider' : rawRole
 
     const supabase = getSupabaseAdmin()
 
@@ -25,8 +31,15 @@ export async function POST(req: Request) {
     if (role === 'provider') {
       const { error: providerError } = await supabase
         .from('providers')
-        .upsert({ id: userId })
-      if (providerError) {
+        .insert({
+          id: userId,
+          company_name: null,
+          tax_id: null,
+          coverage_area: [],
+        })
+        .single()
+
+      if (providerError && providerError.code !== '23505') {
         return NextResponse.json({ error: providerError.message }, { status: 500 })
       }
     }
