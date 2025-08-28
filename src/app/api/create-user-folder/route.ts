@@ -10,22 +10,45 @@ export async function POST(req: Request) {
     const {
       userId,
       role: rawRole = 'client',
-      fullName = '',
+      fullName,
     } = await req.json()
     if (!userId) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
     }
-
-    const role = rawRole === 'pro' ? 'provider' : rawRole
+    const requestedRole = rawRole === 'pro' ? 'provider' : rawRole
 
     const supabase = getSupabaseAdmin()
 
-    const { error: profileError } = await supabase
+    // Fetch existing profile to keep role immutable
+    const { data: existingProfile, error: fetchError } = await supabase
       .from('profiles')
-      .upsert({ id: userId, full_name: fullName, role })
+      .select('role')
+      .eq('id', userId)
+      .maybeSingle()
 
-    if (profileError) {
-      return NextResponse.json({ error: profileError.message }, { status: 500 })
+    if (fetchError) {
+      return NextResponse.json({ error: fetchError.message }, { status: 500 })
+    }
+
+    const role = existingProfile?.role ?? requestedRole
+
+    if (!existingProfile) {
+      const { error: insertError } = await supabase
+        .from('profiles')
+        .insert({ id: userId, full_name: fullName ?? '', role })
+
+      if (insertError) {
+        return NextResponse.json({ error: insertError.message }, { status: 500 })
+      }
+    } else if (fullName) {
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ full_name: fullName })
+        .eq('id', userId)
+
+      if (updateError) {
+        return NextResponse.json({ error: updateError.message }, { status: 500 })
+      }
     }
 
     if (role === 'provider') {
@@ -38,7 +61,7 @@ export async function POST(req: Request) {
             tax_id: null,
             coverage_area: [],
           },
-          { onConflict: 'id' }
+          { onConflict: 'id', ignoreDuplicates: true }
         )
 
       if (providerError) {
