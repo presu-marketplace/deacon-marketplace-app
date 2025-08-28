@@ -298,33 +298,25 @@ function ActivityCard({
   createdAt: string
   statuses: { label: string; className: string }[]
 }) {
-  const statusStyles: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-700',
-    pendiente: 'bg-yellow-100 text-yellow-700',
-    assigned: 'bg-green-100 text-green-700',
-    asignado: 'bg-green-100 text-green-700',
-  }
-
-  const statusClass =
-    statusStyles[status.toLowerCase()] || 'bg-gray-100 text-gray-700'
-
   return (
-    <div className="w-full rounded-lg border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+    <div className="group w-full rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:shadow-md">
       <div className="flex items-start justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">{serviceName}</h2>
+        <h2 className="text-base font-semibold text-gray-900 group-hover:text-black">
+          {serviceName}
+        </h2>
         <div className="flex gap-2">
           {statuses.map((s) => (
             <span
               key={s.label}
-              className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${s.className}`}
+              className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${s.className}`}
             >
               {s.label}
             </span>
           ))}
         </div>
       </div>
-      <p className="mt-2 text-sm text-gray-700">{description}</p>
-      <div className="mt-4 text-sm text-gray-500">{createdAt}</div>
+      <p className="mt-3 text-sm text-gray-600 group-hover:text-gray-800">{description}</p>
+      <div className="mt-4 text-xs text-gray-500">{createdAt}</div>
     </div>
   )
 }
