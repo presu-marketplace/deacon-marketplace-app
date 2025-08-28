@@ -123,10 +123,11 @@ function Toolbar({
       <div className="flex items-center gap-2">
         <div className="relative">
           <input
+            id="activity-search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={pageT.searchPlaceholder}
-            className="w-64 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm shadow-[0_1px_0_#0000000d] focus:outline-none focus:ring-2 focus:ring-neutral-900/5"
+            className="w-64 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 placeholder-neutral-400 shadow-[0_1px_0_#0000000d] focus:outline-none focus:ring-2 focus:ring-neutral-900/5"
           />
           <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400">
             <svg viewBox="0 0 24 24" className="h-4 w-4">
@@ -139,11 +140,10 @@ function Toolbar({
             <button
               key={p.key}
               onClick={() => setStatus(p.key)}
-              className={`rounded-full px-3 py-1 text-xs font-medium ring-1 transition ${
-                status === p.key
-                  ? "bg-neutral-900 text-white ring-neutral-900"
-                  : "bg-white text-neutral-700 ring-neutral-200 hover:bg-neutral-50"
-              }`}
+              className={`rounded-full px-3 py-1 text-xs font-medium ring-1 transition ${status === p.key
+                ? "bg-neutral-900 text-white ring-neutral-900"
+                : "bg-white text-neutral-700 ring-neutral-200 hover:bg-neutral-50"
+                }`}
             >
               {p.label}
             </button>
@@ -385,7 +385,7 @@ export default function ActivityPage() {
     const { title, description, createdAt, status } = props;
     const meta = statusMeta(status);
     const when = createdAt ? formatWhen(createdAt, locale) : null;
-  
+
     return (
       <motion.button
         type="button"
@@ -411,17 +411,34 @@ export default function ActivityPage() {
                       </svg>
                     </div>
                   </div>
-  
+
                   <p className="mt-1 text-neutral-700 line-clamp-2 text-sm">{description}</p>
-  
+
                   {when && (
-                    <div className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-neutral-50 px-2 py-1 text-[11px] text-neutral-600 ring-1 ring-neutral-200">
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-neutral-400" aria-hidden>
-                        <path d="M7 2v3M17 2v3M4 9h16M6 20a8 8 0 1 0 8-8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                        <path d="M14 14v3l2 1" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                    <div className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-neutral-500 leading-none">
+                      {/* Better calendar + small clock */}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        className="h-4 w-4 shrink-0 text-neutral-400 -translate-y-px"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden
+                      >
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                        <circle cx="17" cy="17" r="3.5" />
+                        <line x1="17" y1="17" x2="17" y2="15.5" />
+                        <line x1="17" y1="17" x2="18.5" y2="17" />
                       </svg>
+
                       <time dateTime={when.iso} title={`${when.date} ${when.time}`}>
-                        {when.date} at {when.time}
+                        {when.date} · {when.time}
                       </time>
                     </div>
                   )}
@@ -433,7 +450,7 @@ export default function ActivityPage() {
       </motion.button>
     );
   }
-  
+
 }
 
 function SkeletonCard() {
