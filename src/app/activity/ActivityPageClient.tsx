@@ -224,9 +224,9 @@ export default function ActivityPage() {
   return (
     <>
       <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
-      <div className="bg-white min-h-screen pt-32">
+      <div className="bg-neutral-50 min-h-screen pt-32">
         <div className="max-w-6xl mx-auto px-6 py-8">
-          <h1 className="text-3xl font-semibold tracking-tight text-black mb-6">{pageT.title}</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900 mb-6">{pageT.title}</h1>
 
           {(!user || loading) && (
             <div className="space-y-3">
@@ -293,10 +293,10 @@ export default function ActivityPage() {
     return (
       <button
         type="button"
-        className="group relative w-full text-left"
+        className="group relative w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
         aria-label={`${props.title} – ${meta.label}`}
       >
-        <div className="flex overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_0_#0000000d] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+        <div className="flex overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:bg-neutral-50">
           {/* Status rail */}
           <div className={`w-1 sm:w-1.5 ${meta.rail}`} aria-hidden />
 
@@ -364,13 +364,13 @@ export default function ActivityPage() {
 
 function SkeletonCard() {
   return (
-    <div className="flex overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_0_#0000000d]">
+    <div className="flex overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
       <div className="w-1.5 bg-neutral-200" aria-hidden />
-      <div className="w-full p-5">
+      <div className="w-full p-5 space-y-2">
         <div className="h-4 w-40 bg-neutral-200 rounded" />
-        <div className="mt-2 h-3 w-full bg-neutral-200/70 rounded" />
-        <div className="mt-1.5 h-3 w-3/4 bg-neutral-200/70 rounded" />
-        <div className="mt-3 h-4 w-24 bg-neutral-200 rounded" />
+        <div className="h-3 w-full bg-neutral-200/70 rounded" />
+        <div className="h-3 w-3/4 bg-neutral-200/70 rounded" />
+        <div className="h-4 w-24 bg-neutral-200 rounded" />
       </div>
     </div>
   );
@@ -378,9 +378,9 @@ function SkeletonCard() {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="flex items-center justify-center rounded-2xl border border-dashed border-neutral-200 bg-neutral-50 py-14">
+    <div className="flex items-center justify-center rounded-2xl border border-dashed border-neutral-200 bg-white py-14 shadow-sm">
       <div className="text-center">
-        <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-white shadow-[0_1px_0_#0000000d] ring-1 ring-neutral-200 flex items-center justify-center">
+        <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-neutral-50 shadow-sm ring-1 ring-neutral-200 flex items-center justify-center">
           <svg viewBox="0 0 24 24" className="h-5 w-5 text-neutral-400" aria-hidden>
             <path d="M3 7h18M7 7v10m10-10v10M5 17h14" fill="none" stroke="currentColor" strokeWidth="1.5" />
           </svg>
