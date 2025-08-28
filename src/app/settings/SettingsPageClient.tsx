@@ -51,7 +51,7 @@ export default function SettingsPage() {
       if (!user) return
       setAvatarPath(user.user_metadata?.avatar_url || '')
       const { data } = await supabase
-        .from('api.profiles')
+        .from('profiles')
         .select('full_name, phone, address, city')
         .eq('id', user.id)
         .single()
@@ -87,7 +87,7 @@ export default function SettingsPage() {
     await supabase.auth.updateUser({
       data: { avatar_url: avatarPath, name: fullName, phone, address, city },
     })
-    await supabase.from('api.profiles').upsert({
+    await supabase.from('profiles').upsert({
       id: user.id,
       full_name: fullName,
       phone,
