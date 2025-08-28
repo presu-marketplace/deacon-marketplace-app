@@ -66,6 +66,38 @@ export default function ActivityPage() {
     Record<string, { slug: string; name_en: string; name_es: string }>
   >({})
 
+  const fetchFromApi = async <T,>(
+    path: string,
+    params: URLSearchParams,
+  ): Promise<T | null> => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return null
+    const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/${path}?${params.toString()}`
+    const headers = {
+      apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      Authorization: `Bearer ${session.access_token}`,
+    }
+    let res = await fetch(url, { headers })
+    if (res.status === 403) {
+      const { data: refreshed } = await supabase.auth.refreshSession()
+      if (refreshed.session) {
+        res = await fetch(url, {
+          headers: {
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            Authorization: `Bearer ${refreshed.session.access_token}`,
+          },
+        })
+      }
+    }
+    if (!res.ok) {
+      console.error('API request failed', res.status, await res.text())
+      return null
+    }
+    return (await res.json()) as T
+  }
+
   useEffect(() => {
     const fetchServices = async () => {
       const { data } = await supabase.from('services').select('id, slug, name_en, name_es')
@@ -110,21 +142,20 @@ export default function ActivityPage() {
       setRole(userRole)
 
       if (userRole === 'client') {
-        const { data } = await supabase
-          .from('service_requests')
-          .select(
-            'id, service_id, service_description, request_created_at, request_status'
-          )
-          .eq('user_id', user.id)
-          .order('request_created_at', { ascending: false })
+        const params = new URLSearchParams({
+          select:
+            'id, service_id, service_description, request_created_at, request_status',
+          user_id: `eq.${user.id}`,
+          order: 'request_created_at.desc',
+        })
         const rows =
-          (data as {
+          (await fetchFromApi<{
             id: string
             service_id: string | null
             service_description: string | null
             request_created_at: string
             request_status?: string | null
-          }[]) || []
+          }[]>('service_requests', params)) || []
         setRequests(
           rows.map((r) => ({
             id: r.id,
@@ -135,35 +166,45 @@ export default function ActivityPage() {
           }))
         )
       } else if (userRole === 'provider') {
-        const { data: offerRows, error } = await supabase
-          .from('service_request_services')
-          .select('request_id, service_slug, status')
-          .eq('provider_id', user.id)
-        let rows: { request_id: string; service_slug: string; status?: string | null }[] =
-          (offerRows as { request_id: string; service_slug: string; status?: string | null }[]) || []
-        if (error) {
-          const { data: fallback } = await supabase
-            .from('service_request_services')
-            .select('request_id, service_slug')
-            .eq('provider_id', user.id)
-          rows =
-            (fallback as { request_id: string; service_slug: string; status?: string | null }[]) || []
+        const baseParams = new URLSearchParams({
+          select: 'request_id, service_slug, status',
+          provider_id: `eq.${user.id}`,
+        })
+        let rows =
+          (await fetchFromApi<{
+            request_id: string
+            service_slug: string
+            status?: string | null
+          }[]>('service_request_services', baseParams)) || []
+        if (!rows.length) {
+          const fallback = await fetchFromApi<{
+            request_id: string
+            service_slug: string
+            status?: string | null
+          }[]>(
+            'service_request_services',
+            new URLSearchParams({
+              select: 'request_id, service_slug',
+              provider_id: `eq.${user.id}`,
+            }),
+          )
+          rows = fallback || []
         }
         const ids = rows.map((r) => r.request_id)
         let reqData: Record<string, { description: string | null; created_at: string }> = {}
         if (ids.length) {
-          const { data: reqs } = await supabase
-            .from('service_requests')
-            .select('id, service_description, request_created_at')
-            .in('id', ids)
-          const reqEntries =
-            (reqs as {
+          const reqParams = new URLSearchParams({
+            select: 'id, service_description, request_created_at',
+            id: `in.(${ids.join(',')})`,
+          })
+          const reqs =
+            (await fetchFromApi<{
               id: string
               service_description: string | null
               request_created_at: string
-            }[]) || []
+            }[]>('service_requests', reqParams)) || []
           reqData = Object.fromEntries(
-            reqEntries.map((r) => [r.id, { description: r.service_description, created_at: r.request_created_at }])
+            reqs.map((r) => [r.id, { description: r.service_description, created_at: r.request_created_at }]),
           )
         }
         setOffers(
