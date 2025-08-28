@@ -172,7 +172,6 @@ export async function POST(request: Request) {
   } as const
 
   const { data: inserted, error: dbErr } = await supabase
-    .schema('api')
     .from('service_requests')
     .insert(insertPayload)
     .select('id')
@@ -298,7 +297,6 @@ export async function GET(request: Request) {
   if (qs.get('smoke') === '1') {
     const supabase = getSupabaseAdmin()
     const { error } = await supabase
-      .schema('api')
       .from('service_requests')
       .insert({
         service_description: 'smoke',

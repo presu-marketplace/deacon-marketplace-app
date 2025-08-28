@@ -268,7 +268,7 @@ export default function ServiceFormClient({ service }: Props) {
 
     const loadProfile = async () => {
       const { data } = await supabase
-        .from('api.profiles')
+        .from('profiles')
         .select('full_name, phone, address, city')
         .eq('id', user.id)
         .single()
