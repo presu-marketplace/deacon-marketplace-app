@@ -31,15 +31,17 @@ export async function POST(req: Request) {
     if (role === 'provider') {
       const { error: providerError } = await supabase
         .from('providers')
-        .insert({
-          id: userId,
-          company_name: null,
-          tax_id: null,
-          coverage_area: [],
-        })
-        .single()
+        .upsert(
+          {
+            id: userId,
+            company_name: null,
+            tax_id: null,
+            coverage_area: [],
+          },
+          { onConflict: 'id' }
+        )
 
-      if (providerError && providerError.code !== '23505') {
+      if (providerError) {
         return NextResponse.json({ error: providerError.message }, { status: 500 })
       }
     }
