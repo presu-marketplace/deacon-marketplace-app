@@ -40,8 +40,8 @@ alter table api.providers drop column if exists services;
 -- Join table linking providers to offered services
 create table if not exists api.provider_services (
   provider_id uuid not null references api.providers(id) on delete cascade,
-  service_slug text not null references reference.services(slug) on delete cascade,
-  primary key (provider_id, service_slug)
+  service_id uuid not null references reference.services(id) on delete cascade,
+  primary key (provider_id, service_id)
 );
 
 -- Service requests placed by users
