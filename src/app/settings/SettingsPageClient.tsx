@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { FiEdit2, FiCheckCircle, FiChevronRight } from 'react-icons/fi'
 import Navbar from '@/components/layout/Navbar'
-import { supabase } from '@/lib/supabaseClient'
+import { supabase, getAuthedClient } from '@/lib/supabaseClient'
 import useUser from '@/features/auth/useUser'
 
 export default function SettingsPage() {
@@ -47,14 +47,15 @@ export default function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    const loadProfile = async () => {
-      if (!user) return
-      setAvatarPath(user.user_metadata?.avatar_url || '')
-      const { data } = await supabase
-        .from('api.profiles')
-        .select('full_name, phone, address, city')
-        .eq('id', user.id)
-        .single()
+      const loadProfile = async () => {
+        if (!user) return
+        setAvatarPath(user.user_metadata?.avatar_url || '')
+        const client = await getAuthedClient()
+        const { data } = await client
+          .from('profiles')
+          .select('full_name, phone, address, city')
+          .eq('id', user.id)
+          .single()
       setFullName(data?.full_name || user.user_metadata?.name || '')
       setPhone(data?.phone || user.user_metadata?.phone || '')
       setAddress(data?.address || user.user_metadata?.address || '')
@@ -73,27 +74,29 @@ export default function SettingsPage() {
         setAvatarUrl(avatarPath)
         return
       }
-      const { data } = await supabase.storage
-        .from('users-data')
-        .createSignedUrl(avatarPath, 60 * 60)
-      setAvatarUrl(data?.signedUrl || '/images/user/user-placeholder.png')
-    }
-    loadAvatar()
-  }, [avatarPath])
+        const client = await getAuthedClient()
+        const { data } = await client.storage
+          .from('users-data')
+          .createSignedUrl(avatarPath, 60 * 60)
+        setAvatarUrl(data?.signedUrl || '/images/user/user-placeholder.png')
+      }
+      loadAvatar()
+    }, [avatarPath])
 
   const handleSave = async () => {
     if (!user) return
     setSaving(true)
-    await supabase.auth.updateUser({
-      data: { avatar_url: avatarPath, name: fullName, phone, address, city },
-    })
-    await supabase.from('api.profiles').upsert({
-      id: user.id,
-      full_name: fullName,
-      phone,
-      address,
-      city,
-    })
+      await supabase.auth.updateUser({
+        data: { avatar_url: avatarPath, name: fullName, phone, address, city },
+      })
+      const client = await getAuthedClient()
+      await client.from('profiles').upsert({
+        id: user.id,
+        full_name: fullName,
+        phone,
+        address,
+        city,
+      })
     await supabase.auth.refreshSession()
     router.refresh()
     setSaving(false)
@@ -106,26 +109,27 @@ export default function SettingsPage() {
     setUploading(true)
     const ext = file.name.split('.').pop()
     const filePath = `${user.id}/avatar.${ext}`
-    const { error } = await supabase.storage
-      .from('users-data')
-      .upload(filePath, file, { upsert: true })
-    if (!error) {
-      setAvatarPath(filePath)
-      const { data } = await supabase.storage
+      const client = await getAuthedClient()
+      const { error } = await client.storage
         .from('users-data')
-        .createSignedUrl(filePath, 60 * 60)
-      setAvatarUrl(data?.signedUrl || '/images/user/user-placeholder.png')
-      await supabase.auth.updateUser({ data: { avatar_url: filePath } })
-    } else {
-      const placeholder = '/images/user/user-placeholder.png'
-      setAvatarPath(placeholder)
-      setAvatarUrl(placeholder)
-      await supabase.auth.updateUser({ data: { avatar_url: placeholder } })
+        .upload(filePath, file, { upsert: true })
+      if (!error) {
+        setAvatarPath(filePath)
+        const { data } = await client.storage
+          .from('users-data')
+          .createSignedUrl(filePath, 60 * 60)
+        setAvatarUrl(data?.signedUrl || '/images/user/user-placeholder.png')
+        await supabase.auth.updateUser({ data: { avatar_url: filePath } })
+      } else {
+        const placeholder = '/images/user/user-placeholder.png'
+        setAvatarPath(placeholder)
+        setAvatarUrl(placeholder)
+        await supabase.auth.updateUser({ data: { avatar_url: placeholder } })
+      }
+      await supabase.auth.refreshSession()
+      router.refresh()
+      setUploading(false)
     }
-    await supabase.auth.refreshSession()
-    router.refresh()
-    setUploading(false)
-  }
 
   const pageT = {
     personalInfo: locale === 'es' ? 'Información personal' : 'Personal info',

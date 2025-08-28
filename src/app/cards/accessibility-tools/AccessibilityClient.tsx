@@ -5,9 +5,9 @@ import Navbar from '@/components/layout/Navbar'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import Link from 'next/link'
 
-const SUPPORTED_LOCALES = ['en', 'es'] as const
-type Locale = (typeof SUPPORTED_LOCALES)[number]
+type Locale = 'en' | 'es'
 const isLocale = (v: string | null): v is Locale => v === 'en' || v === 'es'
 
 export default function AccessibilityClient() {
@@ -169,9 +169,9 @@ Please include: **URL**, **browser**, **assistive tech**, and **repro steps**, i
         >
           <ol className="flex items-center gap-2">
             <li>
-              <a href="/" className="hover:text-gray-200 transition-colors">
+              <Link href="/" className="hover:text-gray-200 transition-colors">
                 {t.home}
-              </a>
+              </Link>
             </li>
             <li aria-hidden="true">/</li>
             <li>
@@ -206,28 +206,28 @@ Please include: **URL**, **browser**, **assistive tech**, and **repro steps**, i
           <article className="prose prose-invert max-w-none">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
-              components={{
-                h2: ({ node, ...props }) => (
-                  <h2 className="mt-8 text-2xl font-bold tracking-tight" {...props} />
-                ),
-                h3: ({ node, ...props }) => (
-                  <h3 className="mt-6 text-xl font-semibold tracking-tight" {...props} />
-                ),
-                p: ({ node, ...props }) => (
-                  <p className="leading-relaxed text-gray-200" {...props} />
-                ),
-                ul: ({ node, ...props }) => <ul className="list-disc pl-6" {...props} />,
-                ol: ({ node, ...props }) => <ol className="list-decimal pl-6" {...props} />,
-                li: ({ node, ...props }) => <li className="my-1" {...props} />,
-                a: ({ node, ...props }) => (
-                  <a className="underline decoration-emerald-400/50 underline-offset-4 hover:decoration-emerald-300" {...props} />
-                ),
-                hr: () => <hr className="my-8 border-white/10" />,
-                blockquote: ({ node, ...props }) => (
-                  <blockquote className="border-l-4 border-emerald-400/50 pl-4 text-gray-200/90" {...props} />
-                ),
-                strong: ({ node, ...props }) => <strong className="text-white" {...props} />,
-              }}
+                components={{
+                  h2: ({ ...props }) => (
+                    <h2 className="mt-8 text-2xl font-bold tracking-tight" {...props} />
+                  ),
+                  h3: ({ ...props }) => (
+                    <h3 className="mt-6 text-xl font-semibold tracking-tight" {...props} />
+                  ),
+                  p: ({ ...props }) => (
+                    <p className="leading-relaxed text-gray-200" {...props} />
+                  ),
+                  ul: ({ ...props }) => <ul className="list-disc pl-6" {...props} />,
+                  ol: ({ ...props }) => <ol className="list-decimal pl-6" {...props} />,
+                  li: ({ ...props }) => <li className="my-1" {...props} />,
+                  a: ({ ...props }) => (
+                    <a className="underline decoration-emerald-400/50 underline-offset-4 hover:decoration-emerald-300" {...props} />
+                  ),
+                  hr: () => <hr className="my-8 border-white/10" />,
+                  blockquote: ({ ...props }) => (
+                    <blockquote className="border-l-4 border-emerald-400/50 pl-4 text-gray-200/90" {...props} />
+                  ),
+                  strong: ({ ...props }) => <strong className="text-white" {...props} />,
+                }}
             >
               {content.md}
             </ReactMarkdown>

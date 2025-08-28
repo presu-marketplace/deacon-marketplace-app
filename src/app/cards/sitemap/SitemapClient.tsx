@@ -5,9 +5,8 @@ import Navbar from '@/components/layout/Navbar'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
-const SUPPORTED_LOCALES = ['en', 'es'] as const
- type Locale = (typeof SUPPORTED_LOCALES)[number]
- const isLocale = (v: string | null): v is Locale => v === 'en' || v === 'es'
+type Locale = 'en' | 'es'
+const isLocale = (v: string | null): v is Locale => v === 'en' || v === 'es'
 
 export default function SitemapClient() {
   const router = useRouter()
@@ -135,13 +134,13 @@ export default function SitemapClient() {
     <>
       <Navbar locale={locale} toggleLocale={toggleLocale} t={navT} forceWhite />
       <main className="min-h-screen w-full bg-gradient-to-b from-neutral-950 via-black to-neutral-950 text-white pt-28 pb-24">
-        <nav className="mx-auto mb-6 max-w-5xl px-6 sm:px-10 text-sm text-gray-400">
-          <ol className="flex items-center gap-2">
-            <li>
-              <a href="/" className="hover:text-gray-200 transition-colors">
-                {navT.home}
-              </a>
-            </li>
+          <nav className="mx-auto mb-6 max-w-5xl px-6 sm:px-10 text-sm text-gray-400">
+            <ol className="flex items-center gap-2">
+              <li>
+                <Link href="/" className="hover:text-gray-200 transition-colors">
+                  {navT.home}
+                </Link>
+              </li>
             <li aria-hidden="true">/</li>
             <li>
               <span className="text-gray-100">{content.title}</span>

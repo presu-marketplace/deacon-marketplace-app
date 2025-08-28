@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Navbar from '@/components/layout/Navbar'
 import useUser from '@/features/auth/useUser'
-import { supabase } from '@/lib/supabaseClient'
+import { getAuthedClient } from '@/lib/supabaseClient'
 
 interface ServiceRequest {
   id: string
@@ -68,7 +68,14 @@ export default function ActivityPage() {
 
   useEffect(() => {
     const fetchServices = async () => {
-      const { data } = await supabase.from('services').select('id, slug, name_en, name_es')
+      const client = await getAuthedClient()
+      const { data, error } = await client
+        .from('services')
+        .select('id, slug, name_en, name_es')
+      if (error) {
+        console.error('Failed to load services', error)
+        return
+      }
       const map = Object.fromEntries(
         ((data as { id: string; slug: string; name_en: string; name_es: string }[]) || []).map((s) => [
           s.id,
@@ -101,8 +108,9 @@ export default function ActivityPage() {
       if (!user) return
       setLoading(true)
 
-      const { data: profile } = await supabase
-        .from('api.profiles')
+      const client = await getAuthedClient()
+      const { data: profile } = await client
+        .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
@@ -110,40 +118,46 @@ export default function ActivityPage() {
       setRole(userRole)
 
       if (userRole === 'client') {
-        const { data } = await supabase
-          .from('api.service_requests')
+        const { data, error } = await client
+          .from('service_requests')
           .select(
             'id, service_id, service_description, request_created_at, request_status'
           )
           .eq('user_id', user.id)
           .order('request_created_at', { ascending: false })
-        const rows =
-          (data as {
-            id: string
-            service_id: string | null
-            service_description: string | null
-            request_created_at: string
-            request_status?: string | null
-          }[]) || []
-        setRequests(
-          rows.map((r) => ({
-            id: r.id,
-            service_id: r.service_id,
-            service_description: r.service_description,
-            request_created_at: r.request_created_at,
-            request_status: r.request_status,
-          }))
-        )
+        if (error) {
+          console.error('Failed to fetch requests', error)
+          setRequests([])
+        } else {
+          const rows =
+            (data as {
+              id: string
+              service_id: string | null
+              service_description: string | null
+              request_created_at: string
+              request_status?: string | null
+            }[]) || []
+          setRequests(
+            rows.map((r) => ({
+              id: r.id,
+              service_id: r.service_id,
+              service_description: r.service_description,
+              request_created_at: r.request_created_at,
+              request_status: r.request_status,
+            }))
+          )
+        }
       } else if (userRole === 'provider') {
-        const { data: offerRows, error } = await supabase
-          .from('api.service_request_services')
+        const { data: offerRows, error } = await client
+          .from('service_request_services')
           .select('request_id, service_slug, status')
           .eq('provider_id', user.id)
         let rows: { request_id: string; service_slug: string; status?: string | null }[] =
           (offerRows as { request_id: string; service_slug: string; status?: string | null }[]) || []
         if (error) {
-          const { data: fallback } = await supabase
-            .from('api.service_request_services')
+          console.error('Failed to fetch offers', error)
+          const { data: fallback } = await client
+            .from('service_request_services')
             .select('request_id, service_slug')
             .eq('provider_id', user.id)
           rows =
@@ -152,19 +166,23 @@ export default function ActivityPage() {
         const ids = rows.map((r) => r.request_id)
         let reqData: Record<string, { description: string | null; created_at: string }> = {}
         if (ids.length) {
-          const { data: reqs } = await supabase
-            .from('api.service_requests')
+          const { data: reqs, error: reqError } = await client
+            .from('service_requests')
             .select('id, service_description, request_created_at')
             .in('id', ids)
-          const reqEntries =
-            (reqs as {
-              id: string
-              service_description: string | null
-              request_created_at: string
-            }[]) || []
-          reqData = Object.fromEntries(
-            reqEntries.map((r) => [r.id, { description: r.service_description, created_at: r.request_created_at }])
-          )
+          if (reqError) {
+            console.error('Failed to fetch related requests', reqError)
+          } else {
+            const reqEntries =
+              (reqs as {
+                id: string
+                service_description: string | null
+                request_created_at: string
+              }[]) || []
+            reqData = Object.fromEntries(
+              reqEntries.map((r) => [r.id, { description: r.service_description, created_at: r.request_created_at }])
+            )
+          }
         }
         setOffers(
           rows.map((r) => ({

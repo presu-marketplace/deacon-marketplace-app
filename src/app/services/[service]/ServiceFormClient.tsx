@@ -7,7 +7,7 @@ import Image from 'next/image'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import Stepper from '@/components/ui/Stepper'
-import { supabase } from '@/lib/supabaseClient'
+import { getAuthedClient } from '@/lib/supabaseClient'
 
 const translations = {
   es: {
@@ -267,8 +267,9 @@ export default function ServiceFormClient({ service }: Props) {
     if (user.email) setEmail(user.email)
 
     const loadProfile = async () => {
-      const { data } = await supabase
-        .from('api.profiles')
+      const client = await getAuthedClient()
+      const { data } = await client
+        .from('profiles')
         .select('full_name, phone, address, city')
         .eq('id', user.id)
         .single()
