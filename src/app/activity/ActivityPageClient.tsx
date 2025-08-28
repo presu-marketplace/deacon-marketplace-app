@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
@@ -40,6 +40,17 @@ type ActivityItem = {
   createdAt: string;
   status?: string | null;
 };
+
+interface PageTranslations {
+  searchPlaceholder: string;
+  results: string;
+  all: string;
+  open: string;
+  assigned: string;
+  pending: string;
+  closed: string;
+  noDescription: string;
+}
 
 // ---------- Pure helpers (exported for tests) ----------
 export function normalizeStatus(status?: string | null) {
@@ -97,7 +108,7 @@ function Toolbar({
   status: "all" | "open" | "assigned" | "pending" | "closed";
   setStatus: (v: "all" | "open" | "assigned" | "pending" | "closed") => void;
   count: number;
-  pageT: any;
+  pageT: PageTranslations;
 }) {
   const pills: Array<{ key: "all" | "open" | "assigned" | "pending" | "closed"; label: string }> = [
     { key: "all", label: pageT.all },
@@ -196,6 +207,16 @@ export default function ActivityPage() {
     results: locale === "es" ? "resultados" : "results",
     all: locale === "es" ? "Todos" : "All",
   };
+  const typedPageT: PageTranslations = {
+    searchPlaceholder: t.searchPlaceholder,
+    results: pageT.results,
+    all: pageT.all,
+    open: pageT.open,
+    assigned: pageT.assigned,
+    pending: pageT.pending,
+    closed: pageT.closed,
+    noDescription: pageT.noDescription,
+  };
 
   const user = useUser();
   const [role, setRole] = useState<string | null>(null);
@@ -209,13 +230,26 @@ export default function ActivityPage() {
 
   // -------- fetch helper --------
   const fetchFromApi = async <T,>(path: string, params: URLSearchParams): Promise<T | null> => {
-    const {
+    let {
       data: { session },
     } = await supabase.auth.getSession();
+    if (!session) {
+      const { data } = await supabase.auth.refreshSession();
+      session = data.session;
+    }
     if (!session) return null;
     const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/${path}?${params.toString()}`;
-    const headers = { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, Authorization: `Bearer ${session.access_token}` } as const;
-    let res = await fetch(url, { headers });
+    const getHeaders = (token: string) => ({
+      apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      Authorization: `Bearer ${token}`,
+    }) as const;
+    let res = await fetch(url, { headers: getHeaders(session.access_token) });
+    if (res.status === 401) {
+      const { data } = await supabase.auth.refreshSession();
+      const refreshed = data.session;
+      if (!refreshed) return null;
+      res = await fetch(url, { headers: getHeaders(refreshed.access_token) });
+    }
     if (!res.ok) return null;
     return (await res.json()) as T;
   };
@@ -235,17 +269,20 @@ export default function ActivityPage() {
     fetchServices();
   }, []);
 
-  const getServiceName = (key?: string | null) => {
-    if (!key) return "";
-    const entry = serviceNames[key] || Object.values(serviceNames).find((s) => s.slug === key);
-    if (!entry) return "";
-    return (locale === "es" ? entry.name_es : entry.name_en) || entry.slug;
-  };
+  const getServiceName = useCallback(
+    (key?: string | null) => {
+      if (!key) return "";
+      const entry = serviceNames[key] || Object.values(serviceNames).find((s) => s.slug === key);
+      if (!entry) return "";
+      return (locale === "es" ? entry.name_es : entry.name_en) || entry.slug;
+    },
+    [serviceNames, locale]
+  );
 
   const statusMeta = (status?: string | null) => {
     const s = normalizeStatus(status);
     if (s === "open" || s === "abierto")
-      return { label: pageT.open, rail: "bg-amber-600", pill: "bg-amber-50 text-amber-800 ring-1 ring-amber-300" };
+      return { label: pageT.open, rail: "bg-indigo-600", pill: "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200" };
     if (s === "assigned" || s === "asignado")
       return { label: pageT.assigned, rail: "bg-blue-600", pill: "bg-blue-50 text-blue-700 ring-1 ring-blue-200" };
     if (s === "pending" || s === "pendiente")
@@ -255,7 +292,10 @@ export default function ActivityPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
       const userRole = (profile?.role as string | null) ?? "client";
@@ -266,12 +306,12 @@ export default function ActivityPage() {
           user_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
-        const rows = (await fetchFromApi<any[]>("service_requests", params)) || [];
-        setRequests(rows as any);
+        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
+        setRequests(rows);
       } else if (userRole === "provider") {
         const baseParams = new URLSearchParams({ select: "request_id, service_slug, status", provider_id: `eq.${user.id}` });
-        let rows = (await fetchFromApi<any[]>("service_request_services", baseParams)) || [];
-        setOffers(rows as any);
+        const rows = (await fetchFromApi<Offer[]>("service_request_services", baseParams)) || [];
+        setOffers(rows);
       }
       setLoading(false);
     };
@@ -300,7 +340,7 @@ export default function ActivityPage() {
       }));
     }
     return [];
-  }, [role, requests, offers, serviceNames, locale]);
+  }, [role, requests, offers, getServiceName, pageT.noDescription]);
 
   const filtered = useMemo(() => filterItems(items, query, statusFilter), [items, query, statusFilter]);
 
@@ -311,15 +351,17 @@ export default function ActivityPage() {
         <div className="max-w-6xl mx-auto px-6 py-8">
           <h1 className="text-3xl font-semibold tracking-tight text-black mb-6">{pageT.title}</h1>
 
-          {!user || loading ? (
+          {loading ? (
             <div className="space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
                 <SkeletonCard key={i} />
               ))}
             </div>
+          ) : !user ? (
+            <EmptyState message={pageT.empty} />
           ) : (
             <>
-              <Toolbar query={query} setQuery={setQuery} status={statusFilter} setStatus={setStatusFilter} count={filtered.length} pageT={pageT} />
+              <Toolbar query={query} setQuery={setQuery} status={statusFilter} setStatus={setStatusFilter} count={filtered.length} pageT={typedPageT} />
               {hasData ? (
                 <ul className="mt-4 space-y-3">
                   {filtered.map((it) => (
@@ -373,14 +415,13 @@ export default function ActivityPage() {
                   <p className="mt-1 text-neutral-700 line-clamp-2 text-sm">{description}</p>
   
                   {when && (
-                    <div className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-neutral-500 leading-none">
-                      {/* calendar-clock */}
-                      <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 -translate-y-px" aria-hidden>
+                    <div className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-neutral-50 px-2 py-1 text-[11px] text-neutral-600 ring-1 ring-neutral-200">
+                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-neutral-400" aria-hidden>
                         <path d="M7 2v3M17 2v3M4 9h16M6 20a8 8 0 1 0 8-8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                         <path d="M14 14v3l2 1" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                       </svg>
                       <time dateTime={when.iso} title={`${when.date} ${when.time}`}>
-                        {when.date} · {when.time}
+                        {when.date} at {when.time}
                       </time>
                     </div>
                   )}
