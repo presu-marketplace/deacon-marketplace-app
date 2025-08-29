@@ -6,26 +6,30 @@ create table if not exists api.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text,
   role text check (role = any (array['client','provider','admin'])),
-  created_at timestamp without time zone default now()
+  created_at timestamp without time zone default now(),
+  phone text,
+  address text,
+  city text
 );
 
 -- Provider details linked to profiles
 create table if not exists api.providers (
-  id uuid primary key references api.profiles(id) on delete cascade,
+  user_id uuid primary key references api.profiles(id) on delete cascade,
   company_name text,
   tax_id text,
-  coverage_area text[]
+  coverage_area text[] default '{}'::text[],
+  id uuid not null default gen_random_uuid()
 );
 
 create or replace function api.ensure_provider_role()
 returns trigger as $$
 begin
   if exists (
-    select 1 from api.profiles p where p.id = new.id and p.role = 'provider'
+    select 1 from api.profiles p where p.id = new.user_id and p.role = 'provider'
   ) then
     return new;
   end if;
-  raise exception 'profile % is not a provider', new.id;
+  raise exception 'profile % is not a provider', new.user_id;
 end;
 $$ language plpgsql;
 
@@ -39,7 +43,7 @@ alter table api.providers drop column if exists services;
 
 -- Join table linking providers to offered services
 create table if not exists api.provider_services (
-  provider_id uuid not null references api.providers(id) on delete cascade,
+  provider_id uuid not null references api.providers(user_id) on delete cascade,
   service_id uuid not null references reference.services(id) on delete cascade,
   primary key (provider_id, service_id)
 );
@@ -103,12 +107,11 @@ create trigger service_requests_role_check
 -- Remove legacy category column if exists
 alter table api.service_requests drop column if exists category;
 
--- Each requested service may be resolved by exactly one provider
+-- Link each service request to a provider offer
 create table if not exists api.service_request_services (
   request_id uuid not null references api.service_requests(id) on delete cascade,
-  service_id uuid not null references reference.services(id) on delete cascade,
-  provider_id uuid references api.providers(id) on delete set null,
-  primary key (request_id, service_id)
+  provider_id uuid references api.providers(user_id) on delete set null,
+  primary key (request_id)
 );
 
 -- Grant API schema privileges to service_role
