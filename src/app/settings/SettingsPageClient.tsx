@@ -40,6 +40,7 @@ export default function SettingsPage() {
   const [avatarPath, setAvatarPath] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [phone, setPhone] = useState('')
+  const [phoneValid, setPhoneValid] = useState(true)
   const [address, setAddress] = useState('')
   const [city, setCity] = useState('')
   const [role, setRole] = useState<'client' | 'provider' | 'admin'>('client')
@@ -51,6 +52,17 @@ export default function SettingsPage() {
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, '')
+    return digits ? `+${digits}` : ''
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhone(e.target.value)
+    setPhone(formatted)
+    setPhoneValid(!formatted || /^\+[1-9]\d{1,14}$/.test(formatted))
+  }
+
   useEffect(() => {
     const loadProfile = async () => {
       if (!user) return
@@ -61,7 +73,9 @@ export default function SettingsPage() {
         .eq('id', user.id)
         .single()
       setFullName(data?.full_name || user.user_metadata?.name || '')
-      setPhone(data?.phone || user.user_metadata?.phone || '')
+      const initialPhone = formatPhone(data?.phone || user.user_metadata?.phone || '')
+      setPhone(initialPhone)
+      setPhoneValid(!initialPhone || /^\+[1-9]\d{1,14}$/.test(initialPhone))
       setAddress(data?.address || user.user_metadata?.address || '')
       setCity(data?.city || user.user_metadata?.city || '')
       setRole((data?.role as 'client' | 'provider' | 'admin') || 'client')
@@ -139,6 +153,7 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     if (!user) return
+    if (!phoneValid) return
     setSaving(true)
     await supabase.auth.updateUser({
       data: { avatar_url: avatarPath, name: fullName, phone, address, city },
@@ -282,8 +297,15 @@ export default function SettingsPage() {
             <EditableRow
               label={pageT.phone}
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={handlePhoneChange}
               type="tel"
+              error={
+                !phoneValid
+                  ? locale === 'es'
+                    ? 'Formato E.164 requerido'
+                    : 'Use E.164 format (+123456789)'
+                  : undefined
+              }
               displayValue={
                 !!phone && (
                   <FiCheckCircle className="text-green-600" title={pageT.verified} />
@@ -339,7 +361,7 @@ export default function SettingsPage() {
           <div className="mt-6 flex justify-center">
             <button
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || !phoneValid}
               className="w-full max-w-xs bg-black hover:bg-gray-800 disabled:opacity-60 text-white font-bold text-lg py-3 rounded-xl transition transform hover:scale-[1.02]"
             >
               {saving ? pageT.updating : pageT.update}
@@ -369,12 +391,14 @@ function EditableRow({
   onChange,
   type = 'text',
   displayValue,
+  error,
 }: {
   label: string
   value: string
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   type?: string
   displayValue?: React.ReactNode
+  error?: string
 }) {
   return (
     <div className="py-4 flex items-center justify-between gap-2">
@@ -385,10 +409,13 @@ function EditableRow({
             type={type}
             value={value}
             onChange={onChange}
-            className="flex-1 text-sm text-gray-900 border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-black"
+            className={`flex-1 text-sm text-gray-900 border rounded-md p-2 focus:outline-none focus:ring-2 ${
+              error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-black'
+            }`}
           />
           {displayValue}
         </div>
+        {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
       </div>
     </div>
   )
@@ -446,7 +473,7 @@ function MultiSelect({
             return (
               <span
                 key={id}
-                className="bg-gray-200 rounded px-2 py-0.5 text-xs text-gray-800"
+                className="bg-gray-200 rounded px-2 py-0.5 text-xs text-gray-900"
               >
                 {name}
               </span>
@@ -464,7 +491,7 @@ function MultiSelect({
                 key={s.id}
                 className="cursor-pointer select-none p-2 text-sm hover:bg-gray-100"
               >
-                <label className="flex items-center gap-2">
+                <label className="flex items-center gap-2 text-gray-900">
                   <input
                     type="checkbox"
                     checked={checked}
