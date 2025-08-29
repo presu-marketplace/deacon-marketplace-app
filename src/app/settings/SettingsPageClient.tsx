@@ -155,10 +155,26 @@ export default function SettingsPage() {
     if (!user) return
     if (!phoneValid) return
     setSaving(true)
-    await supabase.auth.updateUser({
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) {
+      console.error('No Supabase session; user must be authenticated')
+      setSaving(false)
+      return
+    }
+
+    const { error: authErr } = await supabase.auth.updateUser({
       data: { avatar_url: avatarPath, name: fullName, phone, address, city },
     })
-    await supabase.from('profiles').upsert({
+    if (authErr) {
+      console.error('Failed to update auth user', authErr)
+      setSaving(false)
+      return
+    }
+
+    const { error: profileErr } = await supabase.from('profiles').upsert({
       id: user.id,
       full_name: fullName,
       phone,
@@ -166,27 +182,72 @@ export default function SettingsPage() {
       city,
       role,
     })
+    if (profileErr) {
+      console.error('Failed to upsert profile', profileErr)
+      setSaving(false)
+      return
+    }
 
     if (role === 'provider') {
-      await supabase.from('providers').upsert({
+      const { error: providerErr } = await supabase.from('providers').upsert({
         user_id: user.id,
         company_name: companyName,
         tax_id: taxId,
         coverage_area: city ? [city] : [],
       })
-      await supabase.from('provider_services').delete().eq('provider_id', user.id)
+      if (providerErr) {
+        console.error('Failed to upsert provider', providerErr)
+        setSaving(false)
+        return
+      }
+      const { error: delErr } = await supabase
+        .from('provider_services')
+        .delete()
+        .eq('provider_id', user.id)
+      if (delErr) {
+        console.error('Failed to clear provider services', delErr)
+        setSaving(false)
+        return
+      }
       if (selectedServices.length > 0) {
         const uniqueServices = Array.from(new Set(selectedServices))
         const rows = uniqueServices.map((service_id) => ({
           provider_id: user.id,
           service_id,
         }))
-        await supabase.from('provider_services').insert(rows)
+        const { error: insertErr } = await supabase
+          .from('provider_services')
+          .insert(rows)
+        if (insertErr) {
+          console.error('Failed to insert provider services', insertErr)
+          setSaving(false)
+          return
+        }
+      }
+    } else {
+      const { error: provDelErr } = await supabase
+        .from('providers')
+        .delete()
+        .eq('user_id', user.id)
+      if (provDelErr) {
+        console.error('Failed to delete provider', provDelErr)
+        setSaving(false)
+        return
+      }
+      const { error: svcDelErr } = await supabase
+        .from('provider_services')
+        .delete()
+        .eq('provider_id', user.id)
+      if (svcDelErr) {
+        console.error('Failed to delete provider services', svcDelErr)
+        setSaving(false)
+        return
       }
     } else {
       await supabase.from('providers').delete().eq('user_id', user.id)
       await supabase.from('provider_services').delete().eq('provider_id', user.id)
     }
+
     await supabase.auth.refreshSession()
     router.refresh()
     setSaving(false)
