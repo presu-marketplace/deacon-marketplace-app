@@ -159,7 +159,8 @@ export default function SettingsPage() {
       })
       await supabase.from('provider_services').delete().eq('provider_id', user.id)
       if (selectedServices.length > 0) {
-        const rows = selectedServices.map((service_id) => ({
+        const uniqueServices = Array.from(new Set(selectedServices))
+        const rows = uniqueServices.map((service_id) => ({
           provider_id: user.id,
           service_id,
         }))
