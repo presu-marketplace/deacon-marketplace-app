@@ -40,6 +40,7 @@ export default function SettingsPage() {
   const [avatarPath, setAvatarPath] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [phone, setPhone] = useState('')
+  const [phoneValid, setPhoneValid] = useState(true)
   const [address, setAddress] = useState('')
   const [city, setCity] = useState('')
   const [role, setRole] = useState<'client' | 'provider' | 'admin'>('client')
@@ -51,6 +52,17 @@ export default function SettingsPage() {
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, '')
+    return digits ? `+${digits}` : ''
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhone(e.target.value)
+    setPhone(formatted)
+    setPhoneValid(!formatted || /^\+[1-9]\d{1,14}$/.test(formatted))
+  }
+
   useEffect(() => {
     const loadProfile = async () => {
       if (!user) return
@@ -61,7 +73,9 @@ export default function SettingsPage() {
         .eq('id', user.id)
         .single()
       setFullName(data?.full_name || user.user_metadata?.name || '')
-      setPhone(data?.phone || user.user_metadata?.phone || '')
+      const initialPhone = formatPhone(data?.phone || user.user_metadata?.phone || '')
+      setPhone(initialPhone)
+      setPhoneValid(!initialPhone || /^\+[1-9]\d{1,14}$/.test(initialPhone))
       setAddress(data?.address || user.user_metadata?.address || '')
       setCity(data?.city || user.user_metadata?.city || '')
       setRole((data?.role as 'client' | 'provider' | 'admin') || 'client')
@@ -81,11 +95,43 @@ export default function SettingsPage() {
         const { data: allServices } = await supabase
           .from('services')
           .select('id, name_en, name_es')
-        setServices(allServices || [])
+        const sorted = (allServices || []).sort((a, b) => {
+          const aName = locale === 'es' ? a.name_es : a.name_en
+          const bName = locale === 'es' ? b.name_es : b.name_en
+          return aName.localeCompare(bName)
+        })
+        setServices(sorted)
       }
     }
     loadProfile()
-  }, [user])
+  }, [user, locale])
+
+  useEffect(() => {
+    const fillCity = async () => {
+      if (city) return
+      if (!('geolocation' in navigator) || !('permissions' in navigator)) return
+      try {
+        const status = await navigator.permissions.query({ name: 'geolocation' as PermissionName })
+        if (status.state === 'granted') {
+          navigator.geolocation.getCurrentPosition(async (pos) => {
+            try {
+              const { latitude, longitude } = pos.coords
+              const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=${locale === 'es' ? 'es' : 'en'}`)
+              const data = await res.json()
+              const cityName = data.city || data.locality || ''
+              const stateName = data.principalSubdivision || ''
+              if (cityName && stateName) setCity(`${cityName}, ${stateName}`)
+            } catch {
+              // ignore errors
+            }
+          })
+        }
+      } catch {
+        // ignore errors
+      }
+    }
+    fillCity()
+  }, [city, locale])
 
   useEffect(() => {
     const loadAvatar = async () => {
@@ -107,6 +153,7 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     if (!user) return
+    if (!phoneValid) return
     setSaving(true)
     await supabase.auth.updateUser({
       data: { avatar_url: avatarPath, name: fullName, phone, address, city },
@@ -117,7 +164,9 @@ export default function SettingsPage() {
       phone,
       address,
       city,
+      role,
     })
+
     if (role === 'provider') {
       await supabase.from('providers').upsert({
         user_id: user.id,
@@ -127,12 +176,16 @@ export default function SettingsPage() {
       })
       await supabase.from('provider_services').delete().eq('provider_id', user.id)
       if (selectedServices.length > 0) {
-        const rows = selectedServices.map((service_id) => ({
+        const uniqueServices = Array.from(new Set(selectedServices))
+        const rows = uniqueServices.map((service_id) => ({
           provider_id: user.id,
           service_id,
         }))
         await supabase.from('provider_services').insert(rows)
       }
+    } else {
+      await supabase.from('providers').delete().eq('user_id', user.id)
+      await supabase.from('provider_services').delete().eq('provider_id', user.id)
     }
     await supabase.auth.refreshSession()
     router.refresh()
@@ -249,15 +302,19 @@ export default function SettingsPage() {
             <EditableRow
               label={pageT.phone}
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={handlePhoneChange}
               type="tel"
+              error={
+                !phoneValid
+                  ? locale === 'es'
+                    ? 'Formato E.164 requerido'
+                    : 'Use E.164 format (+123456789)'
+                  : undefined
+              }
               displayValue={
-                <span className="inline-flex items-center gap-2">
-                  {phone}
-                  {!!phone && (
-                    <FiCheckCircle className="text-green-600" title={pageT.verified} />
-                  )}
-                </span>
+                !!phone && (
+                  <FiCheckCircle className="text-green-600" title={pageT.verified} />
+                )
               }
             />
             <EditableRow
@@ -265,53 +322,41 @@ export default function SettingsPage() {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
-              <EditableRow
-                label={pageT.city}
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              />
-              {role === 'provider' && (
-                <>
-                  <EditableRow
-                    label={pageT.companyName}
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                  />
-                  <EditableRow
-                    label={pageT.taxId}
-                    value={taxId}
-                    onChange={(e) => setTaxId(e.target.value)}
-                  />
-                  <div className="py-4">
-                    <div className="text-sm font-semibold text-gray-900">
-                      {pageT.services}
-                    </div>
-                    <div className="mt-1 text-sm text-gray-700 space-y-1">
-                      {services.map((s) => (
-                        <label key={s.id} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={selectedServices.includes(s.id)}
-                            onChange={() =>
-                              setSelectedServices((prev) =>
-                                prev.includes(s.id)
-                                  ? prev.filter((id) => id !== s.id)
-                                  : [...prev, s.id]
-                              )
-                            }
-                          />
-                          {locale === 'es' ? s.name_es : s.name_en}
-                        </label>
-                      ))}
-                    </div>
+            <EditableRow
+              label={pageT.city}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            />
+            {role === 'provider' && (
+              <>
+                <EditableRow
+                  label={pageT.companyName}
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                />
+                <EditableRow
+                  label={pageT.taxId}
+                  value={taxId}
+                  onChange={(e) => setTaxId(e.target.value)}
+                />
+                <div className="py-4">
+                  <div className="text-sm font-semibold text-gray-900">
+                    {pageT.services}
                   </div>
-                </>
-              )}
-              <Row
-                label={pageT.email}
-                value={
-                  <span className="inline-flex items-center gap-2">
-                    {user.email}
+                  <MultiSelect
+                    options={services}
+                    selected={selectedServices}
+                    onChange={setSelectedServices}
+                    locale={locale}
+                  />
+                </div>
+              </>
+            )}
+            <Row
+              label={pageT.email}
+              value={
+                <span className="inline-flex items-center gap-2">
+                  {user.email}
                   <FiCheckCircle className="text-green-600" title={pageT.verified} />
                 </span>
               }
@@ -321,7 +366,7 @@ export default function SettingsPage() {
           <div className="mt-6 flex justify-center">
             <button
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || !phoneValid}
               className="w-full max-w-xs bg-black hover:bg-gray-800 disabled:opacity-60 text-white font-bold text-lg py-3 rounded-xl transition transform hover:scale-[1.02]"
             >
               {saving ? pageT.updating : pageT.update}
@@ -351,38 +396,120 @@ function EditableRow({
   onChange,
   type = 'text',
   displayValue,
+  error,
 }: {
   label: string
   value: string
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   type?: string
   displayValue?: React.ReactNode
+  error?: string
 }) {
-  const [editing, setEditing] = useState(false)
   return (
-    <div className="py-4 flex items-center justify-between">
+    <div className="py-4 flex items-center justify-between gap-2">
       <div className="flex-1">
         <label className="text-sm font-semibold text-gray-900">{label}</label>
-        {editing ? (
+        <div className="mt-1 flex items-center gap-2">
           <input
             type={type}
             value={value}
             onChange={onChange}
-            onBlur={() => setEditing(false)}
-            autoFocus
-            className="mt-1 text-sm text-gray-900 border border-white rounded-md w-full p-2 focus:outline-none focus:ring-2 focus:ring-black"
+            className={`flex-1 text-sm text-gray-900 border rounded-md p-2 focus:outline-none focus:ring-2 ${
+              error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-black'
+            }`}
           />
-        ) : (
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            className="mt-1 text-sm text-gray-700 text-left w-full"
-          >
-            {displayValue ?? value}
-          </button>
-        )}
+          {displayValue}
+        </div>
+        {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
       </div>
-      {!editing && <FiChevronRight className="text-gray-400 shrink-0" aria-hidden />}
+    </div>
+  )
+}
+
+function MultiSelect({
+  options,
+  selected,
+  onChange,
+  locale,
+}: {
+  options: { id: string; name_en: string; name_es: string }[]
+  selected: string[]
+  onChange: (ids: string[]) => void
+  locale: 'en' | 'es'
+}) {
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const toggleOption = (id: string) => {
+    if (selected.includes(id)) {
+      onChange(selected.filter((s) => s !== id))
+    } else {
+      onChange([...selected, id])
+    }
+  }
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="mt-1 w-full flex flex-wrap items-center gap-1 rounded-md border border-gray-300 bg-white p-2 text-left text-sm focus:outline-none focus:ring-2 focus:ring-black"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        {selected.length === 0 ? (
+          <span className="text-gray-500">
+            {locale === 'es' ? 'Seleccionar servicios' : 'Select services'}
+          </span>
+        ) : (
+          selected.map((id) => {
+            const svc = options.find((o) => o.id === id)
+            const name = locale === 'es' ? svc?.name_es : svc?.name_en
+            return (
+              <span
+                key={id}
+                className="bg-gray-200 rounded px-2 py-0.5 text-xs text-gray-900"
+              >
+                {name}
+              </span>
+            )
+          })
+        )}
+      </button>
+      {open && (
+        <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+          {options.map((s) => {
+            const checked = selected.includes(s.id)
+            const name = locale === 'es' ? s.name_es : s.name_en
+            return (
+              <li
+                key={s.id}
+                className="cursor-pointer select-none p-2 text-sm hover:bg-gray-100"
+              >
+                <label className="flex items-center gap-2 text-gray-900">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleOption(s.id)}
+                    className="rounded border-gray-300"
+                  />
+                  {name}
+                </label>
+              </li>
+            )
+          })}
+        </ul>
+      )}
     </div>
   )
 }
