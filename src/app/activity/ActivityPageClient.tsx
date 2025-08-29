@@ -23,14 +23,6 @@ interface ServiceRequest {
   service_id?: string | null;
 }
 
-interface Offer {
-  request_id: string;
-  service_slug: string;
-  description?: string | null;
-  status?: string | null;
-  created_at?: string;
-}
-
 type Locale = "en" | "es";
 
 type ActivityItem = {
@@ -219,9 +211,7 @@ export default function ActivityPage() {
   };
 
   const user = useUser();
-  const [role, setRole] = useState<string | null>(null);
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
-  const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [serviceNames, setServiceNames] = useState<Record<string, { slug: string; name_en: string; name_es: string }>>({});
 
@@ -299,7 +289,6 @@ export default function ActivityPage() {
       setLoading(true);
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
       const userRole = (profile?.role as string | null) ?? "client";
-      setRole(userRole);
       if (userRole === "client") {
         const params = new URLSearchParams({
           select: "id, service_id, service_description, request_created_at, request_status",
@@ -309,38 +298,30 @@ export default function ActivityPage() {
         const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
         setRequests(rows);
       } else if (userRole === "provider") {
-        const baseParams = new URLSearchParams({ select: "request_id, service_slug, status", provider_id: `eq.${user.id}` });
-        const rows = (await fetchFromApi<Offer[]>("service_request_services", baseParams)) || [];
-        setOffers(rows);
+        const params = new URLSearchParams({
+          select: "id, service_id, service_description, request_created_at, request_status",
+          provider_id: `eq.${user.id}`,
+          order: "request_created_at.desc",
+        });
+        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
+        setRequests(rows);
       }
       setLoading(false);
     };
     fetchData();
   }, [user]);
 
-  const hasData = (role === "client" && requests.length > 0) || (role === "provider" && offers.length > 0);
+  const hasData = requests.length > 0;
 
   const items: ActivityItem[] = useMemo(() => {
-    if (role === "client") {
-      return requests.map((r) => ({
-        id: r.id,
-        title: getServiceName(r.service_id),
-        description: r.service_description || pageT.noDescription,
-        createdAt: r.request_created_at,
-        status: r.request_status ?? "closed",
-      }));
-    }
-    if (role === "provider") {
-      return offers.map((o) => ({
-        id: `${o.request_id}-${o.service_slug}`,
-        title: getServiceName(o.service_slug),
-        description: o.description || pageT.noDescription,
-        createdAt: o.created_at || "",
-        status: o.status ?? "closed",
-      }));
-    }
-    return [];
-  }, [role, requests, offers, getServiceName, pageT.noDescription]);
+    return requests.map((r) => ({
+      id: r.id,
+      title: getServiceName(r.service_id),
+      description: r.service_description || pageT.noDescription,
+      createdAt: r.request_created_at,
+      status: r.request_status ?? "closed",
+    }));
+  }, [requests, getServiceName, pageT.noDescription]);
 
   const filtered = useMemo(() => filterItems(items, query, statusFilter), [items, query, statusFilter]);
 

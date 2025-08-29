@@ -69,7 +69,7 @@ export default function SettingsPage() {
         const { data: provider } = await supabase
           .from('providers')
           .select('company_name, tax_id, coverage_area')
-          .eq('id', user.id)
+          .eq('user_id', user.id)
           .single()
         setCompanyName(provider?.company_name || '')
         setTaxId(provider?.tax_id || '')
@@ -120,7 +120,7 @@ export default function SettingsPage() {
     })
     if (role === 'provider') {
       await supabase.from('providers').upsert({
-        id: user.id,
+        user_id: user.id,
         company_name: companyName,
         tax_id: taxId,
         coverage_area: city ? [city] : [],

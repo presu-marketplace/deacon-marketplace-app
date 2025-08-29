@@ -60,8 +60,8 @@ export async function POST(req: Request) {
       const { error: providerError } = await api
         .from('providers')
         .upsert(
-          { id: userId, company_name: null, tax_id: null, coverage_area: [] },
-          { onConflict: 'id', ignoreDuplicates: true }
+          { user_id: userId, company_name: null, tax_id: null, coverage_area: [] },
+          { onConflict: 'user_id', ignoreDuplicates: true }
         )
       if (providerError) return NextResponse.json({ error: providerError.message }, { status: 500 })
     }
