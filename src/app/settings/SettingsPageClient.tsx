@@ -217,14 +217,28 @@ export default function SettingsPage() {
         }))
         const { error: insertErr } = await supabase
           .from('provider_services')
-          .insert(rows)
+          .insert(rows);
         if (insertErr) {
           console.error('Failed to insert provider services', insertErr)
           setSaving(false)
           return
         }
       }
+      const { error: svcDelErr } = await supabase
+        .from('provider_services')
+        .delete()
+        .eq('provider_id', user.id)
+      if (svcDelErr) {
+        console.error('Failed to delete provider services', svcDelErr)
+        setSaving(false)
+        return
+      }
     } else {
+      await supabase.from('providers').delete().eq('user_id', user.id)
+      await supabase.from('provider_services').delete().eq('provider_id', user.id)
+    }
+
+    if (role !== 'provider') {
       const { error: provDelErr } = await supabase
         .from('providers')
         .delete()
@@ -243,9 +257,6 @@ export default function SettingsPage() {
         setSaving(false)
         return
       }
-    } else {
-      await supabase.from('providers').delete().eq('user_id', user.id)
-      await supabase.from('provider_services').delete().eq('provider_id', user.id)
     }
 
     await supabase.auth.refreshSession()
