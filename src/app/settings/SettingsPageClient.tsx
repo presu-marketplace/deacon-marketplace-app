@@ -285,12 +285,9 @@ export default function SettingsPage() {
               onChange={(e) => setPhone(e.target.value)}
               type="tel"
               displayValue={
-                <span className="inline-flex items-center gap-2">
-                  {phone}
-                  {!!phone && (
-                    <FiCheckCircle className="text-green-600" title={pageT.verified} />
-                  )}
-                </span>
+                !!phone && (
+                  <FiCheckCircle className="text-green-600" title={pageT.verified} />
+                )
               }
             />
             <EditableRow
@@ -298,51 +295,41 @@ export default function SettingsPage() {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
-              <EditableRow
-                label={pageT.city}
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              />
-              {role === 'provider' && (
-                <>
-                  <EditableRow
-                    label={pageT.companyName}
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                  />
-                  <EditableRow
-                    label={pageT.taxId}
-                    value={taxId}
-                    onChange={(e) => setTaxId(e.target.value)}
-                  />
-                  <div className="py-4">
-                    <div className="text-sm font-semibold text-gray-900">
-                      {pageT.services}
-                    </div>
-                    <select
-                      multiple
-                      value={selectedServices}
-                      onChange={(e) =>
-                        setSelectedServices(
-                          Array.from(e.target.selectedOptions, (option) => option.value)
-                        )
-                      }
-                      className="mt-1 text-sm text-gray-900 border border-white rounded-md w-full p-2 focus:outline-none focus:ring-2 focus:ring-black"
-                    >
-                      {services.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {locale === 'es' ? s.name_es : s.name_en}
-                        </option>
-                      ))}
-                    </select>
+            <EditableRow
+              label={pageT.city}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            />
+            {role === 'provider' && (
+              <>
+                <EditableRow
+                  label={pageT.companyName}
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                />
+                <EditableRow
+                  label={pageT.taxId}
+                  value={taxId}
+                  onChange={(e) => setTaxId(e.target.value)}
+                />
+                <div className="py-4">
+                  <div className="text-sm font-semibold text-gray-900">
+                    {pageT.services}
                   </div>
-                </>
-              )}
-              <Row
-                label={pageT.email}
-                value={
-                  <span className="inline-flex items-center gap-2">
-                    {user.email}
+                  <MultiSelect
+                    options={services}
+                    selected={selectedServices}
+                    onChange={setSelectedServices}
+                    locale={locale}
+                  />
+                </div>
+              </>
+            )}
+            <Row
+              label={pageT.email}
+              value={
+                <span className="inline-flex items-center gap-2">
+                  {user.email}
                   <FiCheckCircle className="text-green-600" title={pageT.verified} />
                 </span>
               }
@@ -389,31 +376,108 @@ function EditableRow({
   type?: string
   displayValue?: React.ReactNode
 }) {
-  const [editing, setEditing] = useState(false)
   return (
-    <div className="py-4 flex items-center justify-between">
+    <div className="py-4 flex items-center justify-between gap-2">
       <div className="flex-1">
         <label className="text-sm font-semibold text-gray-900">{label}</label>
-        {editing ? (
+        <div className="mt-1 flex items-center gap-2">
           <input
             type={type}
             value={value}
             onChange={onChange}
-            onBlur={() => setEditing(false)}
-            autoFocus
-            className="mt-1 text-sm text-gray-900 border border-white rounded-md w-full p-2 focus:outline-none focus:ring-2 focus:ring-black"
+            className="flex-1 text-sm text-gray-900 border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-black"
           />
-        ) : (
-          <button
-            type="button"
-            onClick={() => setEditing(true)}
-            className="mt-1 text-sm text-gray-700 text-left w-full"
-          >
-            {displayValue ?? value}
-          </button>
-        )}
+          {displayValue}
+        </div>
       </div>
-      {!editing && <FiChevronRight className="text-gray-400 shrink-0" aria-hidden />}
+    </div>
+  )
+}
+
+function MultiSelect({
+  options,
+  selected,
+  onChange,
+  locale,
+}: {
+  options: { id: string; name_en: string; name_es: string }[]
+  selected: string[]
+  onChange: (ids: string[]) => void
+  locale: 'en' | 'es'
+}) {
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const toggleOption = (id: string) => {
+    if (selected.includes(id)) {
+      onChange(selected.filter((s) => s !== id))
+    } else {
+      onChange([...selected, id])
+    }
+  }
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="mt-1 w-full flex flex-wrap items-center gap-1 rounded-md border border-gray-300 bg-white p-2 text-left text-sm focus:outline-none focus:ring-2 focus:ring-black"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+      >
+        {selected.length === 0 ? (
+          <span className="text-gray-500">
+            {locale === 'es' ? 'Seleccionar servicios' : 'Select services'}
+          </span>
+        ) : (
+          selected.map((id) => {
+            const svc = options.find((o) => o.id === id)
+            const name = locale === 'es' ? svc?.name_es : svc?.name_en
+            return (
+              <span
+                key={id}
+                className="bg-gray-200 rounded px-2 py-0.5 text-xs text-gray-800"
+              >
+                {name}
+              </span>
+            )
+          })
+        )}
+      </button>
+      {open && (
+        <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+          {options.map((s) => {
+            const checked = selected.includes(s.id)
+            const name = locale === 'es' ? s.name_es : s.name_en
+            return (
+              <li
+                key={s.id}
+                className="cursor-pointer select-none p-2 text-sm hover:bg-gray-100"
+              >
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={() => toggleOption(s.id)}
+                    className="rounded border-gray-300"
+                  />
+                  {name}
+                </label>
+              </li>
+            )
+          })}
+        </ul>
+      )}
     </div>
   )
 }
