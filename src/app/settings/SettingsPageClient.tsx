@@ -164,7 +164,9 @@ export default function SettingsPage() {
       phone,
       address,
       city,
+      role,
     })
+
     if (role === 'provider') {
       await supabase.from('providers').upsert({
         user_id: user.id,
@@ -181,6 +183,9 @@ export default function SettingsPage() {
         }))
         await supabase.from('provider_services').insert(rows)
       }
+    } else {
+      await supabase.from('providers').delete().eq('user_id', user.id)
+      await supabase.from('provider_services').delete().eq('provider_id', user.id)
     }
     await supabase.auth.refreshSession()
     router.refresh()
