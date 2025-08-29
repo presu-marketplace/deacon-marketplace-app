@@ -81,11 +81,43 @@ export default function SettingsPage() {
         const { data: allServices } = await supabase
           .from('services')
           .select('id, name_en, name_es')
-        setServices(allServices || [])
+        const sorted = (allServices || []).sort((a, b) => {
+          const aName = locale === 'es' ? a.name_es : a.name_en
+          const bName = locale === 'es' ? b.name_es : b.name_en
+          return aName.localeCompare(bName)
+        })
+        setServices(sorted)
       }
     }
     loadProfile()
-  }, [user])
+  }, [user, locale])
+
+  useEffect(() => {
+    const fillCity = async () => {
+      if (city) return
+      if (!('geolocation' in navigator) || !('permissions' in navigator)) return
+      try {
+        const status = await navigator.permissions.query({ name: 'geolocation' as PermissionName })
+        if (status.state === 'granted') {
+          navigator.geolocation.getCurrentPosition(async (pos) => {
+            try {
+              const { latitude, longitude } = pos.coords
+              const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=${locale === 'es' ? 'es' : 'en'}`)
+              const data = await res.json()
+              const cityName = data.city || data.locality || ''
+              const stateName = data.principalSubdivision || ''
+              if (cityName && stateName) setCity(`${cityName}, ${stateName}`)
+            } catch {
+              // ignore errors
+            }
+          })
+        }
+      } catch {
+        // ignore errors
+      }
+    }
+    fillCity()
+  }, [city, locale])
 
   useEffect(() => {
     const loadAvatar = async () => {
@@ -127,7 +159,8 @@ export default function SettingsPage() {
       })
       await supabase.from('provider_services').delete().eq('provider_id', user.id)
       if (selectedServices.length > 0) {
-        const rows = selectedServices.map((service_id) => ({
+        const uniqueServices = Array.from(new Set(selectedServices))
+        const rows = uniqueServices.map((service_id) => ({
           provider_id: user.id,
           service_id,
         }))
@@ -286,24 +319,22 @@ export default function SettingsPage() {
                     <div className="text-sm font-semibold text-gray-900">
                       {pageT.services}
                     </div>
-                    <div className="mt-1 text-sm text-gray-700 space-y-1">
+                    <select
+                      multiple
+                      value={selectedServices}
+                      onChange={(e) =>
+                        setSelectedServices(
+                          Array.from(e.target.selectedOptions, (option) => option.value)
+                        )
+                      }
+                      className="mt-1 text-sm text-gray-900 border border-white rounded-md w-full p-2 focus:outline-none focus:ring-2 focus:ring-black"
+                    >
                       {services.map((s) => (
-                        <label key={s.id} className="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            checked={selectedServices.includes(s.id)}
-                            onChange={() =>
-                              setSelectedServices((prev) =>
-                                prev.includes(s.id)
-                                  ? prev.filter((id) => id !== s.id)
-                                  : [...prev, s.id]
-                              )
-                            }
-                          />
+                        <option key={s.id} value={s.id}>
                           {locale === 'es' ? s.name_es : s.name_en}
-                        </label>
+                        </option>
                       ))}
-                    </div>
+                    </select>
                   </div>
                 </>
               )}
