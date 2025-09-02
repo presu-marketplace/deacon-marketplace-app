@@ -22,6 +22,8 @@ interface ServiceRequest {
   request_status?: string | null;
   service_id?: string | null;
   provider_id?: string | null;
+  user_name?: string | null;
+  service_deadline?: string | null;
 }
 
 interface ProviderServiceRow {
@@ -40,6 +42,8 @@ type ActivityItem = {
   status?: string | null;
   serviceId?: string | null;
   providerId?: string | null;
+  userName?: string | null;
+  dueDate?: string | null;
 };
 
 interface PageTranslations {
@@ -51,6 +55,10 @@ interface PageTranslations {
   pending: string;
   closed: string;
   noDescription: string;
+  user: string;
+  due: string;
+  asc: string;
+  desc: string;
 }
 
 // ---------- Pure helpers (exported for tests) ----------
@@ -91,6 +99,14 @@ function formatWhen(iso: string, locale: Locale) {
   return { iso: d.toISOString(), date, time };
 }
 
+function formatDate(iso: string, locale: Locale) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  const tag = LOCALE_TO_BCP47[locale] || "en-US";
+  const date = new Intl.DateTimeFormat(tag, { day: "2-digit", month: "short", year: "numeric" }).format(d);
+  return { iso: d.toISOString(), date };
+}
+
 // -------------------------------------------------------
 
 /**
@@ -103,6 +119,11 @@ function Toolbar({
   setStatus,
   count,
   pageT,
+  user,
+  setUser,
+  order,
+  setOrder,
+  role,
 }: {
   query: string;
   setQuery: (v: string) => void;
@@ -110,6 +131,11 @@ function Toolbar({
   setStatus: (v: "all" | "open" | "assigned" | "pending" | "closed") => void;
   count: number;
   pageT: PageTranslations;
+  user?: string;
+  setUser?: (v: string) => void;
+  order?: "asc" | "desc";
+  setOrder?: (v: "asc" | "desc") => void;
+  role?: "client" | "provider" | "admin";
 }) {
   const pills: Array<{ key: "all" | "open" | "assigned" | "pending" | "closed"; label: string }> = [
     { key: "all", label: pageT.all },
@@ -118,6 +144,7 @@ function Toolbar({
     { key: "pending", label: pageT.pending },
     { key: "closed", label: pageT.closed },
   ];
+  const isAdmin = role === "admin";
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -136,6 +163,14 @@ function Toolbar({
             </svg>
           </span>
         </div>
+        {isAdmin && (
+          <input
+            value={user || ""}
+            onChange={(e) => setUser && setUser(e.target.value)}
+            placeholder={pageT.user}
+            className="w-40 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 placeholder-neutral-400 shadow-[0_1px_0_#0000000d] focus:outline-none focus:ring-2 focus:ring-neutral-900/5"
+          />
+        )}
         <div className="flex items-center gap-1">
           {pills.map((p) => (
             <button
@@ -154,6 +189,16 @@ function Toolbar({
 
       <div className="flex items-center gap-3">
         <span className="text-xs text-neutral-500">{count} {pageT.results}</span>
+        {isAdmin && (
+          <select
+            value={order}
+            onChange={(e) => setOrder && setOrder(e.target.value as "asc" | "desc")}
+            className="rounded-xl border border-neutral-200 bg-white px-2 py-1 text-xs text-neutral-700 shadow-[0_1px_0_#0000000d] focus:outline-none focus:ring-2 focus:ring-neutral-900/5"
+          >
+            <option value="asc">{pageT.asc}</option>
+            <option value="desc">{pageT.desc}</option>
+          </select>
+        )}
       </div>
     </div>
   );
@@ -207,6 +252,10 @@ export default function ActivityPage() {
     noDescription: locale === "es" ? "Sin descripción" : "No description",
     results: locale === "es" ? "resultados" : "results",
     all: locale === "es" ? "Todos" : "All",
+    user: locale === "es" ? "Usuario" : "User",
+    due: locale === "es" ? "Vence" : "Due",
+    asc: locale === "es" ? "Ascendente" : "Ascendant",
+    desc: locale === "es" ? "Descendente" : "Descendant",
   };
   const typedPageT: PageTranslations = {
     searchPlaceholder: t.searchPlaceholder,
@@ -217,6 +266,10 @@ export default function ActivityPage() {
     pending: pageT.pending,
     closed: pageT.closed,
     noDescription: pageT.noDescription,
+    user: pageT.user,
+    due: pageT.due,
+    asc: pageT.asc,
+    desc: pageT.desc,
   };
 
   const user = useUser();
@@ -228,6 +281,8 @@ export default function ActivityPage() {
 
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "assigned" | "pending" | "closed">("all");
+  const [userQuery, setUserQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // -------- fetch helper --------
   const fetchFromApi = async <T,>(path: string, params: URLSearchParams): Promise<T | null> => {
@@ -320,7 +375,8 @@ export default function ActivityPage() {
       setRole(userRole);
       if (userRole === "client") {
         const params = new URLSearchParams({
-          select: "id, service_id, provider_id, service_description, request_created_at, request_status",
+          select:
+            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline",
           user_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
@@ -328,7 +384,8 @@ export default function ActivityPage() {
         setRequests(rows);
       } else if (userRole === "provider") {
         const params = new URLSearchParams({
-          select: "id, service_id, provider_id, service_description, request_created_at, request_status",
+          select:
+            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline",
           provider_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
@@ -336,7 +393,8 @@ export default function ActivityPage() {
         setRequests(rows);
       } else if (userRole === "admin") {
         const params = new URLSearchParams({
-          select: "id, service_id, provider_id, service_description, request_created_at, request_status",
+          select:
+            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline",
           order: "request_created_at.desc",
         });
         const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
@@ -358,10 +416,25 @@ export default function ActivityPage() {
       status: r.request_status ?? "closed",
       serviceId: r.service_id,
       providerId: r.provider_id,
+      userName: r.user_name,
+      dueDate: r.service_deadline,
     }));
   }, [requests, getServiceName, pageT.noDescription]);
 
-  const filtered = useMemo(() => filterItems(items, query, statusFilter), [items, query, statusFilter]);
+  const filtered = useMemo(() => {
+    const base = filterItems(items, query, statusFilter);
+    const byUser =
+      role === "admin"
+        ? base.filter((it) =>
+            !userQuery || (it.userName || "").toLowerCase().includes(userQuery.toLowerCase())
+          )
+        : base;
+    return [...byUser].sort((a, b) =>
+      sortOrder === "asc"
+        ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [items, query, statusFilter, userQuery, sortOrder, role]);
 
   const assignProvider = useCallback(async (requestId: string, providerId: string) => {
     await supabase
@@ -401,6 +474,11 @@ export default function ActivityPage() {
                 setStatus={setStatusFilter}
                 count={filtered.length}
                 pageT={typedPageT}
+                user={userQuery}
+                setUser={setUserQuery}
+                order={sortOrder}
+                setOrder={setSortOrder}
+                role={role}
               />
               {filtered.length ? (
                 <ul className="mt-4 space-y-3">
@@ -414,6 +492,8 @@ export default function ActivityPage() {
                         status={it.status}
                         serviceId={it.serviceId}
                         providerId={it.providerId}
+                        userName={it.userName}
+                        dueDate={it.dueDate}
                       />
                     </li>
                   ))}
@@ -431,10 +511,21 @@ export default function ActivityPage() {
   );
 
   // -------- Local component --------
-  function ActivityCard(props: { id: string; title: string; description: string; createdAt: string; status?: string | null; serviceId?: string | null; providerId?: string | null }) {
-    const { id, title, description, createdAt, status, serviceId, providerId } = props;
+  function ActivityCard(props: {
+    id: string;
+    title: string;
+    description: string;
+    createdAt: string;
+    status?: string | null;
+    serviceId?: string | null;
+    providerId?: string | null;
+    userName?: string | null;
+    dueDate?: string | null;
+  }) {
+    const { id, title, description, createdAt, status, serviceId, providerId, userName, dueDate } = props;
     const meta = statusMeta(status);
     const when = createdAt ? formatWhen(createdAt, locale) : null;
+    const due = dueDate ? formatDate(dueDate, locale) : null;
     const providerOptions = serviceId ? providersByService[serviceId] || [] : [];
     const [selected, setSelected] = useState(providerId || "");
     const assignDisabled = !selected || selected === providerId;
@@ -465,6 +556,17 @@ export default function ActivityPage() {
                   </div>
 
                   <p className="mt-1 text-neutral-700 line-clamp-2 text-sm">{description}</p>
+
+                  {role === "admin" && (
+                    <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:gap-4 text-[12px] text-neutral-500">
+                      {userName && <span>{userName}</span>}
+                      {due && (
+                        <span>
+                          {pageT.due}: <time dateTime={due.iso}>{due.date}</time>
+                        </span>
+                      )}
+                    </div>
+                  )}
 
                   {when && (
                     <div className="mt-3 inline-flex items-center gap-1.5 text-[12px] text-neutral-500 leading-none">
