@@ -121,7 +121,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
 
   const renderSuggestions = () =>
     filteredServices.length > 0 && (
-      <ul className="absolute top-full left-0 right-0 mt-1 max-h-60 overflow-auto z-50 bg-white border border-gray-200 rounded-md shadow-lg divide-y divide-gray-100">
+      <ul className="absolute top-full left-0 right-0 mt-1 max-h-36 overflow-y-auto z-50 bg-white border border-gray-200 rounded-md shadow-lg divide-y divide-gray-100">
         {filteredServices.map((s) => {
           const name = locale === 'es' ? s.name_es : s.name_en
           return (
