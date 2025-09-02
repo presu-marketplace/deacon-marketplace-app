@@ -190,7 +190,7 @@ export default function ActivityPage() {
   const pageT = {
     title: locale === "es" ? "Actividad" : "Activity",
     loading: locale === "es" ? "Cargando..." : "Loading...",
-    empty: locale === "es" ? "Sin actividad" : "No activity yet",
+    empty: locale === "es" ? "Sin actividad para mostrar" : "No activity to display",
     open: locale === "es" ? "abierto" : "open",
     closed: locale === "es" ? "cerrado" : "closed",
     pending: locale === "es" ? "pendiente" : "pending",
@@ -340,14 +340,26 @@ export default function ActivityPage() {
             </div>
           ) : !user ? (
             <EmptyState message={pageT.empty} />
-          ) : (
+          ) : hasData ? (
             <>
-              <Toolbar query={query} setQuery={setQuery} status={statusFilter} setStatus={setStatusFilter} count={filtered.length} pageT={typedPageT} />
-              {hasData ? (
+              <Toolbar
+                query={query}
+                setQuery={setQuery}
+                status={statusFilter}
+                setStatus={setStatusFilter}
+                count={filtered.length}
+                pageT={typedPageT}
+              />
+              {filtered.length ? (
                 <ul className="mt-4 space-y-3">
                   {filtered.map((it) => (
                     <li key={it.id}>
-                      <ActivityCard title={it.title} description={it.description} createdAt={it.createdAt} status={it.status} />
+                      <ActivityCard
+                        title={it.title}
+                        description={it.description}
+                        createdAt={it.createdAt}
+                        status={it.status}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -355,6 +367,8 @@ export default function ActivityPage() {
                 <EmptyState message={pageT.empty} />
               )}
             </>
+          ) : (
+            <EmptyState message={pageT.empty} />
           )}
         </div>
       </div>
