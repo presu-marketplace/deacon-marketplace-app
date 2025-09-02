@@ -2,7 +2,12 @@
 create schema if not exists api;
 
 -- Enum for service request workflow
-create type if not exists public.request_status as enum ('open','assigned','pending','closed');
+do $$
+begin
+  create type public.request_status as enum ('open','assigned','pending','closed');
+exception
+  when duplicate_object then null;
+end $$;
 
 -- User profiles
 create table if not exists api.profiles (
