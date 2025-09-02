@@ -121,13 +121,13 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
 
   const renderSuggestions = () =>
     filteredServices.length > 0 && (
-      <ul className="absolute top-full left-0 right-0 mt-1 max-h-60 overflow-auto z-50 bg-white border border-gray-200 rounded-md shadow-lg divide-y divide-gray-100">
+      <ul className="absolute top-full left-0 right-0 mt-1 max-h-36 overflow-y-auto z-50 bg-white border border-gray-200 rounded-md shadow-lg divide-y divide-gray-100">
         {filteredServices.map((s) => {
           const name = locale === 'es' ? s.name_es : s.name_en
           return (
             <li
               key={s.slug}
-              onPointerDown={() => handleSelect(s)}
+              onClick={() => handleSelect(s)}
               className="px-4 py-2 text-sm text-gray-800 cursor-pointer hover:bg-gray-50 transition-colors"
             >
               {highlightMatch(name)}
@@ -191,7 +191,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
               </button>
               {renderSuggestions()}
             </div>
-            <button onClick={handleSearch} className="bg-black text-white rounded-full px-6 py-2 text-sm font-medium shadow hover:bg-gray-900 transition">
+            <button onClick={handleSearch} className="w-full bg-black text-white rounded-full px-6 py-2 text-sm font-medium shadow hover:bg-gray-900 transition">
               {t.searchHere}
             </button>
           </div>
@@ -230,7 +230,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
               </svg>
               <span className="text-gray-700 truncate max-w-[180px]">{userAddress ?? t.location}</span>
             </button>
-            <button onClick={handleSearch} className="bg-black text-white rounded-full px-6 py-3 text-sm font-medium shadow hover:bg-gray-900 transition">
+            <button onClick={handleSearch} className="flex-shrink-0 bg-black text-white rounded-full px-6 py-3 text-sm font-medium shadow hover:bg-gray-900 transition">
               {t.searchHere}
             </button>
           </div>
