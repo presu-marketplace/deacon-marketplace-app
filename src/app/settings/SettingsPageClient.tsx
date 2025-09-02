@@ -52,6 +52,26 @@ export default function SettingsPage() {
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const handleServiceSelection = async (ids: string[]) => {
+    if (!user) return
+    const added = ids.filter((id) => !selectedServices.includes(id))
+    const removed = selectedServices.filter((id) => !ids.includes(id))
+    setSelectedServices(ids)
+    if (added.length > 0) {
+      const rows = added.map((service_id) => ({ provider_id: user.id, service_id }))
+      const { error } = await supabase.from('provider_services').upsert(rows)
+      if (error) console.error('Failed to upsert provider services', error)
+    }
+    if (removed.length > 0) {
+      const { error } = await supabase
+        .from('provider_services')
+        .delete()
+        .eq('provider_id', user.id)
+        .in('service_id', removed)
+      if (error) console.error('Failed to delete provider services', error)
+    }
+  }
+
   const formatPhone = (value: string) => {
     const digits = value.replace(/\D/g, '')
     return digits ? `+${digits}` : ''
@@ -196,30 +216,6 @@ export default function SettingsPage() {
         setSaving(false)
         return
       }
-      const { error: delErr } = await supabase
-        .from('provider_services')
-        .delete()
-        .eq('provider_id', user.id)
-      if (delErr) {
-        console.error('Failed to clear provider services', delErr)
-        setSaving(false)
-        return
-      }
-      if (selectedServices.length > 0) {
-        const uniqueServices = Array.from(new Set(selectedServices))
-        const rows = uniqueServices.map((service_id) => ({
-          provider_id: user.id,
-          service_id,
-        }))
-        const { error: insertErr } = await supabase
-          .from('provider_services')
-          .insert(rows);
-        if (insertErr) {
-          console.error('Failed to insert provider services', insertErr)
-          setSaving(false)
-          return
-        }
-      }
     }
 
     if (role !== 'provider') {
@@ -241,18 +237,6 @@ export default function SettingsPage() {
         setSaving(false)
         return
       }
-      const { error: svcDelErr } = await supabase
-        .from('provider_services')
-        .delete()
-        .eq('provider_id', user.id)
-      if (svcDelErr) {
-        console.error('Failed to delete provider services', svcDelErr)
-        setSaving(false)
-        return
-      }
-    } else {
-      await supabase.from('providers').delete().eq('user_id', user.id)
-      await supabase.from('provider_services').delete().eq('provider_id', user.id)
     }
 
     await supabase.auth.refreshSession()
@@ -414,7 +398,7 @@ export default function SettingsPage() {
                   <MultiSelect
                     options={services}
                     selected={selectedServices}
-                    onChange={setSelectedServices}
+                    onChange={handleServiceSelection}
                     locale={locale}
                   />
                 </div>
