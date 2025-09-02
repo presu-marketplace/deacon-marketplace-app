@@ -1,6 +1,10 @@
 -- Ensure RLS is on
 alter table api.providers enable row level security;
 
+-- Allow authenticated users to work with their provider record
+grant usage on schema api to authenticated;
+grant select, insert, update, delete on api.providers to authenticated;
+
 -- SELECT: providers can read their own row
 create policy "providers select own"
 on api.providers
