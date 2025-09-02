@@ -127,7 +127,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
           return (
             <li
               key={s.slug}
-              onPointerDown={() => handleSelect(s)}
+              onClick={() => handleSelect(s)}
               className="px-4 py-2 text-sm text-gray-800 cursor-pointer hover:bg-gray-50 transition-colors"
             >
               {highlightMatch(name)}
@@ -138,7 +138,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
     )
 
   return (
-    <section className="relative w-full h-[580px] md:h-[740px] overflow-hidden">
+    <section className="relative w-full h-[580px] md:h-[740px] overflow-x-hidden">
       {/* Rotating background images */}
       {heroImages.map((src, index) => (
         <Image
@@ -191,7 +191,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
               </button>
               {renderSuggestions()}
             </div>
-            <button onClick={handleSearch} className="bg-black text-white rounded-full px-6 py-2 text-sm font-medium shadow hover:bg-gray-900 transition">
+            <button onClick={handleSearch} className="w-full bg-black text-white rounded-full px-6 py-2 text-sm font-medium shadow hover:bg-gray-900 transition">
               {t.searchHere}
             </button>
           </div>
@@ -230,7 +230,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
               </svg>
               <span className="text-gray-700 truncate max-w-[180px]">{userAddress ?? t.location}</span>
             </button>
-            <button onClick={handleSearch} className="bg-black text-white rounded-full px-6 py-3 text-sm font-medium shadow hover:bg-gray-900 transition">
+            <button onClick={handleSearch} className="flex-shrink-0 bg-black text-white rounded-full px-6 py-3 text-sm font-medium shadow hover:bg-gray-900 transition">
               {t.searchHere}
             </button>
           </div>
