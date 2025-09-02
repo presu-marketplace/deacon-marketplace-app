@@ -21,6 +21,13 @@ interface ServiceRequest {
   request_created_at: string;
   request_status?: string | null;
   service_id?: string | null;
+  provider_id?: string | null;
+}
+
+interface ProviderServiceRow {
+  service_id: string;
+  provider_id: string;
+  providers: { profiles?: { full_name: string | null } | null } | null;
 }
 
 type Locale = "en" | "es";
@@ -31,6 +38,8 @@ type ActivityItem = {
   description: string;
   createdAt: string;
   status?: string | null;
+  serviceId?: string | null;
+  providerId?: string | null;
 };
 
 interface PageTranslations {
@@ -214,6 +223,8 @@ export default function ActivityPage() {
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [serviceNames, setServiceNames] = useState<Record<string, { slug: string; name_en: string; name_es: string }>>({});
+  const [role, setRole] = useState<"client" | "provider" | "admin">("client");
+  const [providersByService, setProvidersByService] = useState<Record<string, { id: string; name: string }[]>>({});
 
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "assigned" | "pending" | "closed">("all");
@@ -259,6 +270,23 @@ export default function ActivityPage() {
     fetchServices();
   }, []);
 
+  useEffect(() => {
+    if (role !== "admin") return;
+    const fetchProviders = async () => {
+      const { data } = await supabase
+        .from("provider_services")
+        .select("service_id, provider_id, providers(profiles(full_name))");
+      const map: Record<string, { id: string; name: string }[]> = {};
+      for (const row of (data as ProviderServiceRow[] | null) || []) {
+        const name = row.providers?.profiles?.full_name || "";
+        if (!map[row.service_id]) map[row.service_id] = [];
+        map[row.service_id].push({ id: row.provider_id, name });
+      }
+      setProvidersByService(map);
+    };
+    fetchProviders();
+  }, [role]);
+
   const getServiceName = useCallback(
     (key?: string | null) => {
       if (!key) return "";
@@ -288,10 +316,11 @@ export default function ActivityPage() {
       }
       setLoading(true);
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-      const userRole = (profile?.role as string | null) ?? "client";
+      const userRole = (profile?.role as "client" | "provider" | "admin" | null) ?? "client";
+      setRole(userRole);
       if (userRole === "client") {
         const params = new URLSearchParams({
-          select: "id, service_id, service_description, request_created_at, request_status",
+          select: "id, service_id, provider_id, service_description, request_created_at, request_status",
           user_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
@@ -299,8 +328,15 @@ export default function ActivityPage() {
         setRequests(rows);
       } else if (userRole === "provider") {
         const params = new URLSearchParams({
-          select: "id, service_id, service_description, request_created_at, request_status",
+          select: "id, service_id, provider_id, service_description, request_created_at, request_status",
           provider_id: `eq.${user.id}`,
+          order: "request_created_at.desc",
+        });
+        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
+        setRequests(rows);
+      } else if (userRole === "admin") {
+        const params = new URLSearchParams({
+          select: "id, service_id, provider_id, service_description, request_created_at, request_status",
           order: "request_created_at.desc",
         });
         const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
@@ -320,10 +356,26 @@ export default function ActivityPage() {
       description: r.service_description || pageT.noDescription,
       createdAt: r.request_created_at,
       status: r.request_status ?? "closed",
+      serviceId: r.service_id,
+      providerId: r.provider_id,
     }));
   }, [requests, getServiceName, pageT.noDescription]);
 
   const filtered = useMemo(() => filterItems(items, query, statusFilter), [items, query, statusFilter]);
+
+  const assignProvider = useCallback(async (requestId: string, providerId: string) => {
+    await supabase
+      .from("service_requests")
+      .update({
+        provider_id: providerId,
+        provider_assigned_at: new Date().toISOString(),
+        request_status: "assigned",
+      })
+      .eq("id", requestId);
+    setRequests((prev) =>
+      prev.map((r) => (r.id === requestId ? { ...r, provider_id: providerId, request_status: "assigned" } : r))
+    );
+  }, []);
 
   return (
     <>
@@ -355,10 +407,13 @@ export default function ActivityPage() {
                   {filtered.map((it) => (
                     <li key={it.id}>
                       <ActivityCard
+                        id={it.id}
                         title={it.title}
                         description={it.description}
                         createdAt={it.createdAt}
                         status={it.status}
+                        serviceId={it.serviceId}
+                        providerId={it.providerId}
                       />
                     </li>
                   ))}
@@ -376,15 +431,17 @@ export default function ActivityPage() {
   );
 
   // -------- Local component --------
-  function ActivityCard(props: { title: string; description: string; createdAt: string; status?: string | null }) {
-    const { title, description, createdAt, status } = props;
+  function ActivityCard(props: { id: string; title: string; description: string; createdAt: string; status?: string | null; serviceId?: string | null; providerId?: string | null }) {
+    const { id, title, description, createdAt, status, serviceId, providerId } = props;
     const meta = statusMeta(status);
     const when = createdAt ? formatWhen(createdAt, locale) : null;
+    const providerOptions = serviceId ? providersByService[serviceId] || [] : [];
+    const [selected, setSelected] = useState(providerId || "");
+    const assignDisabled = !selected || selected === providerId;
 
     return (
-      <motion.button
-        type="button"
-        className="group relative w-full text-left"
+      <motion.div
+        className="group relative w-full"
         aria-label={`${title} – ${meta.label}`}
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -437,12 +494,39 @@ export default function ActivityPage() {
                       </time>
                     </div>
                   )}
+
+                  {role === "admin" && providerOptions.length > 0 && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <select
+                        className="border border-neutral-300 rounded px-2 py-1 text-sm"
+                        value={selected}
+                        onChange={(e) => setSelected(e.target.value)}
+                      >
+                        <option value="">
+                          {locale === "es" ? "Seleccionar" : "Select"}
+                        </option>
+                        {providerOptions.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name || p.id}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => assignProvider(id, selected)}
+                        disabled={assignDisabled}
+                        className="rounded bg-neutral-900 px-3 py-1 text-xs font-medium text-white disabled:opacity-40"
+                      >
+                        {locale === "es" ? "Asignar" : "Assign"}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </motion.button>
+      </motion.div>
     );
   }
 
