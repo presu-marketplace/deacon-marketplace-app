@@ -1,6 +1,14 @@
 -- Schema for profiles, providers and service request workflow
 create schema if not exists api;
 
+-- Enum for service request workflow
+do $$
+begin
+  create type public.request_status as enum ('open','assigned','pending','closed');
+exception
+  when duplicate_object then null;
+end $$;
+
 -- User profiles
 create table if not exists api.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
@@ -23,13 +31,20 @@ create table if not exists api.providers (
 
 create or replace function api.ensure_provider_role()
 returns trigger as $$
+declare
+  pid uuid;
 begin
+  -- Provider id may live in different columns depending on the table
+  pid := coalesce(new.provider_id, new.user_id);
+  if pid is null then
+    return new;
+  end if;
   if exists (
-    select 1 from api.profiles p where p.id = new.user_id and p.role = 'provider'
+    select 1 from api.profiles p where p.id = pid and p.role = 'provider'
   ) then
     return new;
   end if;
-  raise exception 'profile % is not a provider', new.user_id;
+  raise exception 'profile % is not a provider', pid;
 end;
 $$ language plpgsql;
 
@@ -48,41 +63,71 @@ create table if not exists api.provider_services (
   primary key (provider_id, service_id)
 );
 
+
 -- Service requests placed by users
 create table if not exists api.service_requests (
-  user_id uuid references api.profiles(id) on delete set null,
-  service_id uuid references reference.services(id) on delete set null,
-  provider_id uuid references api.profiles(id) on delete set null,
   id uuid not null default gen_random_uuid(),
-  service_description text,
-  service_location text,
-  service_deadline date,
-  user_name text,
-  user_email text,
-  user_telephone text,
-  user_address text,
-  user_city text,
-  request_property_type text,
-  request_cleaning_type text,
-  request_cleaning_frequency text,
-  request_message text,
-  provider_assigned_at timestamptz,
-  request_closed_at timestamptz,
-  request_updated_at timestamptz,
-  request_systems jsonb default '[]'::jsonb,
-  request_invoice_urls text[] default array[]::text[],
-  request_status request_status not null default 'open'::request_status,
-  request_created_at timestamptz default now(),
-  constraint service_requests_pkey primary key (id)
+  user_id uuid null,
+  service_id uuid null,
+  provider_id uuid null,
+  service_description text null,
+  service_location text null,
+  service_deadline date null,
+  user_name text null,
+  user_email text null,
+  user_telephone text null,
+  user_address text null,
+  user_city text null,
+  request_property_type text null,
+  request_cleaning_type text null,
+  request_cleaning_frequency text null,
+  request_message text null,
+  request_systems jsonb null default '[]'::jsonb,
+  request_invoice_urls text[] null default array[]::text[],
+  request_status public.request_status not null default 'open'::request_status,
+  request_created_at timestamptz null default now(),
+  provider_assigned_at timestamptz null,
+  request_closed_at timestamptz null,
+  request_updated_at timestamptz null,
+  constraint service_requests_pkey primary key (id),
+  constraint service_requests_provider_id_fkey foreign key (provider_id) references api.profiles(id) on delete set null,
+  constraint service_requests_service_id_fkey foreign key (service_id) references reference.services(id) on delete set null,
+  constraint service_requests_user_id_fkey foreign key (user_id) references api.profiles(id) on delete set null
 );
 
--- automatically track updates
-create extension if not exists moddatetime schema extensions;
-drop trigger if exists handle_updated_at on api.service_requests;
-drop trigger if exists set_updated_at on api.service_requests;
-create trigger set_request_updated_at
+create index if not exists idx_service_requests_user_id on api.service_requests using btree (user_id);
+create index if not exists idx_service_requests_provider_id on api.service_requests using btree (provider_id);
+create index if not exists idx_service_requests_service_id on api.service_requests using btree (service_id);
+
+drop trigger if exists service_requests_set_timestamps on api.service_requests;
+drop trigger if exists trg_service_requests_set_updated_at on api.service_requests;
+
+create or replace function api.tg_sr_set_timestamps()
+returns trigger as $$
+begin
+  if tg_op = 'INSERT' then
+    new.request_created_at := coalesce(new.request_created_at, now());
+  end if;
+  new.request_updated_at := now();
+  return new;
+end;
+$$ language plpgsql;
+
+create or replace function api.set_updated_at()
+returns trigger as $$
+begin
+  new.request_updated_at := now();
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger service_requests_set_timestamps
   before insert or update on api.service_requests
-  for each row execute procedure moddatetime(request_updated_at);
+  for each row execute function api.tg_sr_set_timestamps();
+
+create trigger trg_service_requests_set_updated_at
+  before update on api.service_requests
+  for each row execute function api.set_updated_at();
 
 -- Ensure service requests come only from client profiles
 create function if not exists api.ensure_client_role()
@@ -103,6 +148,10 @@ $$ language plpgsql;
 create trigger service_requests_role_check
   before insert or update on api.service_requests
   for each row execute function api.ensure_client_role();
+
+create trigger service_requests_provider_role_check
+  before insert or update of provider_id on api.service_requests
+  for each row execute function api.ensure_provider_role();
 
 -- Remove legacy category column if exists
 alter table api.service_requests drop column if exists category;
