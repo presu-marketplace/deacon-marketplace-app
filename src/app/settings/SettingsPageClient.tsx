@@ -241,6 +241,18 @@ export default function SettingsPage() {
         setSaving(false)
         return
       }
+      const { error: svcDelErr } = await supabase
+        .from('provider_services')
+        .delete()
+        .eq('provider_id', user.id)
+      if (svcDelErr) {
+        console.error('Failed to delete provider services', svcDelErr)
+        setSaving(false)
+        return
+      }
+    } else {
+      await supabase.from('providers').delete().eq('user_id', user.id)
+      await supabase.from('provider_services').delete().eq('provider_id', user.id)
     }
 
     await supabase.auth.refreshSession()
