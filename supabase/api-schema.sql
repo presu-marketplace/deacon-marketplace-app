@@ -34,16 +34,26 @@ returns trigger as $$
 declare
   pid uuid;
 begin
-  -- Provider id may live in different columns depending on the table
-  pid := coalesce(new.provider_id, new.user_id);
+  -- Only check provider_id for tables that reference a provider. For the
+  -- providers table itself we validate the user_id column. This prevents
+  -- erroneously requiring provider role when inserting service requests for
+  -- clients.
+  if TG_TABLE_NAME = 'providers' then
+    pid := new.user_id;
+  else
+    pid := new.provider_id;
+  end if;
+
   if pid is null then
     return new;
   end if;
+
   if exists (
     select 1 from api.profiles p where p.id = pid and p.role = 'provider'
   ) then
     return new;
   end if;
+
   raise exception 'profile % is not a provider', pid;
 end;
 $$ language plpgsql;
