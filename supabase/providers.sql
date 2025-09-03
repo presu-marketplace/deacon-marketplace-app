@@ -40,3 +40,21 @@ on api.providers
 for delete
 to authenticated
 using (user_id = auth.uid());
+
+-- ADMIN: unrestricted access to all provider rows
+create policy "providers admin manage"
+on api.providers
+for all
+to authenticated
+using (
+  exists (
+    select 1 from api.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
+)
+with check (
+  exists (
+    select 1 from api.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
+);
