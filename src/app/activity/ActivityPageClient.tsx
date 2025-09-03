@@ -396,6 +396,7 @@ export default function ActivityPage() {
           select:
             "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline",
           order: "request_created_at.desc",
+          limit: "1000",
         });
         const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
         setRequests(rows);
