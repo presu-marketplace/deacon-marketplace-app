@@ -24,6 +24,7 @@ interface ServiceRequest {
   provider_id?: string | null;
   user_name?: string | null;
   service_deadline?: string | null;
+  request_invoice_urls?: string[] | null;
 }
 
 interface ProviderServiceRow {
@@ -44,6 +45,7 @@ type ActivityItem = {
   providerId?: string | null;
   userName?: string | null;
   dueDate?: string | null;
+  attachments?: string[] | null;
 };
 
 interface PageTranslations {
@@ -59,6 +61,7 @@ interface PageTranslations {
   due: string;
   asc: string;
   desc: string;
+  filterLabel: string;
 }
 
 // ---------- Pure helpers (exported for tests) ----------
@@ -150,6 +153,9 @@ function Toolbar({
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div className="flex items-center gap-2">
         <div className="relative">
+          <label htmlFor="activity-search" className="sr-only">
+            {pageT.searchPlaceholder}
+          </label>
           <input
             id="activity-search"
             value={query}
@@ -157,26 +163,33 @@ function Toolbar({
             placeholder={pageT.searchPlaceholder}
             className="w-64 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 placeholder-neutral-400 shadow-[0_1px_0_#0000000d] focus:outline-none focus:ring-2 focus:ring-neutral-900/5"
           />
-          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400">
+          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400" aria-hidden>
             <svg viewBox="0 0 24 24" className="h-4 w-4">
               <path d="M11 19a8 8 0 1 1 5.293-14.293L21 9.414" fill="none" stroke="currentColor" strokeWidth="1.5" />
             </svg>
           </span>
         </div>
         {isAdmin && (
-          <input
-            value={user || ""}
-            onChange={(e) => setUser && setUser(e.target.value)}
-            placeholder={pageT.user}
-            className="w-40 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 placeholder-neutral-400 shadow-[0_1px_0_#0000000d] focus:outline-none focus:ring-2 focus:ring-neutral-900/5"
-          />
+          <div className="relative">
+            <label htmlFor="activity-user" className="sr-only">
+              {pageT.user}
+            </label>
+            <input
+              id="activity-user"
+              value={user || ""}
+              onChange={(e) => setUser && setUser(e.target.value)}
+              placeholder={pageT.user}
+              className="w-40 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 placeholder-neutral-400 shadow-[0_1px_0_#0000000d] focus:outline-none focus:ring-2 focus:ring-neutral-900/5"
+            />
+          </div>
         )}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" role="group" aria-label={pageT.filterLabel}>
           {pills.map((p) => (
             <button
               key={p.key}
               onClick={() => setStatus(p.key)}
-              className={`rounded-full px-3 py-1 text-xs font-medium ring-1 transition ${status === p.key
+              aria-pressed={status === p.key}
+              className={`rounded-full px-3 py-1 text-xs font-medium ring-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${status === p.key
                 ? "bg-neutral-900 text-white ring-neutral-900"
                 : "bg-white text-neutral-700 ring-neutral-200 hover:bg-neutral-50"
                 }`}
@@ -256,6 +269,7 @@ export default function ActivityPage() {
     due: locale === "es" ? "Vence" : "Due",
     asc: locale === "es" ? "Ascendente" : "Ascendant",
     desc: locale === "es" ? "Descendente" : "Descendant",
+    filterLabel: locale === "es" ? "Filtrar por estado" : "Filter by status",
   };
   const typedPageT: PageTranslations = {
     searchPlaceholder: t.searchPlaceholder,
@@ -270,6 +284,7 @@ export default function ActivityPage() {
     due: pageT.due,
     asc: pageT.asc,
     desc: pageT.desc,
+    filterLabel: pageT.filterLabel,
   };
 
   const user = useUser();
@@ -283,6 +298,7 @@ export default function ActivityPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "assigned" | "pending" | "closed">("all");
   const [userQuery, setUserQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [activeItem, setActiveItem] = useState<ActivityItem | null>(null);
 
   // -------- fetch helper --------
   const fetchFromApi = async <T,>(path: string, params: URLSearchParams): Promise<T | null> => {
@@ -376,7 +392,7 @@ export default function ActivityPage() {
       if (userRole === "client") {
         const params = new URLSearchParams({
           select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline",
+            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls",
           user_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
@@ -385,7 +401,7 @@ export default function ActivityPage() {
       } else if (userRole === "provider") {
         const params = new URLSearchParams({
           select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline",
+            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls",
           provider_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
@@ -394,7 +410,7 @@ export default function ActivityPage() {
       } else if (userRole === "admin") {
         const params = new URLSearchParams({
           select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline",
+            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls",
           order: "request_created_at.desc",
           limit: "1000",
         });
@@ -421,6 +437,7 @@ export default function ActivityPage() {
       dueDate:
         r.service_deadline ||
         new Date(new Date(r.request_created_at).getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+      attachments: r.request_invoice_urls,
     }));
   }, [requests, getServiceName, pageT.noDescription]);
 
@@ -511,6 +528,7 @@ export default function ActivityPage() {
                         providerId={it.providerId}
                         userName={it.userName}
                         dueDate={it.dueDate}
+                        attachments={it.attachments}
                       />
                     </li>
                   ))}
@@ -521,9 +539,54 @@ export default function ActivityPage() {
             </>
           ) : (
             <EmptyState message={pageT.empty} />
-          )}
+      )}
         </div>
       </div>
+      {activeItem && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setActiveItem(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-lg relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setActiveItem(null)}
+              aria-label="Close"
+              className="absolute right-3 top-3 text-neutral-500 hover:text-neutral-700"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
+                <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+            <h2 className="font-semibold text-neutral-900 text-lg truncate">{activeItem.title}</h2>
+            <p className="mt-2 text-neutral-700 whitespace-pre-wrap">{activeItem.description}</p>
+            {activeItem.attachments && activeItem.attachments.length > 0 && (
+              <div className="mt-4">
+                <h3 className="font-medium text-neutral-800 mb-1">Attachments</h3>
+                <ul className="list-disc list-inside space-y-1">
+                  {activeItem.attachments.map((url, idx) => (
+                    <li key={idx}>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline break-words"
+                      >
+                        {url}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 
@@ -538,8 +601,9 @@ export default function ActivityPage() {
     providerId?: string | null;
     userName?: string | null;
     dueDate?: string | null;
+    attachments?: string[] | null;
   }) {
-    const { id, title, description, createdAt, status, serviceId, providerId, userName, dueDate } = props;
+    const { id, title, description, createdAt, status, serviceId, providerId, userName, dueDate, attachments } = props;
     const meta = statusMeta(status);
     const when = createdAt ? formatWhen(createdAt, locale) : null;
     const due = dueDate ? formatDate(dueDate, locale) : null;
@@ -549,12 +613,13 @@ export default function ActivityPage() {
 
     return (
       <motion.div
-        className="group relative w-[70%] mx-auto"
+        className="group relative w-[70%] mx-auto cursor-pointer"
         aria-label={`${title} – ${meta.label}`}
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.18 }}
         whileTap={{ scale: 0.995 }}
+        onClick={() => setActiveItem(props)}
       >
         <div className="flex overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_0_#0000000d] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
           <div className={`w-1 sm:w-1.5 ${meta.rail}`} aria-hidden />
@@ -565,6 +630,15 @@ export default function ActivityPage() {
                   <div className="flex items-center justify-between gap-3">
                     <h2 className="truncate font-semibold text-neutral-900 text-[15px] sm:text-base">{title}</h2>
                     <div className="flex items-center gap-2 shrink-0">
+                      {attachments && attachments.length > 0 && (
+                        <svg
+                          viewBox="0 0 24 24"
+                          className="h-4 w-4 text-neutral-400"
+                          aria-label="Has attachments"
+                        >
+                          <path d="M21.44 11.05L13 19.5a5 5 0 01-7.07-7.07l8.49-8.49a3 3 0 014.24 4.24l-8.49 8.49a1 1 0 01-1.41-1.41l7.78-7.78" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium leading-5 ${meta.pill}`}>{meta.label}</span>
                       <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400 transition-transform group-hover:translate-x-0.5" aria-hidden>
                         <path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -583,7 +657,10 @@ export default function ActivityPage() {
                       {role === "admin" && (
                         <button
                           type="button"
-                          onClick={() => extendDeadline(id, dueDate)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            extendDeadline(id, dueDate);
+                          }}
                           className="rounded bg-neutral-200 px-2 py-0.5 text-xs text-neutral-700"
                         >
                           {locale === "es" ? "Extender +3d" : "Extend +3d"}
@@ -627,6 +704,7 @@ export default function ActivityPage() {
                         className="border border-neutral-300 rounded px-2 py-1 text-sm"
                         value={selected}
                         onChange={(e) => setSelected(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <option value="">
                           {locale === "es" ? "Seleccionar" : "Select"}
@@ -639,7 +717,10 @@ export default function ActivityPage() {
                       </select>
                       <button
                         type="button"
-                        onClick={() => assignProvider(id, selected)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          assignProvider(id, selected);
+                        }}
                         disabled={assignDisabled}
                         className="rounded bg-neutral-900 px-3 py-1 text-xs font-medium text-white disabled:opacity-40"
                       >
