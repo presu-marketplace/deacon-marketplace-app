@@ -6,7 +6,7 @@ import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import useUser from "@/features/auth/useUser";
 import { supabase } from "@/lib/supabaseClient";
-import ServiceRequestModal, { RequestStatus } from "./ServiceRequestModal";
+import ServiceRequestModal, { RequestStatus, ModalTranslations } from "./ServiceRequestModal";
 
 /**
  * Uber‑style inspired Activity UI
@@ -311,6 +311,39 @@ export default function ActivityPage() {
     filterLabel: pageT.filterLabel,
   };
 
+  const modalT: ModalTranslations = {
+    subtitle: locale === "es" ? "Solicitud de servicio" : "Service Request",
+    serviceDetails: locale === "es" ? "Detalles del servicio" : "Service Details",
+    requester: locale === "es" ? "Solicitante" : "Requester",
+    timeline: locale === "es" ? "Cronograma" : "Timeline",
+    attachments: locale === "es" ? "Adjuntos" : "Attachments",
+    systems: locale === "es" ? "Sistemas" : "Systems",
+    type: locale === "es" ? "Tipo" : "Type",
+    frequency: locale === "es" ? "Frecuencia" : "Frequency",
+    property: locale === "es" ? "Propiedad" : "Property",
+    location: locale === "es" ? "Ubicación" : "Location",
+    email: locale === "es" ? "Correo" : "Email",
+    phone: locale === "es" ? "Teléfono" : "Phone",
+    address: locale === "es" ? "Dirección" : "Address",
+    requestedOn: locale === "es" ? "Solicitado el" : "Requested on",
+    dueBy: locale === "es" ? "Vence" : "Due by",
+    assignedAt: locale === "es" ? "Asignado el" : "Assigned at",
+    closedAt: locale === "es" ? "Cerrado el" : "Closed at",
+    markAsClosed: locale === "es" ? "Marcar como cerrado" : "Mark as Closed",
+    assignProvider: locale === "es" ? "Asignar proveedor" : "Assign Provider",
+    assign: locale === "es" ? "Asignar" : "Assign",
+    cancel: locale === "es" ? "Cancelar" : "Cancel",
+    selectProvider: locale === "es" ? "Seleccionar proveedor" : "Select provider",
+    unknown: locale === "es" ? "Desconocido" : "Unknown",
+    more: locale === "es" ? "más" : "more",
+    status: {
+      open: pageT.open,
+      assigned: pageT.assigned,
+      pending: pageT.pending,
+      closed: pageT.closed,
+    },
+  };
+
   const user = useUser();
   const [requests, setRequests] = useState<ServiceRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -366,18 +399,22 @@ export default function ActivityPage() {
   }, []);
 
   useEffect(() => {
-    if (role !== "admin") return;
     const fetchProviders = async () => {
-      const { data } = await supabase
-        .from("provider_services")
-        .select("service_id, provider_id, providers(profiles(full_name))");
-      const map: Record<string, { id: string; name: string }[]> = {};
-      for (const row of (data as ProviderServiceRow[] | null) || []) {
-        const name = row.providers?.profiles?.full_name || "";
-        if (!map[row.service_id]) map[row.service_id] = [];
-        map[row.service_id].push({ id: row.provider_id, name });
+      if (role !== "admin") return;
+      try {
+        const res = await fetch("/api/providers");
+        if (!res.ok) return;
+        const rows = (await res.json()) as ProviderServiceRow[];
+        const map: Record<string, { id: string; name: string }[]> = {};
+        for (const row of rows || []) {
+          const name = row.providers?.profiles?.full_name || "";
+          if (!map[row.service_id]) map[row.service_id] = [];
+          map[row.service_id].push({ id: row.provider_id, name });
+        }
+        setProvidersByService(map);
+      } catch {
+        /* ignore */
       }
-      setProvidersByService(map);
     };
     fetchProviders();
   }, [role]);
@@ -662,6 +699,8 @@ export default function ActivityPage() {
           onClose={() => setActiveItem(null)}
           onAssign={(id, providerId) => assignProvider(id, providerId)}
           onCloseRequest={(req) => closeRequest(req.id)}
+          locale={locale}
+          t={modalT}
         />
       )}
     </>

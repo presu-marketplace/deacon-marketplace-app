@@ -42,23 +42,58 @@ export interface ServiceRequest {
   user_address?: string | null;
   user_city?: string | null;
 }
+export interface ModalTranslations {
+  subtitle: string;
+  serviceDetails: string;
+  requester: string;
+  timeline: string;
+  attachments: string;
+  systems: string;
+  type: string;
+  frequency: string;
+  property: string;
+  location: string;
+  email: string;
+  phone: string;
+  address: string;
+  requestedOn: string;
+  dueBy: string;
+  assignedAt: string;
+  closedAt: string;
+  markAsClosed: string;
+  assignProvider: string;
+  assign: string;
+  cancel: string;
+  selectProvider: string;
+  unknown: string;
+  status: Record<RequestStatus, string>;
+  more: string;
+}
 
-const fmtDate = (iso?: string | null) =>
+const LOCALE_MAP: Record<"en" | "es", string> = { en: "en-US", es: "es-AR" };
+
+const fmtDate = (iso?: string | null, locale: "en" | "es" = "en") =>
   iso
-    ? new Date(iso).toLocaleString(undefined, {
+    ? new Date(iso).toLocaleString(LOCALE_MAP[locale], {
         dateStyle: "medium",
         timeStyle: "short",
       })
     : null;
 
-const fmtDateOnly = (iso?: string | null) =>
-  iso ? new Date(iso).toLocaleDateString(undefined, { dateStyle: "medium" }) : null;
+const fmtDateOnly = (iso?: string | null, locale: "en" | "es" = "en") =>
+  iso ? new Date(iso).toLocaleDateString(LOCALE_MAP[locale], { dateStyle: "medium" }) : null;
 
 function classNames(...s: Array<string | undefined | false>) {
   return s.filter(Boolean).join(" ");
 }
 
-function StatusBadge({ status }: { status: RequestStatus }) {
+function StatusBadge({
+  status,
+  labels,
+}: {
+  status: RequestStatus;
+  labels: Record<RequestStatus, string>;
+}) {
   const color: Record<RequestStatus, string> = {
     open: "bg-blue-600 text-white",
     assigned: "bg-amber-500 text-white",
@@ -67,7 +102,7 @@ function StatusBadge({ status }: { status: RequestStatus }) {
   };
   return (
     <span className={classNames("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium shadow-sm", color[status])}>
-      {status}
+      {labels[status] || status}
     </span>
   );
 }
@@ -199,6 +234,8 @@ export default function ServiceRequestModal({
   providers,
   onAssign,
   onCloseRequest,
+  locale,
+  t,
 }: {
   open: boolean;
   request: ServiceRequest;
@@ -207,6 +244,8 @@ export default function ServiceRequestModal({
   providers?: { id: string; name: string }[];
   onAssign?: (id: string, providerId: string) => void;
   onCloseRequest?: (req: ServiceRequest) => void;
+  locale: "en" | "es";
+  t: ModalTranslations;
 }) {
   const [assignMode, setAssignMode] = useState(false);
   const [selected, setSelected] = useState("");
@@ -243,12 +282,12 @@ export default function ServiceRequestModal({
         <div className="flex items-start justify-between gap-4 border-b border-neutral-200 px-6 py-4">
           <div className="min-w-0">
             <h2 className="truncate text-xl font-semibold text-neutral-900">
-              {request.service_name || "Service Request"}
+              {request.service_name || t.subtitle}
             </h2>
-            <p className="mt-0.5 text-sm text-neutral-500">{request.service_id ? "Service Request" : ""}</p>
+            <p className="mt-0.5 text-sm text-neutral-500">{t.subtitle}</p>
           </div>
           <div className="flex items-center gap-3">
-            <StatusBadge status={request.request_status} />
+            <StatusBadge status={request.request_status} labels={t.status} />
             <button
               onClick={onClose}
               className="rounded-full p-1.5 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700"
@@ -261,24 +300,26 @@ export default function ServiceRequestModal({
 
         <div className="grid gap-8 px-6 py-5 sm:grid-cols-2">
           <section>
-            <SectionLabel icon={FiFileText}>Service Details</SectionLabel>
+            <SectionLabel icon={FiFileText}>{t.serviceDetails}</SectionLabel>
 
-            <FieldRow icon={FiLayers} label="Type" value={request.request_cleaning_type} />
+            <FieldRow icon={FiLayers} label={t.type} value={request.request_cleaning_type} />
             <FieldRow
               icon={FiRepeat}
-              label="Frequency"
+              label={t.frequency}
               value={
-                request.request_cleaning_frequency && <Chip>{request.request_cleaning_frequency}</Chip>
+                request.request_cleaning_frequency && (
+                  <Chip>{request.request_cleaning_frequency}</Chip>
+                )
               }
             />
-            <FieldRow icon={FiHome} label="Property" value={request.request_property_type} />
-            <FieldRow icon={FiMapPin} label="Location" value={request.service_location || request.user_city} />
+            <FieldRow icon={FiHome} label={t.property} value={request.request_property_type} />
+            <FieldRow icon={FiMapPin} label={t.location} value={request.service_location || request.user_city} />
 
             <Note>{request.request_message || request.service_description}</Note>
 
             {systems.length > 0 && (
               <div className="mt-3">
-                <div className="mb-1 text-xs font-medium text-neutral-500">Systems</div>
+                <div className="mb-1 text-xs font-medium text-neutral-500">{t.systems}</div>
                 <div>
                   {systems.slice(0, 8).map((s, i) => {
                     const name =
@@ -287,21 +328,21 @@ export default function ServiceRequestModal({
                         : String(s);
                     return <Chip key={i}>{name}</Chip>;
                   })}
-                  {systems.length > 8 && <Chip>+{systems.length - 8} more</Chip>}
+                  {systems.length > 8 && <Chip>+{systems.length - 8} {t.more}</Chip>}
                 </div>
               </div>
             )}
 
             {hasFiles && (
               <div className="mt-4">
-                <div className="mb-1 text-xs font-medium text-neutral-500">Attachments</div>
+                <div className="mb-1 text-xs font-medium text-neutral-500">{t.attachments}</div>
                 <AttachmentList urls={request.request_invoice_urls!} />
               </div>
             )}
           </section>
 
           <section>
-            <SectionLabel icon={FiUser}>Requester</SectionLabel>
+            <SectionLabel icon={FiUser}>{t.requester}</SectionLabel>
 
             <div className="mb-2 flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-100 text-sm font-semibold text-neutral-600">
@@ -309,7 +350,7 @@ export default function ServiceRequestModal({
               </div>
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium text-neutral-800">
-                  {request.user_name || "Unknown"}
+                  {request.user_name || t.unknown}
                 </div>
                 {request.user_city ? (
                   <div className="truncate text-xs text-neutral-500">{request.user_city}</div>
@@ -317,17 +358,17 @@ export default function ServiceRequestModal({
               </div>
             </div>
 
-            <FieldRow icon={FiMail} label="Email" value={request.user_email} href={request.user_email ? `mailto:${request.user_email}` : undefined} />
-            <FieldRow icon={FiPhone} label="Phone" value={request.user_telephone} href={request.user_telephone ? `tel:${request.user_telephone}` : undefined} />
-            <FieldRow icon={FiMapPin} label="Address" value={fullAddress(request)} href={mapsHref(fullAddress(request))} />
+            <FieldRow icon={FiMail} label={t.email} value={request.user_email} href={request.user_email ? `mailto:${request.user_email}` : undefined} />
+            <FieldRow icon={FiPhone} label={t.phone} value={request.user_telephone} href={request.user_telephone ? `tel:${request.user_telephone}` : undefined} />
+            <FieldRow icon={FiMapPin} label={t.address} value={fullAddress(request)} href={mapsHref(fullAddress(request))} />
 
             <div className="mt-4">
-              <SectionLabel icon={FiCalendar}>Timeline</SectionLabel>
+              <SectionLabel icon={FiCalendar}>{t.timeline}</SectionLabel>
               <div className="space-y-3">
-                <TimelineItem icon={FiClock} title="Requested on" when={fmtDate(request.request_created_at)} />
-                <TimelineItem icon={FiCalendar} title="Due by" when={fmtDateOnly(request.service_deadline)} danger={overdue} />
-                <TimelineItem icon={FiUser} title="Assigned at" when={fmtDate(request.provider_assigned_at)} />
-                <TimelineItem icon={FiCalendar} title="Closed at" when={fmtDate(request.request_closed_at)} />
+                <TimelineItem icon={FiClock} title={t.requestedOn} when={fmtDate(request.request_created_at, locale)} />
+                <TimelineItem icon={FiCalendar} title={t.dueBy} when={fmtDateOnly(request.service_deadline, locale)} danger={overdue} />
+                <TimelineItem icon={FiUser} title={t.assignedAt} when={fmtDate(request.provider_assigned_at, locale)} />
+                <TimelineItem icon={FiCalendar} title={t.closedAt} when={fmtDate(request.request_closed_at, locale)} />
               </div>
             </div>
           </section>
@@ -341,7 +382,7 @@ export default function ServiceRequestModal({
                 onClick={() => onCloseRequest?.(request)}
                 className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
               >
-                Mark as Closed
+                {t.markAsClosed}
               </button>
             )}
             {request.request_status === "open" && role === "admin" && (
@@ -352,7 +393,7 @@ export default function ServiceRequestModal({
                     value={selected}
                     onChange={(e) => setSelected(e.target.value)}
                   >
-                    <option value="">Select provider</option>
+                    <option value="">{t.selectProvider}</option>
                     {(providers || []).map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.name || p.id}
@@ -368,7 +409,7 @@ export default function ServiceRequestModal({
                     disabled={!selected}
                     className="rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-40"
                   >
-                    Assign
+                    {t.assign}
                   </button>
                   <button
                     onClick={() => {
@@ -377,7 +418,7 @@ export default function ServiceRequestModal({
                     }}
                     className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
                   >
-                    Cancel
+                    {t.cancel}
                   </button>
                 </>
               ) : (
@@ -385,7 +426,7 @@ export default function ServiceRequestModal({
                   onClick={() => setAssignMode(true)}
                   className="rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
                 >
-                  Assign Provider
+                  {t.assignProvider}
                 </button>
               )
             )}
