@@ -560,10 +560,21 @@ export default function ActivityPage() {
         request_closed_at: now,
       })
       .eq("id", requestId);
+
+    await supabase
+      .from("service_request_services")
+      .upsert({ request_id: requestId, provider_id: providerId }, { onConflict: "request_id" });
+
     setRequests((prev) =>
       prev.map((r) =>
         r.id === requestId
-          ? { ...r, provider_id: providerId, request_status: "closed", request_closed_at: now }
+          ? {
+              ...r,
+              provider_id: providerId,
+              provider_assigned_at: now,
+              request_status: "closed",
+              request_closed_at: now,
+            }
           : r
       )
     );
