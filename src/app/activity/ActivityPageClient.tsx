@@ -640,10 +640,10 @@ export default function ActivityPage() {
                 setOrder={setSortOrder}
                 role={role}
               />
-              {filtered.length ? (
-                <ul className="mt-6 space-y-3">
-                  {filtered.map((it) => (
-                    <li key={it.id}>
+                {filtered.length ? (
+                  <ul className="mt-8 space-y-3">
+                    {filtered.map((it) => (
+                      <li key={it.id}>
                       <ActivityCard
                         id={it.id}
                         title={it.title}
