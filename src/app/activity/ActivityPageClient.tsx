@@ -24,6 +24,18 @@ interface ServiceRequest {
   provider_id?: string | null;
   user_name?: string | null;
   service_deadline?: string | null;
+  request_invoice_urls?: string[] | null;
+  service_location?: string | null;
+  request_message?: string | null;
+  request_property_type?: string | null;
+  request_cleaning_type?: string | null;
+  request_cleaning_frequency?: string | null;
+  user_email?: string | null;
+  user_telephone?: string | null;
+  user_address?: string | null;
+  user_city?: string | null;
+  provider_assigned_at?: string | null;
+  request_closed_at?: string | null;
 }
 
 interface ProviderServiceRow {
@@ -44,6 +56,19 @@ type ActivityItem = {
   providerId?: string | null;
   userName?: string | null;
   dueDate?: string | null;
+  attachments?: string[] | null;
+  message?: string | null;
+  serviceLocation?: string | null;
+  requestPropertyType?: string | null;
+  requestCleaningType?: string | null;
+  requestCleaningFrequency?: string | null;
+  userEmail?: string | null;
+  userTelephone?: string | null;
+  userAddress?: string | null;
+  userCity?: string | null;
+  providerAssignedAt?: string | null;
+  requestClosedAt?: string | null;
+  serviceSlug?: string | null;
 };
 
 interface PageTranslations {
@@ -59,6 +84,7 @@ interface PageTranslations {
   due: string;
   asc: string;
   desc: string;
+  filterLabel: string;
 }
 
 // ---------- Pure helpers (exported for tests) ----------
@@ -150,6 +176,9 @@ function Toolbar({
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div className="flex items-center gap-2">
         <div className="relative">
+          <label htmlFor="activity-search" className="sr-only">
+            {pageT.searchPlaceholder}
+          </label>
           <input
             id="activity-search"
             value={query}
@@ -157,26 +186,33 @@ function Toolbar({
             placeholder={pageT.searchPlaceholder}
             className="w-64 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 placeholder-neutral-400 shadow-[0_1px_0_#0000000d] focus:outline-none focus:ring-2 focus:ring-neutral-900/5"
           />
-          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400">
+          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400" aria-hidden>
             <svg viewBox="0 0 24 24" className="h-4 w-4">
               <path d="M11 19a8 8 0 1 1 5.293-14.293L21 9.414" fill="none" stroke="currentColor" strokeWidth="1.5" />
             </svg>
           </span>
         </div>
         {isAdmin && (
-          <input
-            value={user || ""}
-            onChange={(e) => setUser && setUser(e.target.value)}
-            placeholder={pageT.user}
-            className="w-40 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 placeholder-neutral-400 shadow-[0_1px_0_#0000000d] focus:outline-none focus:ring-2 focus:ring-neutral-900/5"
-          />
+          <div className="relative">
+            <label htmlFor="activity-user" className="sr-only">
+              {pageT.user}
+            </label>
+            <input
+              id="activity-user"
+              value={user || ""}
+              onChange={(e) => setUser && setUser(e.target.value)}
+              placeholder={pageT.user}
+              className="w-40 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 placeholder-neutral-400 shadow-[0_1px_0_#0000000d] focus:outline-none focus:ring-2 focus:ring-neutral-900/5"
+            />
+          </div>
         )}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" role="group" aria-label={pageT.filterLabel}>
           {pills.map((p) => (
             <button
               key={p.key}
               onClick={() => setStatus(p.key)}
-              className={`rounded-full px-3 py-1 text-xs font-medium ring-1 transition ${status === p.key
+              aria-pressed={status === p.key}
+              className={`rounded-full px-3 py-1 text-xs font-medium ring-1 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${status === p.key
                 ? "bg-neutral-900 text-white ring-neutral-900"
                 : "bg-white text-neutral-700 ring-neutral-200 hover:bg-neutral-50"
                 }`}
@@ -256,6 +292,7 @@ export default function ActivityPage() {
     due: locale === "es" ? "Vence" : "Due",
     asc: locale === "es" ? "Ascendente" : "Ascendant",
     desc: locale === "es" ? "Descendente" : "Descendant",
+    filterLabel: locale === "es" ? "Filtrar por estado" : "Filter by status",
   };
   const typedPageT: PageTranslations = {
     searchPlaceholder: t.searchPlaceholder,
@@ -270,6 +307,7 @@ export default function ActivityPage() {
     due: pageT.due,
     asc: pageT.asc,
     desc: pageT.desc,
+    filterLabel: pageT.filterLabel,
   };
 
   const user = useUser();
@@ -283,6 +321,7 @@ export default function ActivityPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "assigned" | "pending" | "closed">("all");
   const [userQuery, setUserQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [activeItem, setActiveItem] = useState<ActivityItem | null>(null);
 
   // -------- fetch helper --------
   const fetchFromApi = async <T,>(path: string, params: URLSearchParams): Promise<T | null> => {
@@ -355,12 +394,32 @@ export default function ActivityPage() {
   const statusMeta = (status?: string | null) => {
     const s = normalizeStatus(status);
     if (s === "open" || s === "abierto")
-      return { label: pageT.open, rail: "bg-indigo-600", pill: "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200" };
+      return {
+        label: pageT.open,
+        rail: "bg-blue-600",
+        pill: "bg-blue-50 text-blue-700 ring-1 ring-blue-200",
+        accent: "border-blue-600",
+      };
     if (s === "assigned" || s === "asignado")
-      return { label: pageT.assigned, rail: "bg-blue-600", pill: "bg-blue-50 text-blue-700 ring-1 ring-blue-200" };
+      return {
+        label: pageT.assigned,
+        rail: "bg-yellow-500",
+        pill: "bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200",
+        accent: "border-yellow-500",
+      };
     if (s === "pending" || s === "pendiente")
-      return { label: pageT.pending, rail: "bg-yellow-500", pill: "bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200" };
-    return { label: pageT.closed, rail: "bg-emerald-600", pill: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200" };
+      return {
+        label: pageT.pending,
+        rail: "bg-orange-500",
+        pill: "bg-orange-50 text-orange-700 ring-1 ring-orange-200",
+        accent: "border-orange-500",
+      };
+    return {
+      label: pageT.closed,
+      rail: "bg-gray-500",
+      pill: "bg-gray-50 text-gray-700 ring-1 ring-gray-200",
+      accent: "border-gray-500",
+    };
   };
 
   useEffect(() => {
@@ -376,7 +435,7 @@ export default function ActivityPage() {
       if (userRole === "client") {
         const params = new URLSearchParams({
           select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline",
+            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at",
           user_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
@@ -385,7 +444,7 @@ export default function ActivityPage() {
       } else if (userRole === "provider") {
         const params = new URLSearchParams({
           select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline",
+            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at",
           provider_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
@@ -394,7 +453,7 @@ export default function ActivityPage() {
       } else if (userRole === "admin") {
         const params = new URLSearchParams({
           select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline",
+            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at",
           order: "request_created_at.desc",
           limit: "1000",
         });
@@ -418,9 +477,24 @@ export default function ActivityPage() {
       serviceId: r.service_id,
       providerId: r.provider_id,
       userName: r.user_name,
-      dueDate: r.service_deadline,
+      dueDate:
+        r.service_deadline ||
+        new Date(new Date(r.request_created_at).getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+      attachments: r.request_invoice_urls,
+      message: r.request_message,
+      serviceLocation: r.service_location,
+      requestPropertyType: r.request_property_type,
+      requestCleaningType: r.request_cleaning_type,
+      requestCleaningFrequency: r.request_cleaning_frequency,
+      userEmail: r.user_email,
+      userTelephone: r.user_telephone,
+      userAddress: r.user_address,
+      userCity: r.user_city,
+      providerAssignedAt: r.provider_assigned_at,
+      requestClosedAt: r.request_closed_at,
+      serviceSlug: r.service_id ? serviceNames[r.service_id]?.slug || null : null,
     }));
-  }, [requests, getServiceName, pageT.noDescription]);
+  }, [requests, getServiceName, pageT.noDescription, serviceNames]);
 
   const filtered = useMemo(() => {
     const base = filterItems(items, query, statusFilter);
@@ -450,6 +524,26 @@ export default function ActivityPage() {
       prev.map((r) => (r.id === requestId ? { ...r, provider_id: providerId, request_status: "assigned" } : r))
     );
   }, []);
+
+  const extendDeadline = useCallback(async (requestId: string, currentDue?: string) => {
+    const base = currentDue ? new Date(currentDue) : new Date();
+    const extended = new Date(base.getTime() + 3 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
+    await supabase
+      .from("service_requests")
+      .update({ service_deadline: extended })
+      .eq("id", requestId);
+    setRequests((prev) =>
+      prev.map((r) => (r.id === requestId ? { ...r, service_deadline: extended } : r))
+    );
+  }, []);
+
+  const activeMeta = activeItem ? statusMeta(activeItem.status) : null;
+  const modalRequested = activeItem?.createdAt ? formatWhen(activeItem.createdAt, locale) : null;
+  const modalDue = activeItem?.dueDate ? formatDate(activeItem.dueDate, locale) : null;
+  const modalAssigned = activeItem?.providerAssignedAt ? formatWhen(activeItem.providerAssignedAt, locale) : null;
+  const modalClosed = activeItem?.requestClosedAt ? formatWhen(activeItem.requestClosedAt, locale) : null;
 
   return (
     <>
@@ -495,6 +589,19 @@ export default function ActivityPage() {
                         providerId={it.providerId}
                         userName={it.userName}
                         dueDate={it.dueDate}
+                        attachments={it.attachments}
+                        message={it.message}
+                        serviceLocation={it.serviceLocation}
+                        requestPropertyType={it.requestPropertyType}
+                        requestCleaningType={it.requestCleaningType}
+                        requestCleaningFrequency={it.requestCleaningFrequency}
+                        userEmail={it.userEmail}
+                        userTelephone={it.userTelephone}
+                        userAddress={it.userAddress}
+                        userCity={it.userCity}
+                        providerAssignedAt={it.providerAssignedAt}
+                        requestClosedAt={it.requestClosedAt}
+                        serviceSlug={it.serviceSlug}
                       />
                     </li>
                   ))}
@@ -505,9 +612,190 @@ export default function ActivityPage() {
             </>
           ) : (
             <EmptyState message={pageT.empty} />
-          )}
+      )}
         </div>
       </div>
+      {activeItem && activeMeta && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setActiveItem(null)}
+        >
+          <div
+            className={`w-full max-w-2xl rounded-2xl bg-white p-6 shadow-lg relative border-t-4 ${activeMeta.accent}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setActiveItem(null)}
+              aria-label="Close"
+              className="absolute right-3 top-3 rounded-full p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
+                <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-neutral-900">{activeItem.title}</h2>
+              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${activeMeta.pill}`}>
+                {activeMeta.label}
+              </span>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
+                      <path d="M9 2h6a2 2 0 012 2v1h3a1 1 0 011 1v15a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1h3V4a2 2 0 012-2z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M9 4h6v2H9z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {locale === "es" ? "Detalles del servicio" : "Service Details"}
+                  </h3>
+                  <div className="mt-2 space-y-2 text-sm text-neutral-700">
+                    {activeItem.description && (
+                      <p className="whitespace-pre-wrap">{activeItem.description}</p>
+                    )}
+                    {activeItem.message && (
+                      <p className="whitespace-pre-wrap">{activeItem.message}</p>
+                    )}
+                    {activeItem.serviceLocation && <p>{activeItem.serviceLocation}</p>}
+                    {activeItem.serviceSlug === "security" && activeItem.requestPropertyType && (
+                      <p>{activeItem.requestPropertyType}</p>
+                    )}
+                    {activeItem.serviceSlug === "cleaning" && (
+                      <>
+                        {activeItem.requestCleaningType && <p>{activeItem.requestCleaningType}</p>}
+                        {activeItem.requestCleaningFrequency && <p>{activeItem.requestCleaningFrequency}</p>}
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
+                      <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    {locale === "es" ? "Cronología" : "Timeline"}
+                  </h3>
+                  <ul className="mt-2 space-y-1 text-sm text-neutral-600">
+                    {modalRequested && (
+                      <li className="flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          <line x1="16" y1="2" x2="16" y2="6" />
+                          <line x1="8" y1="2" x2="8" y2="6" />
+                          <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                        <span>
+                          {locale === "es" ? "Solicitado el" : "Requested on"}{" "}
+                          <time dateTime={modalRequested.iso}>
+                            {modalRequested.date} · {modalRequested.time}
+                          </time>
+                        </span>
+                      </li>
+                    )}
+                    {modalDue && (
+                      <li className="flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          <line x1="16" y1="2" x2="16" y2="6" />
+                          <line x1="8" y1="2" x2="8" y2="6" />
+                          <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                        <span>
+                          {locale === "es" ? "Vence" : "Due by"}{" "}
+                          <time dateTime={modalDue.iso}>{modalDue.date}</time>
+                        </span>
+                      </li>
+                    )}
+                    {modalAssigned && (
+                      <li className="flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
+                          <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <span>
+                          {locale === "es" ? "Asignado el" : "Assigned at"}{" "}
+                          <time dateTime={modalAssigned.iso}>
+                            {modalAssigned.date} · {modalAssigned.time}
+                          </time>
+                        </span>
+                      </li>
+                    )}
+                    {modalClosed && (
+                      <li className="flex items-center gap-2">
+                        <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
+                          <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <span>
+                          {locale === "es" ? "Cerrado el" : "Closed at"}{" "}
+                          <time dateTime={modalClosed.iso}>
+                            {modalClosed.date} · {modalClosed.time}
+                          </time>
+                        </span>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              </div>
+              <div>
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
+                    <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M6 20c0-3.313 2.687-6 6-6s6 2.687 6 6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {locale === "es" ? "Solicitante" : "Requester"}
+                </h3>
+                <div className="mt-2 space-y-2 text-sm text-neutral-700">
+                  {activeItem.userName && <p>{activeItem.userName}</p>}
+                  {activeItem.userEmail && <p>{activeItem.userEmail}</p>}
+                  {activeItem.userTelephone && <p>{activeItem.userTelephone}</p>}
+                  {(activeItem.userAddress || activeItem.userCity) && (
+                    <p className="flex items-start gap-1">
+                      <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400 mt-0.5" aria-hidden>
+                        <path d="M12 21s-6-5.686-6-10a6 6 0 1112 0c0 4.314-6 10-6 10z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx="12" cy="11" r="2.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <span>{[activeItem.userAddress, activeItem.userCity].filter(Boolean).join(', ')}</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+            {activeItem.attachments && activeItem.attachments.length > 0 && (
+              <div className="mt-6">
+                <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
+                    <path d="M21.44 11.05L13 19.5a5 5 0 01-7.07-7.07l8.49-8.49a3 3 0 014.24 4.24l-8.49 8.49a1 1 0 01-1.41-1.41l7.78-7.78" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {locale === "es" ? "Adjuntos" : "Attachments"}
+                </h3>
+                <ul className="mt-2 space-y-1 text-sm">
+                  {activeItem.attachments.map((url, idx) => (
+                    <li key={idx} className="flex items-center gap-2">
+                      <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="M14 2v6h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline break-words"
+                      >
+                        {url}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 
@@ -522,8 +810,21 @@ export default function ActivityPage() {
     providerId?: string | null;
     userName?: string | null;
     dueDate?: string | null;
+    attachments?: string[] | null;
+    message?: string | null;
+    serviceLocation?: string | null;
+    requestPropertyType?: string | null;
+    requestCleaningType?: string | null;
+    requestCleaningFrequency?: string | null;
+    userEmail?: string | null;
+    userTelephone?: string | null;
+    userAddress?: string | null;
+    userCity?: string | null;
+    providerAssignedAt?: string | null;
+    requestClosedAt?: string | null;
+    serviceSlug?: string | null;
   }) {
-    const { id, title, description, createdAt, status, serviceId, providerId, userName, dueDate } = props;
+    const { id, title, description, createdAt, status, serviceId, providerId, userName, dueDate, attachments } = props;
     const meta = statusMeta(status);
     const when = createdAt ? formatWhen(createdAt, locale) : null;
     const due = dueDate ? formatDate(dueDate, locale) : null;
@@ -533,12 +834,13 @@ export default function ActivityPage() {
 
     return (
       <motion.div
-        className="group relative w-full"
+        className="group relative w-[70%] mx-auto cursor-pointer"
         aria-label={`${title} – ${meta.label}`}
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.18 }}
         whileTap={{ scale: 0.995 }}
+        onClick={() => setActiveItem(props)}
       >
         <div className="flex overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_0_#0000000d] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
           <div className={`w-1 sm:w-1.5 ${meta.rail}`} aria-hidden />
@@ -549,6 +851,15 @@ export default function ActivityPage() {
                   <div className="flex items-center justify-between gap-3">
                     <h2 className="truncate font-semibold text-neutral-900 text-[15px] sm:text-base">{title}</h2>
                     <div className="flex items-center gap-2 shrink-0">
+                      {attachments && attachments.length > 0 && (
+                        <svg
+                          viewBox="0 0 24 24"
+                          className="h-4 w-4 text-neutral-400"
+                          aria-label="Has attachments"
+                        >
+                          <path d="M21.44 11.05L13 19.5a5 5 0 01-7.07-7.07l8.49-8.49a3 3 0 014.24 4.24l-8.49 8.49a1 1 0 01-1.41-1.41l7.78-7.78" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium leading-5 ${meta.pill}`}>{meta.label}</span>
                       <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400 transition-transform group-hover:translate-x-0.5" aria-hidden>
                         <path d="M9 18l6-6-6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -558,13 +869,23 @@ export default function ActivityPage() {
 
                   <p className="mt-1 text-neutral-700 line-clamp-2 text-sm">{description}</p>
 
-                  {role === "admin" && (
+                  {due && (
                     <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:gap-4 text-[12px] text-neutral-500">
-                      {userName && <span>{userName}</span>}
-                      {due && (
-                        <span>
-                          {pageT.due}: <time dateTime={due.iso}>{due.date}</time>
-                        </span>
+                      {role === "admin" && userName && <span>{userName}</span>}
+                      <span>
+                        {pageT.due}: <time dateTime={due.iso}>{due.date}</time>
+                      </span>
+                      {role === "admin" && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            extendDeadline(id, dueDate);
+                          }}
+                          className="rounded bg-neutral-200 px-2 py-0.5 text-xs text-neutral-700"
+                        >
+                          {locale === "es" ? "Extender +3d" : "Extend +3d"}
+                        </button>
                       )}
                     </div>
                   )}
@@ -604,6 +925,7 @@ export default function ActivityPage() {
                         className="border border-neutral-300 rounded px-2 py-1 text-sm"
                         value={selected}
                         onChange={(e) => setSelected(e.target.value)}
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <option value="">
                           {locale === "es" ? "Seleccionar" : "Select"}
@@ -616,7 +938,10 @@ export default function ActivityPage() {
                       </select>
                       <button
                         type="button"
-                        onClick={() => assignProvider(id, selected)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          assignProvider(id, selected);
+                        }}
                         disabled={assignDisabled}
                         className="rounded bg-neutral-900 px-3 py-1 text-xs font-medium text-white disabled:opacity-40"
                       >
@@ -637,7 +962,7 @@ export default function ActivityPage() {
 
 function SkeletonCard() {
   return (
-    <div className="flex overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_0_#0000000d]">
+    <div className="w-[70%] mx-auto flex overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_0_#0000000d]">
       <div className="w-1.5 bg-neutral-200" aria-hidden />
       <div className="w-full p-5">
         <div className="h-4 w-40 bg-neutral-200 rounded" />
