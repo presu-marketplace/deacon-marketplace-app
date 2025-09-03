@@ -282,10 +282,10 @@ export default function ActivityPage() {
     title: locale === "es" ? "Actividad" : "Activity",
     loading: locale === "es" ? "Cargando..." : "Loading...",
     empty: locale === "es" ? "Sin actividad para mostrar" : "No activity to display",
-    open: locale === "es" ? "abierto" : "open",
-    closed: locale === "es" ? "cerrado" : "closed",
-    pending: locale === "es" ? "pendiente" : "pending",
-    assigned: locale === "es" ? "asignado" : "assigned",
+    open: locale === "es" ? "Abierto" : "Open",
+    closed: locale === "es" ? "Cerrado" : "Closed",
+    pending: locale === "es" ? "Pendiente" : "Pending",
+    assigned: locale === "es" ? "Asignado" : "Assigned",
     noDescription: locale === "es" ? "Sin descripción" : "No description",
     results: locale === "es" ? "resultados" : "results",
     all: locale === "es" ? "Todos" : "All",
@@ -396,7 +396,7 @@ export default function ActivityPage() {
       setServiceNames(map);
     };
     fetchServices();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const fetchProviders = async () => {
@@ -556,14 +556,9 @@ export default function ActivityPage() {
       .update({
         provider_id: providerId,
         provider_assigned_at: now,
-        request_status: "closed",
-        request_closed_at: now,
+        request_status: "assigned",
       })
       .eq("id", requestId);
-
-    await supabase
-      .from("service_request_services")
-      .upsert({ request_id: requestId, provider_id: providerId }, { onConflict: "request_id" });
 
     setRequests((prev) =>
       prev.map((r) =>
@@ -572,13 +567,14 @@ export default function ActivityPage() {
               ...r,
               provider_id: providerId,
               provider_assigned_at: now,
-              request_status: "closed",
-              request_closed_at: now,
+              request_status: "assigned",
             }
           : r
       )
     );
-  }, []);
+    setActiveItem(null);
+    router.refresh();
+  }, [router]);
 
   const extendDeadline = useCallback(async (requestId: string, currentDue?: string) => {
     const base = currentDue ? new Date(currentDue) : new Date();

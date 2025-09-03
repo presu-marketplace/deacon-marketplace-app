@@ -401,8 +401,11 @@ export default function ServiceRequestModal({
                     ))}
                   </select>
                   <button
-                    onClick={() => {
-                      if (selected) onAssign?.(request.id, selected);
+                    onClick={async () => {
+                      if (selected) {
+                        await onAssign?.(request.id, selected);
+                        onClose?.();
+                      }
                       setAssignMode(false);
                       setSelected("");
                     }}
