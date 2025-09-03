@@ -282,10 +282,10 @@ export default function ActivityPage() {
     title: locale === "es" ? "Actividad" : "Activity",
     loading: locale === "es" ? "Cargando..." : "Loading...",
     empty: locale === "es" ? "Sin actividad para mostrar" : "No activity to display",
-    open: locale === "es" ? "abierto" : "open",
-    closed: locale === "es" ? "cerrado" : "closed",
-    pending: locale === "es" ? "pendiente" : "pending",
-    assigned: locale === "es" ? "asignado" : "assigned",
+    open: locale === "es" ? "Abierto" : "Open",
+    closed: locale === "es" ? "Cerrado" : "Closed",
+    pending: locale === "es" ? "Pendiente" : "Pending",
+    assigned: locale === "es" ? "Asignado" : "Assigned",
     noDescription: locale === "es" ? "Sin descripción" : "No description",
     results: locale === "es" ? "resultados" : "results",
     all: locale === "es" ? "Todos" : "All",
@@ -396,7 +396,7 @@ export default function ActivityPage() {
       setServiceNames(map);
     };
     fetchServices();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const fetchProviders = async () => {
@@ -549,36 +549,36 @@ export default function ActivityPage() {
     );
   }, [items, query, statusFilter, userQuery, sortOrder, role]);
 
-  const assignProvider = useCallback(async (requestId: string, providerId: string) => {
-    const now = new Date().toISOString();
-    await supabase
-      .from("service_requests")
-      .update({
-        provider_id: providerId,
-        provider_assigned_at: now,
-        request_status: "closed",
-        request_closed_at: now,
-      })
-      .eq("id", requestId);
+  const assignProvider = useCallback(
+    async (requestId: string, providerId: string) => {
+      const now = new Date().toISOString();
+      const { error } = await supabase.rpc("assign_provider", {
+        req_id: requestId,
+        prov_id: providerId,
+      });
 
-    await supabase
-      .from("service_request_services")
-      .upsert({ request_id: requestId, provider_id: providerId }, { onConflict: "request_id" });
+      if (error) {
+        console.error("Failed to assign provider", error);
+        return;
+      }
 
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === requestId
-          ? {
-              ...r,
-              provider_id: providerId,
-              provider_assigned_at: now,
-              request_status: "closed",
-              request_closed_at: now,
-            }
-          : r
-      )
-    );
-  }, []);
+      setRequests((prev) =>
+        prev.map((r) =>
+          r.id === requestId
+            ? {
+                ...r,
+                provider_id: providerId,
+                provider_assigned_at: now,
+                request_status: "assigned",
+              }
+            : r
+        )
+      );
+      setActiveItem(null);
+      router.refresh();
+    },
+    [router]
+  );
 
   const extendDeadline = useCallback(async (requestId: string, currentDue?: string) => {
     const base = currentDue ? new Date(currentDue) : new Date();
