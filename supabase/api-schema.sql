@@ -166,17 +166,9 @@ create trigger service_requests_provider_role_check
 -- Remove legacy category column if exists
 alter table api.service_requests drop column if exists category;
 
--- Link each service request to a provider offer
-create table if not exists api.service_request_services (
-  request_id uuid not null references api.service_requests(id) on delete cascade,
-  provider_id uuid references api.providers(user_id) on delete set null,
-  primary key (request_id)
-);
-
 -- Grant API schema privileges to service_role
 grant usage on schema api to service_role;
 grant all on api.profiles to service_role;
 grant all on api.providers to service_role;
 grant all on api.provider_services to service_role;
 grant all on api.service_requests to service_role;
-grant all on api.service_request_services to service_role;
