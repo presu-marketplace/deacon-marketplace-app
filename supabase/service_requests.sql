@@ -78,3 +78,25 @@ end;
 $$;
 
 grant execute on function api.assign_provider(uuid, uuid) to authenticated;
+
+-- RPC for closing service requests; restricted to admins
+create or replace function api.close_request(req_id uuid)
+returns void
+security definer
+language plpgsql
+as $$
+begin
+  if not exists (
+    select 1 from api.profiles p where p.id = auth.uid() and p.role = 'admin'
+  ) then
+    raise exception 'only admins can close requests';
+  end if;
+
+  update api.service_requests
+    set request_status = 'closed',
+        request_closed_at = now()
+    where id = req_id;
+end;
+$$;
+
+grant execute on function api.close_request(uuid) to authenticated;
