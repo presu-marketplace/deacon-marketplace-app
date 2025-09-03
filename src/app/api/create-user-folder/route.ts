@@ -42,7 +42,7 @@ export async function POST(req: Request) {
           ? 'provider'
           : (existingProfile.role as 'client' | 'provider')
 
-      const updates: Record<string, any> = {}
+      const updates: Record<string, unknown> = {}
       if (fullName) updates.full_name = fullName
       if (finalRole !== existingProfile.role) updates.role = finalRole
 
