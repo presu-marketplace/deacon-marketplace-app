@@ -396,7 +396,7 @@ export default function ActivityPage() {
       setServiceNames(map);
     };
     fetchServices();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const fetchProviders = async () => {
@@ -572,7 +572,9 @@ export default function ActivityPage() {
           : r
       )
     );
-  }, []);
+    setActiveItem(null);
+    router.refresh();
+  }, [router]);
 
   const extendDeadline = useCallback(async (requestId: string, currentDue?: string) => {
     const base = currentDue ? new Date(currentDue) : new Date();
