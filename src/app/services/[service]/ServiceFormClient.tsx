@@ -238,8 +238,8 @@ export default function ServiceFormClient({ service }: Props) {
   const [submitted, setSubmitted] = useState(false)
   const user = useUser()
 
-  const isSeguridad = service.toLowerCase() === 'seguridad'
-  const isLimpieza = service.toLowerCase() === 'limpieza'
+  const isSeguridad = service.toLowerCase() === 'security'
+  const isLimpieza = service.toLowerCase() === 'cleaning'
   const t = translations[locale]
   type ServiceInfo = typeof serviceInfo[keyof typeof serviceInfo]
   const info: ServiceInfo =
