@@ -716,7 +716,7 @@ export default function ActivityPage() {
           providers={activeItem.serviceId ? providersByService[activeItem.serviceId] || [] : []}
           onClose={() => setActiveItem(null)}
           onAssign={(id, providerId) => assignProvider(id, providerId)}
-          onCloseRequest={(req) => closeRequest(req.id)}
+          onCloseRequest={role === "provider" ? undefined : (req) => closeRequest(req.id)}
           locale={locale}
           t={modalT}
         />
