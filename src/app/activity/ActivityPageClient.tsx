@@ -655,6 +655,7 @@ export default function ActivityPage() {
           onAssign={(req) => console.log("assign", req.id)}
           onCloseRequest={(req) => closeRequest(req.id)}
         />
+
       )}
     </>
   );
