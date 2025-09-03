@@ -5,16 +5,15 @@ alter table api.service_requests enable row level security;
 grant usage on schema api to authenticated;
 grant select, insert, update, delete on api.service_requests to authenticated;
 
--- Clients can view their own requests
-create policy "service_requests select own" on api.service_requests
+create policy "Clients can view their own service requests" on api.service_requests
 for select to authenticated using (user_id = auth.uid());
 
 -- Providers can view assigned requests
-create policy "service_requests select assigned" on api.service_requests
+create policy "Providers can view assigned service requests" on api.service_requests
 for select to authenticated using (provider_id = auth.uid());
 
 -- Admins can view all requests
-create policy "service_requests select all" on api.service_requests
+create policy "Admins can view all service requests" on api.service_requests
 for select to authenticated using (
   exists (
     select 1 from api.profiles p
@@ -23,11 +22,11 @@ for select to authenticated using (
 );
 
 -- Clients can create their own requests
-create policy "service_requests insert own" on api.service_requests
+create policy "Clients can insert their own service requests" on api.service_requests
 for insert to authenticated with check (user_id = auth.uid());
 
 -- Allow updates by owner, assigned provider, or admin
-create policy "service_requests update allowed" on api.service_requests
+create policy "Clients, assigned providers, or admins can update service requests" on api.service_requests
 for update to authenticated using (
   user_id = auth.uid()
   or provider_id = auth.uid()
