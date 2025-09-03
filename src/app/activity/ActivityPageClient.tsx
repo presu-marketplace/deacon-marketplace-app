@@ -630,7 +630,7 @@ export default function ActivityPage() {
                 role={role}
               />
               {filtered.length ? (
-                <ul className="mt-4 space-y-3">
+                <ul className="mt-6 space-y-3">
                   {filtered.map((it) => (
                     <li key={it.id}>
                       <ActivityCard
