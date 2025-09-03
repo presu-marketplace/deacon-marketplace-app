@@ -549,37 +549,36 @@ export default function ActivityPage() {
     );
   }, [items, query, statusFilter, userQuery, sortOrder, role]);
 
-  const assignProvider = useCallback(async (requestId: string, providerId: string) => {
-    const now = new Date().toISOString();
-    const { error } = await supabase
-      .from("service_requests")
-      .update({
-        provider_id: providerId,
-        provider_assigned_at: now,
-        request_status: "assigned",
-      })
-      .eq("id", requestId);
+  const assignProvider = useCallback(
+    async (requestId: string, providerId: string) => {
+      const now = new Date().toISOString();
+      const { error } = await supabase.rpc("assign_provider", {
+        req_id: requestId,
+        prov_id: providerId,
+      });
 
-    if (error) {
-      console.error("Failed to assign provider", error);
-      return;
-    }
+      if (error) {
+        console.error("Failed to assign provider", error);
+        return;
+      }
 
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === requestId
-          ? {
-              ...r,
-              provider_id: providerId,
-              provider_assigned_at: now,
-              request_status: "assigned",
-            }
-          : r
-      )
-    );
-    setActiveItem(null);
-    router.refresh();
-  }, [router]);
+      setRequests((prev) =>
+        prev.map((r) =>
+          r.id === requestId
+            ? {
+                ...r,
+                provider_id: providerId,
+                provider_assigned_at: now,
+                request_status: "assigned",
+              }
+            : r
+        )
+      );
+      setActiveItem(null);
+      router.refresh();
+    },
+    [router]
+  );
 
   const extendDeadline = useCallback(async (requestId: string, currentDue?: string) => {
     const base = currentDue ? new Date(currentDue) : new Date();

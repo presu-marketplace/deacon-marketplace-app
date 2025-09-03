@@ -56,10 +56,25 @@ for delete to authenticated using (
   )
 );
 
--- Admins can delete requests
-create policy "Admins can delete service requests" on api.service_requests
-for delete to authenticated using (
-  exists (
+-- RPC for assigning providers; restricted to admins
+create or replace function api.assign_provider(req_id uuid, prov_id uuid)
+returns void
+security definer
+language plpgsql
+as $$
+begin
+  if not exists (
     select 1 from api.profiles p where p.id = auth.uid() and p.role = 'admin'
-  )
-);
+  ) then
+    raise exception 'only admins can assign providers';
+  end if;
+
+  update api.service_requests
+    set provider_id = prov_id,
+        provider_assigned_at = now(),
+        request_status = 'assigned'
+    where id = req_id;
+end;
+$$;
+
+grant execute on function api.assign_provider(uuid, uuid) to authenticated;
