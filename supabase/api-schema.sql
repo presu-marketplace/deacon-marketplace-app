@@ -30,7 +30,9 @@ create table if not exists api.providers (
 );
 
 create or replace function api.ensure_provider_role()
-returns trigger as $$
+returns trigger
+security definer
+as $$
 declare
   pid uuid;
 begin
@@ -141,7 +143,9 @@ create trigger trg_service_requests_set_updated_at
 
 -- Ensure service requests come only from client profiles
 create function if not exists api.ensure_client_role()
-returns trigger as $$
+returns trigger
+security definer
+as $$
 begin
   if new.user_id is null then
     return new;
@@ -166,17 +170,9 @@ create trigger service_requests_provider_role_check
 -- Remove legacy category column if exists
 alter table api.service_requests drop column if exists category;
 
--- Link each service request to a provider offer
-create table if not exists api.service_request_services (
-  request_id uuid not null references api.service_requests(id) on delete cascade,
-  provider_id uuid references api.providers(user_id) on delete set null,
-  primary key (request_id)
-);
-
 -- Grant API schema privileges to service_role
 grant usage on schema api to service_role;
 grant all on api.profiles to service_role;
 grant all on api.providers to service_role;
 grant all on api.provider_services to service_role;
 grant all on api.service_requests to service_role;
-grant all on api.service_request_services to service_role;
