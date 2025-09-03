@@ -594,21 +594,28 @@ export default function ActivityPage() {
     );
   }, []);
 
-  const closeRequest = useCallback(async (requestId: string) => {
-    const closedAt = new Date().toISOString();
-    await supabase
-      .from("service_requests")
-      .update({ request_status: "closed", request_closed_at: closedAt })
-      .eq("id", requestId);
-    setRequests((prev) =>
-      prev.map((r) =>
-        r.id === requestId
-          ? { ...r, request_status: "closed", request_closed_at: closedAt }
-          : r
-      )
-    );
-    setActiveItem(null);
-  }, []);
+  const closeRequest = useCallback(
+    async (requestId: string) => {
+      const closedAt = new Date().toISOString();
+      const { error } = await supabase.rpc("close_request", {
+        req_id: requestId,
+      });
+      if (error) {
+        console.error("Failed to close request", error);
+        return;
+      }
+      setRequests((prev) =>
+        prev.map((r) =>
+          r.id === requestId
+            ? { ...r, request_status: "closed", request_closed_at: closedAt }
+            : r
+        )
+      );
+      setActiveItem(null);
+      router.refresh();
+    },
+    [router]
+  );
 
   return (
     <>
