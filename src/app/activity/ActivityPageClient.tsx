@@ -418,7 +418,9 @@ export default function ActivityPage() {
       serviceId: r.service_id,
       providerId: r.provider_id,
       userName: r.user_name,
-      dueDate: r.service_deadline,
+      dueDate:
+        r.service_deadline ||
+        new Date(new Date(r.request_created_at).getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
     }));
   }, [requests, getServiceName, pageT.noDescription]);
 
@@ -448,6 +450,20 @@ export default function ActivityPage() {
       .eq("id", requestId);
     setRequests((prev) =>
       prev.map((r) => (r.id === requestId ? { ...r, provider_id: providerId, request_status: "assigned" } : r))
+    );
+  }, []);
+
+  const extendDeadline = useCallback(async (requestId: string, currentDue?: string) => {
+    const base = currentDue ? new Date(currentDue) : new Date();
+    const extended = new Date(base.getTime() + 3 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0];
+    await supabase
+      .from("service_requests")
+      .update({ service_deadline: extended })
+      .eq("id", requestId);
+    setRequests((prev) =>
+      prev.map((r) => (r.id === requestId ? { ...r, service_deadline: extended } : r))
     );
   }, []);
 
@@ -533,7 +549,7 @@ export default function ActivityPage() {
 
     return (
       <motion.div
-        className="group relative w-full"
+        className="group relative w-[70%] mx-auto"
         aria-label={`${title} – ${meta.label}`}
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -558,13 +574,20 @@ export default function ActivityPage() {
 
                   <p className="mt-1 text-neutral-700 line-clamp-2 text-sm">{description}</p>
 
-                  {role === "admin" && (
+                  {due && (
                     <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:gap-4 text-[12px] text-neutral-500">
-                      {userName && <span>{userName}</span>}
-                      {due && (
-                        <span>
-                          {pageT.due}: <time dateTime={due.iso}>{due.date}</time>
-                        </span>
+                      {role === "admin" && userName && <span>{userName}</span>}
+                      <span>
+                        {pageT.due}: <time dateTime={due.iso}>{due.date}</time>
+                      </span>
+                      {role === "admin" && (
+                        <button
+                          type="button"
+                          onClick={() => extendDeadline(id, dueDate)}
+                          className="rounded bg-neutral-200 px-2 py-0.5 text-xs text-neutral-700"
+                        >
+                          {locale === "es" ? "Extender +3d" : "Extend +3d"}
+                        </button>
                       )}
                     </div>
                   )}
@@ -637,7 +660,7 @@ export default function ActivityPage() {
 
 function SkeletonCard() {
   return (
-    <div className="flex overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_0_#0000000d]">
+    <div className="w-[70%] mx-auto flex overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_0_#0000000d]">
       <div className="w-1.5 bg-neutral-200" aria-hidden />
       <div className="w-full p-5">
         <div className="h-4 w-40 bg-neutral-200 rounded" />
