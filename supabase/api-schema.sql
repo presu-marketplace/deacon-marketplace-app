@@ -30,7 +30,9 @@ create table if not exists api.providers (
 );
 
 create or replace function api.ensure_provider_role()
-returns trigger as $$
+returns trigger
+security definer
+as $$
 declare
   pid uuid;
 begin
@@ -141,7 +143,9 @@ create trigger trg_service_requests_set_updated_at
 
 -- Ensure service requests come only from client profiles
 create function if not exists api.ensure_client_role()
-returns trigger as $$
+returns trigger
+security definer
+as $$
 begin
   if new.user_id is null then
     return new;

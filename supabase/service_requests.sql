@@ -4,6 +4,7 @@ alter table api.service_requests enable row level security;
 -- Allow authenticated users to work with their service requests
 grant usage on schema api to authenticated;
 grant select, insert, update, delete on api.service_requests to authenticated;
+grant select on api.profiles to authenticated;
 
 create policy "Clients can view their own service requests" on api.service_requests
 for select to authenticated using (user_id = auth.uid());

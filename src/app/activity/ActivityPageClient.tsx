@@ -551,7 +551,7 @@ export default function ActivityPage() {
 
   const assignProvider = useCallback(async (requestId: string, providerId: string) => {
     const now = new Date().toISOString();
-    await supabase
+    const { error } = await supabase
       .from("service_requests")
       .update({
         provider_id: providerId,
@@ -559,6 +559,11 @@ export default function ActivityPage() {
         request_status: "assigned",
       })
       .eq("id", requestId);
+
+    if (error) {
+      console.error("Failed to assign provider", error);
+      return;
+    }
 
     setRequests((prev) =>
       prev.map((r) =>
