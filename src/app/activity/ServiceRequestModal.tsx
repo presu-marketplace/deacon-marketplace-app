@@ -377,7 +377,7 @@ export default function ServiceRequestModal({
         <div className="flex items-center justify-between gap-3 border-t border-neutral-200 px-6 py-4">
           <div className="text-xs text-neutral-500">ID: {request.id}</div>
           <div className="flex items-center gap-2">
-            {request.request_status !== "closed" && (
+            {request.request_status !== "closed" && role !== "provider" && (
               <button
                 onClick={() => onCloseRequest?.(request)}
                 className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
