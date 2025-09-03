@@ -6,6 +6,7 @@ import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import useUser from "@/features/auth/useUser";
 import { supabase } from "@/lib/supabaseClient";
+import ServiceRequestModal, { RequestStatus } from "./ServiceRequestModal";
 
 /**
  * Uber‑style inspired Activity UI
@@ -539,11 +540,21 @@ export default function ActivityPage() {
     );
   }, []);
 
-  const activeMeta = activeItem ? statusMeta(activeItem.status) : null;
-  const modalRequested = activeItem?.createdAt ? formatWhen(activeItem.createdAt, locale) : null;
-  const modalDue = activeItem?.dueDate ? formatDate(activeItem.dueDate, locale) : null;
-  const modalAssigned = activeItem?.providerAssignedAt ? formatWhen(activeItem.providerAssignedAt, locale) : null;
-  const modalClosed = activeItem?.requestClosedAt ? formatWhen(activeItem.requestClosedAt, locale) : null;
+  const closeRequest = useCallback(async (requestId: string) => {
+    const closedAt = new Date().toISOString();
+    await supabase
+      .from("service_requests")
+      .update({ request_status: "closed", request_closed_at: closedAt })
+      .eq("id", requestId);
+    setRequests((prev) =>
+      prev.map((r) =>
+        r.id === requestId
+          ? { ...r, request_status: "closed", request_closed_at: closedAt }
+          : r
+      )
+    );
+    setActiveItem(null);
+  }, []);
 
   return (
     <>
@@ -615,186 +626,36 @@ export default function ActivityPage() {
       )}
         </div>
       </div>
-      {activeItem && activeMeta && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={() => setActiveItem(null)}
-        >
-          <div
-            className={`w-full max-w-2xl rounded-2xl bg-white p-6 shadow-lg relative border-t-4 ${activeMeta.accent}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setActiveItem(null)}
-              aria-label="Close"
-              className="absolute right-3 top-3 rounded-full p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
-                <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-neutral-900">{activeItem.title}</h2>
-              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${activeMeta.pill}`}>
-                {activeMeta.label}
-              </span>
-            </div>
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
-                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
-                      <path d="M9 2h6a2 2 0 012 2v1h3a1 1 0 011 1v15a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1h3V4a2 2 0 012-2z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M9 4h6v2H9z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    {locale === "es" ? "Detalles del servicio" : "Service Details"}
-                  </h3>
-                  <div className="mt-2 space-y-2 text-sm text-neutral-700">
-                    {activeItem.description && (
-                      <p className="whitespace-pre-wrap">{activeItem.description}</p>
-                    )}
-                    {activeItem.message && (
-                      <p className="whitespace-pre-wrap">{activeItem.message}</p>
-                    )}
-                    {activeItem.serviceLocation && <p>{activeItem.serviceLocation}</p>}
-                    {activeItem.serviceSlug === "security" && activeItem.requestPropertyType && (
-                      <p>{activeItem.requestPropertyType}</p>
-                    )}
-                    {activeItem.serviceSlug === "cleaning" && (
-                      <>
-                        {activeItem.requestCleaningType && <p>{activeItem.requestCleaningType}</p>}
-                        {activeItem.requestCleaningFrequency && <p>{activeItem.requestCleaningFrequency}</p>}
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
-                    <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
-                      <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    {locale === "es" ? "Cronología" : "Timeline"}
-                  </h3>
-                  <ul className="mt-2 space-y-1 text-sm text-neutral-600">
-                    {modalRequested && (
-                      <li className="flex items-center gap-2">
-                        <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                          <line x1="16" y1="2" x2="16" y2="6" />
-                          <line x1="8" y1="2" x2="8" y2="6" />
-                          <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg>
-                        <span>
-                          {locale === "es" ? "Solicitado el" : "Requested on"}{" "}
-                          <time dateTime={modalRequested.iso}>
-                            {modalRequested.date} · {modalRequested.time}
-                          </time>
-                        </span>
-                      </li>
-                    )}
-                    {modalDue && (
-                      <li className="flex items-center gap-2">
-                        <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
-                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                          <line x1="16" y1="2" x2="16" y2="6" />
-                          <line x1="8" y1="2" x2="8" y2="6" />
-                          <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg>
-                        <span>
-                          {locale === "es" ? "Vence" : "Due by"}{" "}
-                          <time dateTime={modalDue.iso}>{modalDue.date}</time>
-                        </span>
-                      </li>
-                    )}
-                    {modalAssigned && (
-                      <li className="flex items-center gap-2">
-                        <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
-                          <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <span>
-                          {locale === "es" ? "Asignado el" : "Assigned at"}{" "}
-                          <time dateTime={modalAssigned.iso}>
-                            {modalAssigned.date} · {modalAssigned.time}
-                          </time>
-                        </span>
-                      </li>
-                    )}
-                    {modalClosed && (
-                      <li className="flex items-center gap-2">
-                        <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
-                          <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                          <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <span>
-                          {locale === "es" ? "Cerrado el" : "Closed at"}{" "}
-                          <time dateTime={modalClosed.iso}>
-                            {modalClosed.date} · {modalClosed.time}
-                          </time>
-                        </span>
-                      </li>
-                    )}
-                  </ul>
-                </div>
-              </div>
-              <div>
-                <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
-                  <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
-                    <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M6 20c0-3.313 2.687-6 6-6s6 2.687 6 6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  {locale === "es" ? "Solicitante" : "Requester"}
-                </h3>
-                <div className="mt-2 space-y-2 text-sm text-neutral-700">
-                  {activeItem.userName && <p>{activeItem.userName}</p>}
-                  {activeItem.userEmail && <p>{activeItem.userEmail}</p>}
-                  {activeItem.userTelephone && <p>{activeItem.userTelephone}</p>}
-                  {(activeItem.userAddress || activeItem.userCity) && (
-                    <p className="flex items-start gap-1">
-                      <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400 mt-0.5" aria-hidden>
-                        <path d="M12 21s-6-5.686-6-10a6 6 0 1112 0c0 4.314-6 10-6 10z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        <circle cx="12" cy="11" r="2.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      <span>{[activeItem.userAddress, activeItem.userCity].filter(Boolean).join(', ')}</span>
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-            {activeItem.attachments && activeItem.attachments.length > 0 && (
-              <div className="mt-6">
-                <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
-                  <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
-                    <path d="M21.44 11.05L13 19.5a5 5 0 01-7.07-7.07l8.49-8.49a3 3 0 014.24 4.24l-8.49 8.49a1 1 0 01-1.41-1.41l7.78-7.78" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  {locale === "es" ? "Adjuntos" : "Attachments"}
-                </h3>
-                <ul className="mt-2 space-y-1 text-sm">
-                  {activeItem.attachments.map((url, idx) => (
-                    <li key={idx} className="flex items-center gap-2">
-                      <svg viewBox="0 0 24 24" className="h-4 w-4 text-neutral-400" aria-hidden>
-                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        <path d="M14 2v6h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline break-words"
-                      >
-                        {url}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
+      {activeItem && (
+        <ServiceRequestModal
+          open
+          request={{
+            id: activeItem.id,
+            service_name: activeItem.title,
+            service_id: activeItem.serviceId,
+            service_description: activeItem.description,
+            request_message: activeItem.message,
+            service_location: activeItem.serviceLocation,
+            service_deadline: activeItem.dueDate,
+            request_property_type: activeItem.requestPropertyType,
+            request_cleaning_type: activeItem.requestCleaningType,
+            request_cleaning_frequency: activeItem.requestCleaningFrequency,
+            request_invoice_urls: activeItem.attachments,
+            request_status: normalizeStatus(activeItem.status) as RequestStatus,
+            request_created_at: activeItem.createdAt,
+            provider_assigned_at: activeItem.providerAssignedAt,
+            request_closed_at: activeItem.requestClosedAt,
+            user_name: activeItem.userName,
+            user_email: activeItem.userEmail,
+            user_telephone: activeItem.userTelephone,
+            user_address: activeItem.userAddress,
+            user_city: activeItem.userCity,
+          }}
+          onClose={() => setActiveItem(null)}
+          onAssign={(req) => console.log("assign", req.id)}
+          onCloseRequest={(req) => closeRequest(req.id)}
+        />
+
       )}
     </>
   );
