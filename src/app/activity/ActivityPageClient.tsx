@@ -560,10 +560,21 @@ export default function ActivityPage() {
         request_closed_at: now,
       })
       .eq("id", requestId);
+
+    await supabase
+      .from("service_request_services")
+      .upsert({ request_id: requestId, provider_id: providerId }, { onConflict: "request_id" });
+
     setRequests((prev) =>
       prev.map((r) =>
         r.id === requestId
-          ? { ...r, provider_id: providerId, request_status: "closed", request_closed_at: now }
+          ? {
+              ...r,
+              provider_id: providerId,
+              provider_assigned_at: now,
+              request_status: "closed",
+              request_closed_at: now,
+            }
           : r
       )
     );
@@ -731,13 +742,10 @@ export default function ActivityPage() {
     requestClosedAt?: string | null;
     serviceSlug?: string | null;
   }) {
-    const { id, title, description, createdAt, status, serviceId, providerId, userName, dueDate, attachments } = props;
+    const { id, title, description, createdAt, status, userName, dueDate, attachments } = props;
     const meta = statusMeta(status);
     const when = createdAt ? formatWhen(createdAt, locale) : null;
     const due = dueDate ? formatDate(dueDate, locale) : null;
-    const providerOptions = serviceId ? providersByService[serviceId] || [] : [];
-    const [selected, setSelected] = useState(providerId || "");
-    const assignDisabled = !selected || selected === providerId;
 
     return (
       <motion.div
@@ -826,36 +834,7 @@ export default function ActivityPage() {
                     </div>
                   )}
 
-                  {role === "admin" && providerOptions.length > 0 && (
-                    <div className="mt-3 flex items-center gap-2">
-                      <select
-                        className="border border-neutral-300 rounded px-2 py-1 text-sm"
-                        value={selected}
-                        onChange={(e) => setSelected(e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <option value="">
-                          {locale === "es" ? "Seleccionar" : "Select"}
-                        </option>
-                        {providerOptions.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.name || p.id}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          assignProvider(id, selected);
-                        }}
-                        disabled={assignDisabled}
-                        className="rounded bg-neutral-900 px-3 py-1 text-xs font-medium text-white disabled:opacity-40"
-                      >
-                        {locale === "es" ? "Asignar" : "Assign"}
-                      </button>
-                    </div>
-                  )}
+                  {/* Provider assignment handled within ServiceRequestModal */}
                 </div>
               </div>
             </div>
