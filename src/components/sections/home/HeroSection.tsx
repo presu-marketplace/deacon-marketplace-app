@@ -184,15 +184,21 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
           {/* Mobile layout */}
           <div className="w-full mt-8 flex flex-col sm:hidden items-center gap-3">
             <div className="relative flex items-center bg-white rounded-full px-4 py-2 shadow w-full">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5 text-gray-500 mr-2 cursor-pointer"
-                viewBox="0 0 256 256"
-                fill="currentColor"
+              <button
+                type="button"
                 onClick={handleIconClick}
+                aria-label={t.searchHere}
+                className="mr-2 text-gray-500"
               >
-                <path d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 10-11.31 11.31l50.06 50.07a8 8 0 0011.32-11.32zM40 112a72 72 0 1172 72 72.08 72.08 0 01-72-72z" />
-              </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5"
+                  viewBox="0 0 256 256"
+                  fill="currentColor"
+                >
+                  <path d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 10-11.31 11.31l50.06 50.07a8 8 0 0011.32-11.32zM40 112a72 72 0 1172 72 72.08 72.08 0 01-72-72z" />
+                </svg>
+              </button>
               <input
                 ref={searchInputRef}
                 type="text"
@@ -221,15 +227,21 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
           {/* Desktop layout */}
           <div className="hidden sm:flex w-full flex-row justify-center cursor-pointer items-center gap-4 mt-8">
             <div className="relative flex items-center bg-white rounded-full px-4 py-3 shadow w-full max-w-md">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5 text-gray-500 mr-3 cursor-pointer"
-                viewBox="0 0 256 256"
-                fill="currentColor"
+              <button
+                type="button"
                 onClick={handleIconClick}
+                aria-label={t.searchHere}
+                className="mr-3 text-gray-500"
               >
-                <path d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 10-11.31 11.31l50.06 50.07a8 8 0 0011.32-11.32zM40 112a72 72 0 1172 72 72.08 72.08 0 01-72-72z" />
-              </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5"
+                  viewBox="0 0 256 256"
+                  fill="currentColor"
+                >
+                  <path d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 10-11.31 11.31l50.06 50.07a8 8 0 0011.32-11.32zM40 112a72 72 0 1172 72 72.08 72.08 0 01-72-72z" />
+                </svg>
+              </button>
               <input
                 ref={searchInputRef}
                 type="text"

@@ -149,7 +149,9 @@ export async function POST(request: Request) {
       .trim() || null
 
   const deadlineDate =
-    deadline && /^\d{4}-\d{2}-\d{2}$/.test(deadline) ? deadline : null
+    deadline && /^\d{4}-\d{2}-\d{2}$/.test(deadline)
+      ? deadline
+      : new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
   // 6) Insert (explicit schema header for safety)
   const insertPayload = {
