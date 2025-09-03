@@ -195,15 +195,22 @@ export default function ServiceRequestModal({
   open,
   request,
   onClose,
+  role,
+  providers,
   onAssign,
   onCloseRequest,
 }: {
   open: boolean;
   request: ServiceRequest;
   onClose: () => void;
-  onAssign?: (req: ServiceRequest) => void;
+  role: "client" | "provider" | "admin";
+  providers?: { id: string; name: string }[];
+  onAssign?: (id: string, providerId: string) => void;
   onCloseRequest?: (req: ServiceRequest) => void;
 }) {
+  const [assignMode, setAssignMode] = useState(false);
+  const [selected, setSelected] = useState("");
+
   if (!open) return null;
 
   const systems = Array.isArray(request.request_systems)
@@ -225,11 +232,11 @@ export default function ServiceRequestModal({
 
       <motion.div
         key="modal"
-        initial={{ opacity: 0, y: 12, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 12, scale: 0.98 }}
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.98 }}
         transition={{ type: "spring", stiffness: 260, damping: 22 }}
-        className="fixed inset-x-0 top-20 z-50 mx-auto w-[min(920px,92vw)] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl"
+        className="fixed left-1/2 top-1/2 z-50 w-[min(920px,92vw)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl"
         role="dialog"
         aria-modal="true"
       >
@@ -337,13 +344,50 @@ export default function ServiceRequestModal({
                 Mark as Closed
               </button>
             )}
-            {request.request_status === "open" && (
-              <button
-                onClick={() => onAssign?.(request)}
-                className="rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
-              >
-                Assign Provider
-              </button>
+            {request.request_status === "open" && role === "admin" && (
+              assignMode ? (
+                <>
+                  <select
+                    className="rounded-xl border border-neutral-200 px-3 py-2 text-sm"
+                    value={selected}
+                    onChange={(e) => setSelected(e.target.value)}
+                  >
+                    <option value="">Select provider</option>
+                    {(providers || []).map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name || p.id}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => {
+                      if (selected) onAssign?.(request.id, selected);
+                      setAssignMode(false);
+                      setSelected("");
+                    }}
+                    disabled={!selected}
+                    className="rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-40"
+                  >
+                    Assign
+                  </button>
+                  <button
+                    onClick={() => {
+                      setAssignMode(false);
+                      setSelected("");
+                    }}
+                    className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setAssignMode(true)}
+                  className="rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+                >
+                  Assign Provider
+                </button>
+              )
             )}
           </div>
         </div>

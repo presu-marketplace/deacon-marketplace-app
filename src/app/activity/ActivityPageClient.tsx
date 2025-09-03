@@ -513,16 +513,22 @@ export default function ActivityPage() {
   }, [items, query, statusFilter, userQuery, sortOrder, role]);
 
   const assignProvider = useCallback(async (requestId: string, providerId: string) => {
+    const now = new Date().toISOString();
     await supabase
       .from("service_requests")
       .update({
         provider_id: providerId,
-        provider_assigned_at: new Date().toISOString(),
-        request_status: "assigned",
+        provider_assigned_at: now,
+        request_status: "closed",
+        request_closed_at: now,
       })
       .eq("id", requestId);
     setRequests((prev) =>
-      prev.map((r) => (r.id === requestId ? { ...r, provider_id: providerId, request_status: "assigned" } : r))
+      prev.map((r) =>
+        r.id === requestId
+          ? { ...r, provider_id: providerId, request_status: "closed", request_closed_at: now }
+          : r
+      )
     );
   }, []);
 
@@ -651,11 +657,12 @@ export default function ActivityPage() {
             user_address: activeItem.userAddress,
             user_city: activeItem.userCity,
           }}
+          role={role}
+          providers={activeItem.serviceId ? providersByService[activeItem.serviceId] || [] : []}
           onClose={() => setActiveItem(null)}
-          onAssign={(req) => console.log("assign", req.id)}
+          onAssign={(id, providerId) => assignProvider(id, providerId)}
           onCloseRequest={(req) => closeRequest(req.id)}
         />
-
       )}
     </>
   );
