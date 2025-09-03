@@ -131,7 +131,7 @@ const translations = {
 }
 
 const serviceInfo = {
-  seguridad: {
+  security: {
     esName: 'Seguridad privada',
     enName: 'Private Security',
     esDesc: 'Protección integral para hogares y negocios.',
@@ -139,7 +139,7 @@ const serviceInfo = {
     image: '/images/services/security.jpg',
     rating: '4.8'
   },
-  limpieza: {
+  cleaning: {
     esName: 'Limpieza Profesional',
     enName: 'Professional Cleaning',
     esDesc: 'Servicios de limpieza detallados para cualquier espacio.',
@@ -147,7 +147,7 @@ const serviceInfo = {
     image: '/images/services/cleaning.jpg',
     rating: '4.7'
   },
-  fumigacion: {
+  fumigation: {
     esName: 'Fumigación a domicilio',
     enName: 'Home Fumigation',
     esDesc: 'Eliminación de plagas con técnicas seguras.',
@@ -155,7 +155,7 @@ const serviceInfo = {
     image: '/images/services/fumigation.jpg',
     rating: '4.6'
   },
-  'mantenimiento-ascensores': {
+  'elevator-maintenance': {
     esName: 'Mantenimiento de ascensores',
     enName: 'Elevator Maintenance',
     esDesc: 'Mantenimiento preventivo y correctivo de ascensores.',
@@ -163,7 +163,7 @@ const serviceInfo = {
     image: '/images/services/elevator_maintenance.jpg',
     rating: '4.5'
   },
-  escribania: {
+  notary: {
     esName: 'Escribanía',
     enName: 'Notary Services',
     esDesc: 'Gestiones notariales con profesionales matriculados.',
@@ -179,7 +179,7 @@ const serviceInfo = {
     image: '/images/services/community.jpg',
     rating: '4.5'
   },
-  'traslados-ejecutivos': {
+  'transfers': {
     esName: 'Traslados Ejecutivos',
     enName: 'Executive Transfers',
     esDesc: 'Transporte ejecutivo cómodo y seguro.',
@@ -187,7 +187,7 @@ const serviceInfo = {
     image: '/images/services/transfer.jpg',
     rating: '4.8'
   },
-  'salones-infantiles': {
+  'kids-party-venues': {
     esName: 'Salones Infantiles',
     enName: 'Kids Party Venues',
     esDesc: 'Espacios ideales para fiestas infantiles.',
