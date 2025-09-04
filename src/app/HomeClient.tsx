@@ -7,6 +7,7 @@ import HeroSection from '../components/sections/home/HeroSection'
 import CardSection from '../components/sections/home/CardSection'
 import Footer from '../components/layout/Footer'
 import LocationPrompt from '../components/sections/home/LocationPrompt'
+import TaglineSection from '../components/sections/home/TaglineSection'
 
 export default function HomeClient() {
   const searchParams = useSearchParams()
@@ -50,6 +51,8 @@ export default function HomeClient() {
       footerNote: 'Do Not Sell or Share My Personal Information',
       copyright: 'All rights reserved.',
       heroHeadline: 'Choose smarter, save more.',
+      tagline:
+        'At Presu we connect companies with suppliers, offering multiple quotes in one place: easy, fast and transparent.',
       joinAsPro: 'Join as a Pro',
       location: 'Location',
       searchHere: 'Search here',
@@ -74,6 +77,8 @@ export default function HomeClient() {
       footerNote: 'No vender ni compartir mi información personal',
       copyright: 'Todos los derechos reservados.',
       heroHeadline: 'Elegí mejor, ahorrá más.',
+      tagline:
+        'En Presu conectamos empresas con proveedores, ofreciendo múltiples presupuestos en un solo lugar: fácil, rápido y transparente.',
       joinAsPro: 'Unirse como profesional',
       location: 'Ubicación',
       searchHere: 'Buscar',
@@ -93,6 +98,7 @@ export default function HomeClient() {
       <div className="w-full">
         <LocationPrompt t={t} setUserAddress={setUserAddress} />
         <HeroSection locale={locale} t={t} userAddress={userAddress} />
+        <TaglineSection t={t} />
       </div>
       <div className="w-full">
         <CardSection locale={locale} t={t} />
