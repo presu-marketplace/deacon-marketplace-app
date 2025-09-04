@@ -188,7 +188,7 @@ function Toolbar({
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <div className="relative">
           <label htmlFor="activity-search" className="sr-only">
             {pageT.searchPlaceholder}
@@ -220,7 +220,7 @@ function Toolbar({
             />
           </div>
         )}
-        <div className="flex items-center gap-1" role="group" aria-label={pageT.filterLabel}>
+        <div className="flex flex-wrap items-center gap-1" role="group" aria-label={pageT.filterLabel}>
           {pills.map((p) => (
             <button
               key={p.key}
