@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name, email, phone, address, city")
+    .select("id, full_name, phone, address, city")
     .in("id", ids);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
