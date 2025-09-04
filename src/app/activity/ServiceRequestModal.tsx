@@ -91,9 +91,9 @@ const LOCALE_MAP: Record<"en" | "es", string> = { en: "en-US", es: "es-AR" };
 const fmtDate = (iso?: string | null, locale: "en" | "es" = "en") =>
   iso
     ? new Date(iso).toLocaleString(LOCALE_MAP[locale], {
-        dateStyle: "medium",
-        timeStyle: "short",
-      })
+      dateStyle: "medium",
+      timeStyle: "short",
+    })
     : null;
 
 const fmtDateOnly = (iso?: string | null, locale: "en" | "es" = "en") =>
@@ -296,23 +296,23 @@ export default function ServiceRequestModal({
     },
     ...(request.provider_assigned_at
       ? [
-          {
-            key: "assigned",
-            label: t.assignedAt,
-            icon: FiUser,
-            subLabel: fmtDate(request.provider_assigned_at, locale) || undefined,
-          },
-        ]
+        {
+          key: "assigned",
+          label: t.assignedAt,
+          icon: FiUser,
+          subLabel: fmtDate(request.provider_assigned_at, locale) || undefined,
+        },
+      ]
       : []),
     ...(request.request_closed_at
       ? [
-          {
-            key: "resolved",
-            label: t.closedAt,
-            icon: FiCheckCircle,
-            subLabel: fmtDate(request.request_closed_at, locale) || undefined,
-          },
-        ]
+        {
+          key: "resolved",
+          label: t.closedAt,
+          icon: FiCheckCircle,
+          subLabel: fmtDate(request.request_closed_at, locale) || undefined,
+        },
+      ]
       : []),
     {
       key: "due",
@@ -437,21 +437,24 @@ export default function ServiceRequestModal({
               </div>
             </div>
 
-            {!showProvider && (
-              <FieldRow
-                icon={FiMail}
-                label={t.email}
-                value={personEmail}
-                href={personEmail ? `mailto:${personEmail}` : undefined}
-              />
-            )}
+            <FieldRow
+              icon={FiMail}
+              label={t.email}
+              value={personEmail}
+              href={personEmail ? `mailto:${personEmail}` : undefined}
+            />
             {showProvider && <FieldRow icon={FiFileText} label={t.taxId} value={taxId} />}
             <FieldRow icon={FiPhone} label={t.phone} value={personPhone} href={personPhone ? `tel:${personPhone}` : undefined} />
             <FieldRow icon={FiMapPin} label={t.address} value={addr} href={mapsHref(addr)} />
 
             <div className="mt-8">
               <SectionLabel icon={FiCalendar}>{t.timeline}</SectionLabel>
-              <Stepper steps={timelineSteps} currentStep={currentStep} className="ml-6 mt-4 mx-0" />
+              <Stepper
+                steps={timelineSteps}
+                currentStep={currentStep}
+                fixedSlots={3} // Requested · Assigned · Closed · Due
+                className="mt-4"
+              />
             </div>
           </section>
         </div>
