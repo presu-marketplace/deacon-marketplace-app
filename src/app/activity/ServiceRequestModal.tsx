@@ -17,7 +17,7 @@ import {
   FiCopy,
   FiCheckCircle,
 } from "react-icons/fi";
-import Stepper from "@/components/ui/Stepper";
+import { AiFillFilePdf } from "react-icons/ai";
 
 export type RequestStatus = "open" | "assigned" | "closed";
 
@@ -203,12 +203,13 @@ function AttachmentList({ urls }: { urls: string[] }) {
     <ul className="space-y-1">
       {urls.map((url, idx) => {
         const size = sizes[url];
-        const name = url.split("/").pop();
+        const raw = decodeURIComponent(url.split("?")[0].split("/").pop() || "");
+        const name = raw.replace(/^[0-9a-fA-F-]{36}-/, "");
         return (
           <li key={idx} className="flex items-center gap-2 text-sm text-neutral-700">
-            <FiFileText className="h-4 w-4 text-neutral-400" />
-            <a href={url} target="_blank" rel="noreferrer" className="truncate hover:underline">
-              {name || url}
+            <AiFillFilePdf className="h-4 w-4 text-red-500" />
+            <a href={url} download={name} className="truncate hover:underline">
+              {name}
             </a>
             {size ? <span className="text-xs text-neutral-500">({fmt(size)})</span> : null}
           </li>
