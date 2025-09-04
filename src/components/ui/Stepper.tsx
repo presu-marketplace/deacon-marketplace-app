@@ -1,22 +1,20 @@
 import * as React from "react";
 
 type Step = {
-  /** Display label for the step */
   label: string;
-  /** Optional icon component to render instead of the step number */
   icon?: React.ElementType;
-  /** Optional secondary line displayed under the label */
+  /** Top sub-line (e.g., date) */
   subLabel?: string;
+  /** Bottom sub-line (e.g., time) */
+  subBottom?: string;
 };
 
 type StepperProps = {
-  /** 1-based index of the active step */
-  currentStep: number;
-  /** Step definitions in order */
+  currentStep: number;                  // 1-based
   steps: Array<string | Step>;
-  /** Optional click handler to allow navigation */
   onStepClick?: (index: number) => void;
   className?: string;
+  fixedSlots?: 3 | 4 | 5 | 6;           // default: steps.length
 };
 
 export default function Stepper({
@@ -24,118 +22,136 @@ export default function Stepper({
   steps,
   onStepClick,
   className = "",
+  fixedSlots,
 }: StepperProps) {
-  // clamp for safety
-  const active = Math.min(Math.max(currentStep, 1), steps.length);
+  const cols = fixedSlots ?? steps.length;
+  const parsed: (Step & { __placeholder?: boolean })[] =
+    steps.map((s) => (typeof s === "string" ? { label: s } : s));
+
+  // pad to fixed slots so spacing never shifts
+  const padded =
+    parsed.length >= cols
+      ? parsed.slice(0, cols)
+      : [
+          ...parsed,
+          ...Array.from({ length: cols - parsed.length }).map(() => ({
+            label: "—",
+            __placeholder: true as const,
+          })),
+        ];
+
+  const active = Math.min(Math.max(currentStep, 1), padded.length);
+  const gridCols = cols * 2 - 1; // node, connector, node, ...
 
   return (
-    <nav
-      aria-label="Progress"
-      className={`w-full max-w-4xl mx-auto select-none ${className}`}
-    >
-      <ol className="flex items-start justify-between gap-2 sm:gap-4">
-        {steps.map((s, i) => {
-          const { label, icon: Icon, subLabel } =
-            typeof s === "string" ? { label: s } : s;
+    <nav aria-label="Progress" className={`w-full select-none ${className}`}>
+      {/* ROW 1: nodes + gray connectors */}
+      <div
+        className="grid items-center"
+        style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0,1fr))` }}
+      >
+        {padded.map((s, i) => {
+          const index = i + 1;
+          const isDone = index < active;
+          const isCurrent = index === active;
+          const isFuture = index > active;
+          const Icon = s.icon;
+
+          return (
+            <React.Fragment key={`node-${i}`}>
+              {/* Node */}
+              <div className="flex items-center justify-center py-1" style={{ gridColumn: i * 2 + 1 }}>
+                <button
+                  type="button"
+                  aria-current={isCurrent ? "step" : undefined}
+                  aria-label={`${index}. ${s.label}`}
+                  onClick={() => onStepClick?.(index)}
+                  disabled={!onStepClick || s.__placeholder}
+                  className={[
+                    "inline-flex h-10 w-10 items-center justify-center rounded-full ring-2 transition",
+                    isDone &&
+                      "bg-neutral-200 ring-neutral-300 text-neutral-600 dark:bg-neutral-700 dark:ring-neutral-600 dark:text-neutral-200",
+                    isCurrent &&
+                      "bg-blue-600 ring-blue-600 text-white shadow-lg shadow-blue-600/40",
+                    isFuture &&
+                      "bg-white ring-neutral-300 text-neutral-400 dark:bg-transparent dark:ring-neutral-600 dark:text-neutral-600",
+                    !s.__placeholder && onStepClick ? "hover:scale-[1.03]" : "cursor-default",
+                  ].join(" ")}
+                >
+                  {s.__placeholder ? (
+                    <span className="text-xs text-neutral-300">•</span>
+                  ) : isDone ? (
+                    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 6 9 17l-5-5" />
+                    </svg>
+                  ) : Icon ? (
+                    <Icon className="h-5 w-5" />
+                  ) : (
+                    <span className="text-sm font-semibold">{index}</span>
+                  )}
+                </button>
+              </div>
+
+              {/* Gray connector to next node */}
+              {i < cols - 1 && (
+                <div aria-hidden className="px-2" style={{ gridColumn: i * 2 + 2 }}>
+                  <div className="h-0.5 w-full rounded-full bg-neutral-300 dark:bg-neutral-700" />
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+
+      {/* ROW 2: labels (title + date + time) under each node */}
+      <div
+        className="mt-2 grid"
+        style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0,1fr))` }}
+      >
+        {padded.map((s, i) => {
           const index = i + 1;
           const isDone = index < active;
           const isCurrent = index === active;
           const isFuture = index > active;
 
           return (
-            <li key={label} className="flex items-center flex-1 min-w-0">
-              {/* Node */}
-              <button
-                type="button"
-                aria-current={isCurrent ? "step" : undefined}
-                aria-label={`${index}. ${label}`}
-                onClick={() => onStepClick?.(index)}
-                disabled={!onStepClick}
+            <div
+              key={`label-${i}`}
+              className="px-2 text-center h-[44px]"   // room for 2 lines
+              style={{ gridColumn: i * 2 + 1 }}
+            >
+              <span
                 className={[
-                  "relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all",
-                  "ring-2 ring-offset-0",
-                  isDone &&
-                    "bg-neutral-200 ring-neutral-300 text-neutral-500 dark:bg-neutral-700 dark:ring-neutral-600 dark:text-neutral-300",
-                  isCurrent &&
-                    "h-10 w-10 bg-blue-600 ring-blue-600 text-white shadow-lg shadow-blue-600/40",
-                  isFuture &&
-                    "bg-transparent ring-neutral-300 text-neutral-400 dark:ring-neutral-600 dark:text-neutral-600",
-                  onStepClick ? "hover:scale-105" : "cursor-default",
+                  "block truncate whitespace-nowrap text-[11px] sm:text-xs leading-tight",
+                  isDone && "text-neutral-400 dark:text-neutral-400",
+                  isCurrent && "text-blue-600 dark:text-blue-400 font-medium",
+                  isFuture && "text-neutral-400/80 dark:text-neutral-600",
                 ].join(" ")}
+                title={s.label}
               >
-                {isDone ? (
-                  /* Check icon */
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-5 w-5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 6 9 17l-5-5" />
-                  </svg>
-                ) : Icon ? (
-                  <Icon className={isCurrent ? "h-6 w-6" : "h-5 w-5"} />
-                ) : (
-                  <span className="text-sm font-semibold">{index}</span>
-                )}
-              </button>
+                {s.label}
+              </span>
 
-              {/* Label */}
-              <div className="ml-2 sm:ml-3 w-24 sm:w-32">
+              {s.subLabel && (
                 <span
-                  className={[
-                    "block text-[11px] sm:text-xs leading-tight",
-                    isDone && "text-neutral-400 dark:text-neutral-400",
-                    isCurrent && "text-blue-600 dark:text-blue-400 font-medium",
-                    isFuture &&
-                      "text-neutral-400/80 dark:text-neutral-600 font-normal",
-                  ].join(" ")}
+                  className="block truncate whitespace-nowrap text-[10px] text-slate-500 dark:text-slate-400"
+                  title={s.subLabel}
                 >
-                  {label}
+                  {s.subLabel}
                 </span>
-                {subLabel && (
-                  <span className="block text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500">
-                    {subLabel}
-                  </span>
-                )}
-              </div>
-
-              {/* Connector */}
-              {index !== steps.length && (
-                <div aria-hidden className="relative mx-2 sm:mx-4 flex-1">
-                  <div
-                    className={[
-                      "h-px w-full",
-                      isDone
-                        ? "bg-neutral-300 dark:bg-neutral-600"
-                        : isCurrent
-                        ? "bg-gradient-to-r from-blue-600 to-neutral-300 dark:from-blue-500 dark:to-neutral-600"
-                        : "bg-neutral-300 dark:bg-neutral-700",
-                    ].join(" ")}
-                  />
-                  <svg
-                    viewBox="0 0 4 4"
-                    className={[
-                      "absolute -right-1 top-1/2 h-2 w-2 -translate-y-1/2",
-                      isDone
-                        ? "text-neutral-300 dark:text-neutral-600"
-                        : isCurrent
-                        ? "text-blue-600 dark:text-blue-500"
-                        : "text-neutral-300 dark:text-neutral-700",
-                    ].join(" ")}
-                    fill="currentColor"
-                  >
-                    <path d="M0 0 L4 2 L0 4 z" />
-                  </svg>
-                </div>
               )}
-            </li>
+              {"subBottom" in s && s.subBottom && (
+                <span
+                  className="block truncate whitespace-nowrap text-[10px] text-slate-400 dark:text-slate-500"
+                  title={s.subBottom}
+                >
+                  {s.subBottom}
+                </span>
+              )}
+            </div>
           );
         })}
-      </ol>
+      </div>
     </nav>
   );
 }
