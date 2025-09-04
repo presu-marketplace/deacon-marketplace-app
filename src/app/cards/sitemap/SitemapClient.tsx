@@ -152,7 +152,7 @@ export default function SitemapClient() {
           <header className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">{content.title}</h1>
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">{content.title}</h1>
                 <p className="mt-2 inline-flex items-center gap-2 text-sm text-gray-300">
                   <span className="inline-flex items-center rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2.5 py-0.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 mr-2" />

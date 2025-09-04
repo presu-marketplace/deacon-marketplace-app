@@ -122,7 +122,7 @@ export default function HelpClient() {
 
           <section className="mx-auto max-w-5xl px-6 sm:px-10">
             <header className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
-              <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">{t.title}</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{t.title}</h1>
               <p className="mt-2 text-sm text-gray-300">{t.intro}</p>
             </header>
 
