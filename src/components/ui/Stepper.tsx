@@ -33,12 +33,12 @@ export default function Stepper({
     parsed.length >= cols
       ? parsed.slice(0, cols)
       : [
-          ...parsed,
-          ...Array.from({ length: cols - parsed.length }).map(() => ({
-            label: "—",
-            __placeholder: true as const,
-          })),
-        ];
+        ...parsed,
+        ...Array.from({ length: cols - parsed.length }).map(() => ({
+          label: "—",
+          __placeholder: true as const,
+        })),
+      ];
 
   const active = Math.min(Math.max(currentStep, 1), padded.length);
   const gridCols = cols * 2 - 1; // node, connector, node, ...
@@ -55,7 +55,7 @@ export default function Stepper({
           const isDone = index < active;
           const isCurrent = index === active;
           const isFuture = index > active;
-          const Icon = s.icon;
+          const Icon = !("__placeholder" in s && s.__placeholder) ? (s as Step).icon : undefined;
 
           return (
             <React.Fragment key={`node-${i}`}>
@@ -70,11 +70,11 @@ export default function Stepper({
                   className={[
                     "inline-flex h-10 w-10 items-center justify-center rounded-full ring-2 transition",
                     isDone &&
-                      "bg-neutral-200 ring-neutral-300 text-neutral-600 dark:bg-neutral-700 dark:ring-neutral-600 dark:text-neutral-200",
+                    "bg-neutral-200 ring-neutral-300 text-neutral-600 dark:bg-neutral-700 dark:ring-neutral-600 dark:text-neutral-200",
                     isCurrent &&
-                      "bg-blue-600 ring-blue-600 text-white shadow-lg shadow-blue-600/40",
+                    "bg-blue-600 ring-blue-600 text-white shadow-lg shadow-blue-600/40",
                     isFuture &&
-                      "bg-white ring-neutral-300 text-neutral-400 dark:bg-transparent dark:ring-neutral-600 dark:text-neutral-600",
+                    "bg-white ring-neutral-300 text-neutral-400 dark:bg-transparent dark:ring-neutral-600 dark:text-neutral-600",
                     !s.__placeholder && onStepClick ? "hover:scale-[1.03]" : "cursor-default",
                   ].join(" ")}
                 >
@@ -113,6 +113,7 @@ export default function Stepper({
           const isDone = index < active;
           const isCurrent = index === active;
           const isFuture = index > active;
+          const subLabel = "subLabel" in s ? s.subLabel : undefined;
 
           return (
             <div
@@ -132,12 +133,12 @@ export default function Stepper({
                 {s.label}
               </span>
 
-              {s.subLabel && (
+              {subLabel && (
                 <span
                   className="block truncate whitespace-nowrap text-[10px] text-slate-500 dark:text-slate-400"
-                  title={s.subLabel}
+                  title={subLabel}
                 >
-                  {s.subLabel}
+                  {subLabel}
                 </span>
               )}
               {"subBottom" in s && s.subBottom && (

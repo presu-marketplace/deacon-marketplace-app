@@ -858,7 +858,7 @@ export default function ActivityPage() {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
-                            extendDeadline(id, dueDate);
+                            extendDeadline(id, dueDate ?? undefined);
                           }}
                           className="rounded bg-neutral-200 px-2 py-0.5 text-xs text-neutral-700"
                         >
