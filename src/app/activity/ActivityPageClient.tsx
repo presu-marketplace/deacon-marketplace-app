@@ -43,6 +43,8 @@ interface ServiceRequest {
     phone?: string | null;
     address?: string | null;
     city?: string | null;
+    company_name?: string | null;
+    tax_id?: string | null;
   } | null;
 }
 
@@ -75,6 +77,8 @@ type ActivityItem = {
   userAddress?: string | null;
   userCity?: string | null;
   providerName?: string | null;
+  providerCompany?: string | null;
+  providerTaxId?: string | null;
   providerPhone?: string | null;
   providerAddress?: string | null;
   providerCity?: string | null;
@@ -331,6 +335,7 @@ export default function ActivityPage() {
     property: locale === "es" ? "Propiedad" : "Property",
     location: locale === "es" ? "Ubicación" : "Location",
     email: locale === "es" ? "Correo" : "Email",
+    taxId: locale === "es" ? "CUIT" : "Tax ID",
     phone: locale === "es" ? "Teléfono" : "Phone",
     address: locale === "es" ? "Dirección" : "Address",
     requestedOn: locale === "es" ? "Solicitado el" : "Requested on",
@@ -481,7 +486,16 @@ export default function ActivityPage() {
         if (providerIds.length) {
           const res = await fetch(`/api/provider-profiles?ids=${providerIds.join(',')}`);
           if (res.ok) {
-            const profiles: Array<{ id: string; full_name: string | null; email: string | null; phone: string | null; address: string | null; city: string | null }> = await res.json();
+            const profiles: Array<{
+              id: string;
+              full_name: string | null;
+              email?: string | null;
+              phone: string | null;
+              address: string | null;
+              city: string | null;
+              company_name: string | null;
+              tax_id: string | null;
+            }> = await res.json();
             const map = Object.fromEntries(profiles.map((p) => [p.id, p]));
             rows.forEach((r) => {
               if (r.provider_id && map[r.provider_id]) {
@@ -546,6 +560,8 @@ export default function ActivityPage() {
       userAddress: r.user_address,
       userCity: r.user_city,
       providerName: r.provider?.full_name || null,
+      providerCompany: r.provider?.company_name || null,
+      providerTaxId: r.provider?.tax_id || null,
       providerPhone: r.provider?.phone || null,
       providerAddress: r.provider?.address || null,
       providerCity: r.provider?.city || null,
@@ -740,6 +756,8 @@ export default function ActivityPage() {
             user_city: activeItem.userCity,
             provider_id: activeItem.providerId,
             provider_name: activeItem.providerName,
+            provider_company_name: activeItem.providerCompany,
+            provider_tax_id: activeItem.providerTaxId,
             provider_email: activeItem.providerEmail,
             provider_telephone: activeItem.providerPhone,
             provider_address: activeItem.providerAddress,
