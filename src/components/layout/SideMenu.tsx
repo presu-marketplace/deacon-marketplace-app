@@ -144,6 +144,19 @@ export default function SideMenu({
                   <p className="text-sm text-gray-500">{user.email}</p>
                 </div>
               </div>
+              <ul className="px-4 pt-6 font-semibold">
+                <li>
+                  <button
+                    onClick={() => {
+                      router.push(`/auth/register?role=pro&lang=${locale}`)
+                      onClose()
+                    }}
+                    className="w-full text-center text-base py-2"
+                  >
+                    {providerLabel}
+                  </button>
+                </li>
+              </ul>
               {/* Mobile user actions */}
               <ul className="md:hidden px-4 pt-6 flex flex-col gap-2">
                 <li>
@@ -238,23 +251,21 @@ export default function SideMenu({
               >
                 {t.login}
               </button>
+              <ul className="px-4 pt-6 font-semibold">
+                <li>
+                  <button
+                    onClick={() => {
+                      router.push(`/auth/register?role=pro&lang=${locale}`)
+                      onClose()
+                    }}
+                    className="w-full text-center text-base py-2"
+                  >
+                    {providerLabel}
+                  </button>
+                </li>
+              </ul>
             </>
           )}
-
-          {/* Additional Options */}
-          <ul className="space-y-4 font-semibold mt-auto pt-6">
-            <li>
-              <button
-                onClick={() => {
-                  router.push(`/auth/register?role=pro&lang=${locale}`)
-                  onClose()
-                }}
-                className="w-full text-center text-base py-2"
-              >
-                {providerLabel}
-              </button>
-            </li>
-          </ul>
         </div>
       </div>
     </>
