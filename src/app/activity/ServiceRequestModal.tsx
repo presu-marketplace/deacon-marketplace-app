@@ -16,7 +16,7 @@ import {
   FiLayers,
 } from "react-icons/fi";
 
-export type RequestStatus = "open" | "assigned" | "pending" | "closed";
+export type RequestStatus = "open" | "assigned" | "closed";
 
 export interface ServiceRequest {
   id: string;
@@ -41,11 +41,18 @@ export interface ServiceRequest {
   user_telephone?: string | null;
   user_address?: string | null;
   user_city?: string | null;
+  provider_id?: string | null;
+  provider_name?: string | null;
+  provider_email?: string | null;
+  provider_telephone?: string | null;
+  provider_address?: string | null;
+  provider_city?: string | null;
 }
 export interface ModalTranslations {
   subtitle: string;
   serviceDetails: string;
   requester: string;
+  provider: string;
   timeline: string;
   attachments: string;
   systems: string;
@@ -66,6 +73,8 @@ export interface ModalTranslations {
   cancel: string;
   selectProvider: string;
   unknown: string;
+  notAssignedYet: string;
+  noProviderAssigned: string;
   status: Record<RequestStatus, string>;
   more: string;
 }
@@ -97,7 +106,6 @@ function StatusBadge({
   const color: Record<RequestStatus, string> = {
     open: "bg-blue-600 text-white",
     assigned: "bg-amber-500 text-white",
-    pending: "bg-gray-600 text-white",
     closed: "bg-neutral-200 text-neutral-700",
   };
   return (
@@ -109,8 +117,8 @@ function StatusBadge({
 
 function SectionLabel({ icon: Icon, children }: { icon: React.ElementType; children: React.ReactNode }) {
   return (
-    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-neutral-50 px-3 py-1 text-sm font-semibold text-neutral-800">
-      <Icon className="h-4 w-4" />
+    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-neutral-50 px-3 py-1 text-lg font-semibold text-neutral-800">
+      <Icon className="h-5 w-5" />
       {children}
     </div>
   );
@@ -129,7 +137,7 @@ function FieldRow({
 }) {
   if (!value) return null;
   const Content = (
-    <div className="flex min-w-0 items-start gap-2 py-1 text-sm text-neutral-700">
+    <div className="ml-6 flex min-w-0 items-start gap-2 py-1 text-sm text-neutral-700">
       <Icon className="mt-0.5 h-4 w-4 flex-none text-neutral-400" />
       <div className="min-w-0">
         {label ? <div className="text-xs font-medium text-neutral-500">{label}</div> : null}
@@ -257,6 +265,34 @@ export default function ServiceRequestModal({
     : [];
   const hasFiles = (request.request_invoice_urls?.length ?? 0) > 0;
   const overdue = request.service_deadline ? new Date(request.service_deadline) < new Date() : false;
+  // Clients and admins always see the Provider section. Details vary by status.
+  const showProvider = role !== "provider";
+  const providerAssigned = Boolean(request.provider_id);
+  let personName: string | null = null;
+  let personCity: string | null = null;
+  let personEmail: string | null = null;
+  let personPhone: string | null = null;
+  let addr: string | undefined;
+
+  if (showProvider) {
+    if (request.request_status === "assigned" || (request.request_status === "closed" && providerAssigned)) {
+      personName = request.provider_name || t.unknown;
+      personCity = request.provider_city || null;
+      personEmail = request.provider_email || null;
+      personPhone = request.provider_telephone || null;
+      addr = fullAddress(request, "provider");
+    } else if (request.request_status === "open") {
+      personName = t.notAssignedYet;
+    } else {
+      personName = t.noProviderAssigned;
+    }
+  } else {
+    personName = request.user_name || null;
+    personCity = request.user_city || null;
+    personEmail = request.user_email || null;
+    personPhone = request.user_telephone || null;
+    addr = fullAddress(request, "user");
+  }
 
   return (
     <AnimatePresence>
@@ -342,25 +378,25 @@ export default function ServiceRequestModal({
           </section>
 
           <section>
-            <SectionLabel icon={FiUser}>{t.requester}</SectionLabel>
+            <SectionLabel icon={FiUser}>{showProvider ? t.provider : t.requester}</SectionLabel>
 
             <div className="mb-2 flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-100 text-sm font-semibold text-neutral-600">
-                {getInitials(request.user_name)}
+                {getInitials(personName)}
               </div>
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium text-neutral-800">
-                  {request.user_name || t.unknown}
+                  {personName || t.unknown}
                 </div>
-                {request.user_city ? (
-                  <div className="truncate text-xs text-neutral-500">{request.user_city}</div>
+                {personCity ? (
+                  <div className="truncate text-xs text-neutral-500">{personCity}</div>
                 ) : null}
               </div>
             </div>
 
-            <FieldRow icon={FiMail} label={t.email} value={request.user_email} href={request.user_email ? `mailto:${request.user_email}` : undefined} />
-            <FieldRow icon={FiPhone} label={t.phone} value={request.user_telephone} href={request.user_telephone ? `tel:${request.user_telephone}` : undefined} />
-            <FieldRow icon={FiMapPin} label={t.address} value={fullAddress(request)} href={mapsHref(fullAddress(request))} />
+            <FieldRow icon={FiMail} label={t.email} value={personEmail} href={personEmail ? `mailto:${personEmail}` : undefined} />
+            <FieldRow icon={FiPhone} label={t.phone} value={personPhone} href={personPhone ? `tel:${personPhone}` : undefined} />
+            <FieldRow icon={FiMapPin} label={t.address} value={addr} href={mapsHref(addr)} />
 
             <div className="mt-4">
               <SectionLabel icon={FiCalendar}>{t.timeline}</SectionLabel>
@@ -446,9 +482,12 @@ function getInitials(name?: string | null) {
   return (n[0]?.[0] ?? "").concat(n[1]?.[0] ?? "").toUpperCase();
 }
 
-function fullAddress(r: ServiceRequest) {
-  const parts = [r.user_address, r.user_city].filter(Boolean);
-  return parts.length ? parts.join(", ") : undefined;
+function fullAddress(r: ServiceRequest, type: "user" | "provider" = "user") {
+  const parts =
+    type === "provider"
+      ? [r.provider_address, r.provider_city]
+      : [r.user_address, r.user_city];
+  return parts.filter(Boolean).join(", ") || undefined;
 }
 
 function mapsHref(addr?: string) {

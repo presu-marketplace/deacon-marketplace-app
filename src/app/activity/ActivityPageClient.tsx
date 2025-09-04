@@ -37,6 +37,13 @@ interface ServiceRequest {
   user_city?: string | null;
   provider_assigned_at?: string | null;
   request_closed_at?: string | null;
+  provider?: {
+    full_name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+    city?: string | null;
+  } | null;
 }
 
 interface ProviderServiceRow {
@@ -67,6 +74,11 @@ type ActivityItem = {
   userTelephone?: string | null;
   userAddress?: string | null;
   userCity?: string | null;
+  providerName?: string | null;
+  providerPhone?: string | null;
+  providerAddress?: string | null;
+  providerCity?: string | null;
+  providerEmail?: string | null;
   providerAssignedAt?: string | null;
   requestClosedAt?: string | null;
   serviceSlug?: string | null;
@@ -78,7 +90,6 @@ interface PageTranslations {
   all: string;
   open: string;
   assigned: string;
-  pending: string;
   closed: string;
   noDescription: string;
   user: string;
@@ -96,13 +107,12 @@ export function normalizeStatus(status?: string | null) {
 export function filterItems(
   items: ActivityItem[],
   query: string,
-  statusFilter: "all" | "open" | "assigned" | "pending" | "closed"
+  statusFilter: "all" | "open" | "assigned" | "closed"
 ) {
   const q = (query || "").trim().toLowerCase();
   const equivalents: Record<Exclude<typeof statusFilter, "all">, string[]> = {
     open: ["open", "abierto"],
     assigned: ["assigned", "asignado"],
-    pending: ["pending", "pendiente"],
     closed: ["closed", "cerrado"],
   };
 
@@ -154,8 +164,8 @@ function Toolbar({
 }: {
   query: string;
   setQuery: (v: string) => void;
-  status: "all" | "open" | "assigned" | "pending" | "closed";
-  setStatus: (v: "all" | "open" | "assigned" | "pending" | "closed") => void;
+  status: "all" | "open" | "assigned" | "closed";
+  setStatus: (v: "all" | "open" | "assigned" | "closed") => void;
   count: number;
   pageT: PageTranslations;
   user?: string;
@@ -164,11 +174,10 @@ function Toolbar({
   setOrder?: (v: "asc" | "desc") => void;
   role?: "client" | "provider" | "admin";
 }) {
-  const pills: Array<{ key: "all" | "open" | "assigned" | "pending" | "closed"; label: string }> = [
+  const pills: Array<{ key: "all" | "open" | "assigned" | "closed"; label: string }> = [
     { key: "all", label: pageT.all },
     { key: "open", label: pageT.open },
     { key: "assigned", label: pageT.assigned },
-    { key: "pending", label: pageT.pending },
     { key: "closed", label: pageT.closed },
   ];
   const isAdmin = role === "admin";
@@ -284,7 +293,6 @@ export default function ActivityPage() {
     empty: locale === "es" ? "Sin actividad para mostrar" : "No activity to display",
     open: locale === "es" ? "Abierto" : "Open",
     closed: locale === "es" ? "Cerrado" : "Closed",
-    pending: locale === "es" ? "Pendiente" : "Pending",
     assigned: locale === "es" ? "Asignado" : "Assigned",
     noDescription: locale === "es" ? "Sin descripción" : "No description",
     results: locale === "es" ? "resultados" : "results",
@@ -301,7 +309,6 @@ export default function ActivityPage() {
     all: pageT.all,
     open: pageT.open,
     assigned: pageT.assigned,
-    pending: pageT.pending,
     closed: pageT.closed,
     noDescription: pageT.noDescription,
     user: pageT.user,
@@ -315,6 +322,7 @@ export default function ActivityPage() {
     subtitle: locale === "es" ? "Solicitud de servicio" : "Service Request",
     serviceDetails: locale === "es" ? "Detalles del servicio" : "Service Details",
     requester: locale === "es" ? "Solicitante" : "Requester",
+    provider: locale === "es" ? "Proveedor" : "Provider",
     timeline: locale === "es" ? "Cronograma" : "Timeline",
     attachments: locale === "es" ? "Adjuntos" : "Attachments",
     systems: locale === "es" ? "Sistemas" : "Systems",
@@ -335,11 +343,12 @@ export default function ActivityPage() {
     cancel: locale === "es" ? "Cancelar" : "Cancel",
     selectProvider: locale === "es" ? "Seleccionar proveedor" : "Select provider",
     unknown: locale === "es" ? "Desconocido" : "Unknown",
+    notAssignedYet: locale === "es" ? "Sin asignar aún" : "Not Assigned Yet",
+    noProviderAssigned: locale === "es" ? "Sin proveedor asignado" : "No Provider Assigned",
     more: locale === "es" ? "más" : "more",
     status: {
       open: pageT.open,
       assigned: pageT.assigned,
-      pending: pageT.pending,
       closed: pageT.closed,
     },
   };
@@ -352,7 +361,7 @@ export default function ActivityPage() {
   const [providersByService, setProvidersByService] = useState<Record<string, { id: string; name: string }[]>>({});
 
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "open" | "assigned" | "pending" | "closed">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "open" | "assigned" | "closed">("all");
   const [userQuery, setUserQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [activeItem, setActiveItem] = useState<ActivityItem | null>(null);
@@ -445,13 +454,6 @@ export default function ActivityPage() {
         pill: "bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200",
         accent: "border-yellow-500",
       };
-    if (s === "pending" || s === "pendiente")
-      return {
-        label: pageT.pending,
-        rail: "bg-orange-500",
-        pill: "bg-orange-50 text-orange-700 ring-1 ring-orange-200",
-        accent: "border-orange-500",
-      };
     return {
       label: pageT.closed,
       rail: "bg-gray-500",
@@ -470,33 +472,48 @@ export default function ActivityPage() {
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
       const userRole = (profile?.role as "client" | "provider" | "admin" | null) ?? "client";
       setRole(userRole);
+      const selectBase =
+        "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at";
+
+      async function fetchAndEnrich(params: URLSearchParams) {
+        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
+        const providerIds = Array.from(new Set(rows.map((r) => r.provider_id).filter(Boolean))) as string[];
+        if (providerIds.length) {
+          const res = await fetch(`/api/provider-profiles?ids=${providerIds.join(',')}`);
+          if (res.ok) {
+            const profiles: Array<{ id: string; full_name: string | null; email: string | null; phone: string | null; address: string | null; city: string | null }> = await res.json();
+            const map = Object.fromEntries(profiles.map((p) => [p.id, p]));
+            rows.forEach((r) => {
+              if (r.provider_id && map[r.provider_id]) {
+                r.provider = map[r.provider_id];
+              }
+            });
+          }
+        }
+        setRequests(rows);
+      }
+
       if (userRole === "client") {
         const params = new URLSearchParams({
-          select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at",
+          select: selectBase,
           user_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
-        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
-        setRequests(rows);
+        await fetchAndEnrich(params);
       } else if (userRole === "provider") {
         const params = new URLSearchParams({
-          select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at",
+          select: selectBase,
           provider_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
-        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
-        setRequests(rows);
+        await fetchAndEnrich(params);
       } else if (userRole === "admin") {
         const params = new URLSearchParams({
-          select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at",
+          select: selectBase,
           order: "request_created_at.desc",
           limit: "1000",
         });
-        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
-        setRequests(rows);
+        await fetchAndEnrich(params);
       }
       setLoading(false);
     };
@@ -528,6 +545,11 @@ export default function ActivityPage() {
       userTelephone: r.user_telephone,
       userAddress: r.user_address,
       userCity: r.user_city,
+      providerName: r.provider?.full_name || null,
+      providerPhone: r.provider?.phone || null,
+      providerAddress: r.provider?.address || null,
+      providerCity: r.provider?.city || null,
+      providerEmail: r.provider?.email || null,
       providerAssignedAt: r.provider_assigned_at,
       requestClosedAt: r.request_closed_at,
       serviceSlug: r.service_id ? serviceNames[r.service_id]?.slug || null : null,
@@ -671,6 +693,11 @@ export default function ActivityPage() {
                         userTelephone={it.userTelephone}
                         userAddress={it.userAddress}
                         userCity={it.userCity}
+                        providerName={it.providerName}
+                        providerPhone={it.providerPhone}
+                        providerAddress={it.providerAddress}
+                        providerCity={it.providerCity}
+                        providerEmail={it.providerEmail}
                         providerAssignedAt={it.providerAssignedAt}
                         requestClosedAt={it.requestClosedAt}
                         serviceSlug={it.serviceSlug}
@@ -711,6 +738,12 @@ export default function ActivityPage() {
             user_telephone: activeItem.userTelephone,
             user_address: activeItem.userAddress,
             user_city: activeItem.userCity,
+            provider_id: activeItem.providerId,
+            provider_name: activeItem.providerName,
+            provider_email: activeItem.providerEmail,
+            provider_telephone: activeItem.providerPhone,
+            provider_address: activeItem.providerAddress,
+            provider_city: activeItem.providerCity,
           }}
           role={role}
           providers={activeItem.serviceId ? providersByService[activeItem.serviceId] || [] : []}
@@ -745,6 +778,11 @@ export default function ActivityPage() {
     userTelephone?: string | null;
     userAddress?: string | null;
     userCity?: string | null;
+    providerName?: string | null;
+    providerPhone?: string | null;
+    providerAddress?: string | null;
+    providerCity?: string | null;
+    providerEmail?: string | null;
     providerAssignedAt?: string | null;
     requestClosedAt?: string | null;
     serviceSlug?: string | null;
