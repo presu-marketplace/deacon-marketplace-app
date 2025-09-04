@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Navbar from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import type { Service } from '@/lib/serviceCatalog'
 import { upcomingServices } from '@/lib/serviceCatalog'
+import { getFooterTranslations } from '@/lib/footerTranslations'
 
 export default function ServicesClient() {
   const [locale, setLocale] = useState<'en' | 'es'>('es')
@@ -121,6 +123,8 @@ export default function ServicesClient() {
     )
   }
 
+  const footerT = getFooterTranslations(locale)
+
   return (
     <div className="min-h-screen bg-white text-black">
       <Navbar
@@ -136,22 +140,25 @@ export default function ServicesClient() {
         }}
       />
 
-      <main className="pt-24 px-4 sm:px-8 max-w-7xl mx-auto">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-6">{t.availableTitle}</h1>
+      <main className="pt-24 pb-24 px-4 sm:px-8 max-w-7xl mx-auto space-y-24">
+        <section>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-6">{t.availableTitle}</h1>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {services.map((s) => renderCard(s))}
-        </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {services.map((s) => renderCard(s))}
+          </div>
+        </section>
 
         {upcomingServices.length > 0 && (
-          <>
-            <h2 className="text-2xl sm:text-3xl font-bold mt-12 mb-6">{t.upcomingTitle}</h2>
+          <section>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-6">{t.upcomingTitle}</h2>
             <div className="flex gap-6 overflow-x-auto pb-2">
               {upcomingServices.map((s) => renderCard(s, 'w-64 flex-shrink-0'))}
             </div>
-          </>
+          </section>
         )}
       </main>
+      <Footer t={footerT} locale={locale} />
     </div>
   )
 }

@@ -6,6 +6,7 @@ import useUser from '@/features/auth/useUser'
 import Image from 'next/image'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import { getFooterTranslations } from '@/lib/footerTranslations'
 import Stepper from '@/components/ui/Stepper'
 import { supabase } from '@/lib/supabaseClient'
 
@@ -370,17 +371,7 @@ export default function ServiceFormClient({ service }: Props) {
     howItWorks: ''
   }
 
-  const footerT = {
-    terms: locale === 'es' ? 'Términos de uso' : 'Terms of Use',
-    privacy: locale === 'es' ? 'Política de privacidad' : 'Privacy Policy',
-    sitemap: locale === 'es' ? 'Mapa del sitio' : 'Sitemap',
-    accessibility: locale === 'es' ? 'Accesibilidad' : 'Accessibility',
-    footerNote:
-      locale === 'es'
-        ? 'No vender ni compartir mi información personal'
-        : 'Do Not Sell or Share My Personal Information',
-    copyright: locale === 'es' ? 'Todos los derechos reservados.' : 'All rights reserved.'
-  }
+  const footerT = getFooterTranslations(locale)
 
   const stepLabels =
     locale === 'es'
@@ -390,7 +381,7 @@ export default function ServiceFormClient({ service }: Props) {
   return (
     <div className="min-h-screen flex flex-col bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
       <Navbar locale={locale} toggleLocale={toggleLocale} t={navT} forceWhite />
-      <main className="flex-grow pt-24 pb-12">
+      <main className="flex-grow pt-24 pb-24">
         {info.image && (
           <div className="relative w-full h-48 md:h-64">
             <Image
