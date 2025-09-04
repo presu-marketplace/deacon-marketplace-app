@@ -659,7 +659,7 @@ export default function ActivityPage() {
     <>
       <Navbar locale={locale} toggleLocale={toggleLocale} t={t} forceWhite />
       <div className="bg-white min-h-screen pt-32">
-        <div className="max-w-6xl mx-auto px-6 py-8">
+        <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6">
           <h1 className="text-3xl font-semibold tracking-tight text-black mb-6">{pageT.title}</h1>
 
           {loading ? (
@@ -812,7 +812,7 @@ export default function ActivityPage() {
 
     return (
       <motion.div
-        className="group relative w-[70%] mx-auto cursor-pointer"
+        className="group relative w-full sm:w-[70%] mx-auto cursor-pointer"
         aria-label={`${title} – ${meta.label}`}
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -911,7 +911,7 @@ export default function ActivityPage() {
 
 function SkeletonCard() {
   return (
-    <div className="w-[70%] mx-auto flex overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_0_#0000000d]">
+    <div className="w-full sm:w-[70%] mx-auto flex overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_0_#0000000d]">
       <div className="w-1.5 bg-neutral-200" aria-hidden />
       <div className="w-full p-5">
         <div className="h-4 w-40 bg-neutral-200 rounded" />
