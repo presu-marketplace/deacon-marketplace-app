@@ -163,7 +163,7 @@ Questions? Contact **info@presu.com.ar**.`,
           <header className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
                   {content.title}
                 </h1>
                 <p className="mt-2 inline-flex items-center gap-2 text-sm text-gray-300">
