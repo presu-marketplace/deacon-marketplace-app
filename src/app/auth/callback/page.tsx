@@ -13,7 +13,7 @@ export default function CallbackPage() {
       const nextParam = urlParams.get('next')
       const next = nextParam ? decodeURIComponent(nextParam) : '/'
 
-      const { data, error } = await supabase.auth.getSessionFromURL()
+      const { data, error } = await supabase.auth.getSession()
       if (data.session) {
         const fullName =
           data.session.user.user_metadata?.full_name ||
