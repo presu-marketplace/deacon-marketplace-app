@@ -41,11 +41,17 @@ export interface ServiceRequest {
   user_telephone?: string | null;
   user_address?: string | null;
   user_city?: string | null;
+  provider_name?: string | null;
+  provider_email?: string | null;
+  provider_telephone?: string | null;
+  provider_address?: string | null;
+  provider_city?: string | null;
 }
 export interface ModalTranslations {
   subtitle: string;
   serviceDetails: string;
   requester: string;
+  provider: string;
   timeline: string;
   attachments: string;
   systems: string;
@@ -109,8 +115,8 @@ function StatusBadge({
 
 function SectionLabel({ icon: Icon, children }: { icon: React.ElementType; children: React.ReactNode }) {
   return (
-    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-neutral-50 px-3 py-1 text-sm font-semibold text-neutral-800">
-      <Icon className="h-4 w-4" />
+    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-neutral-50 px-3 py-1 text-lg font-semibold text-neutral-800">
+      <Icon className="h-5 w-5" />
       {children}
     </div>
   );
@@ -129,7 +135,7 @@ function FieldRow({
 }) {
   if (!value) return null;
   const Content = (
-    <div className="flex min-w-0 items-start gap-2 py-1 text-sm text-neutral-700">
+    <div className="ml-6 flex min-w-0 items-start gap-2 py-1 text-sm text-neutral-700">
       <Icon className="mt-0.5 h-4 w-4 flex-none text-neutral-400" />
       <div className="min-w-0">
         {label ? <div className="text-xs font-medium text-neutral-500">{label}</div> : null}
@@ -257,6 +263,13 @@ export default function ServiceRequestModal({
     : [];
   const hasFiles = (request.request_invoice_urls?.length ?? 0) > 0;
   const overdue = request.service_deadline ? new Date(request.service_deadline) < new Date() : false;
+  // Clients see provider details only when a request has been assigned
+  const showProvider = role !== "provider" && request.request_status === "assigned";
+  const personName = showProvider ? request.provider_name : request.user_name;
+  const personCity = showProvider ? request.provider_city : request.user_city;
+  const personEmail = showProvider ? request.provider_email : request.user_email;
+  const personPhone = showProvider ? request.provider_telephone : request.user_telephone;
+  const addr = fullAddress(request, showProvider ? "provider" : "user");
 
   return (
     <AnimatePresence>
@@ -342,25 +355,25 @@ export default function ServiceRequestModal({
           </section>
 
           <section>
-            <SectionLabel icon={FiUser}>{t.requester}</SectionLabel>
+            <SectionLabel icon={FiUser}>{showProvider ? t.provider : t.requester}</SectionLabel>
 
             <div className="mb-2 flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-100 text-sm font-semibold text-neutral-600">
-                {getInitials(request.user_name)}
+                {getInitials(personName)}
               </div>
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium text-neutral-800">
-                  {request.user_name || t.unknown}
+                  {personName || t.unknown}
                 </div>
-                {request.user_city ? (
-                  <div className="truncate text-xs text-neutral-500">{request.user_city}</div>
+                {personCity ? (
+                  <div className="truncate text-xs text-neutral-500">{personCity}</div>
                 ) : null}
               </div>
             </div>
 
-            <FieldRow icon={FiMail} label={t.email} value={request.user_email} href={request.user_email ? `mailto:${request.user_email}` : undefined} />
-            <FieldRow icon={FiPhone} label={t.phone} value={request.user_telephone} href={request.user_telephone ? `tel:${request.user_telephone}` : undefined} />
-            <FieldRow icon={FiMapPin} label={t.address} value={fullAddress(request)} href={mapsHref(fullAddress(request))} />
+            <FieldRow icon={FiMail} label={t.email} value={personEmail} href={personEmail ? `mailto:${personEmail}` : undefined} />
+            <FieldRow icon={FiPhone} label={t.phone} value={personPhone} href={personPhone ? `tel:${personPhone}` : undefined} />
+            <FieldRow icon={FiMapPin} label={t.address} value={addr} href={mapsHref(addr)} />
 
             <div className="mt-4">
               <SectionLabel icon={FiCalendar}>{t.timeline}</SectionLabel>
@@ -446,9 +459,12 @@ function getInitials(name?: string | null) {
   return (n[0]?.[0] ?? "").concat(n[1]?.[0] ?? "").toUpperCase();
 }
 
-function fullAddress(r: ServiceRequest) {
-  const parts = [r.user_address, r.user_city].filter(Boolean);
-  return parts.length ? parts.join(", ") : undefined;
+function fullAddress(r: ServiceRequest, type: "user" | "provider" = "user") {
+  const parts =
+    type === "provider"
+      ? [r.provider_address, r.provider_city]
+      : [r.user_address, r.user_city];
+  return parts.filter(Boolean).join(", ") || undefined;
 }
 
 function mapsHref(addr?: string) {
