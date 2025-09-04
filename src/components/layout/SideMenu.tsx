@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import useUser from '@/features/auth/useUser'
@@ -76,6 +77,22 @@ export default function SideMenu({
   const providerLabel =
     locale === 'es' ? 'Quiero ser proveedor' : 'Join as a provider'
 
+  const activityText = locale === 'es' ? 'Actividad' : 'Activity'
+  const activityAlt = activityText
+
+  const helpText = locale === 'es' ? 'Ayuda' : 'Help'
+  const helpAlt = helpText
+
+  const settingsText = locale === 'es' ? 'Configuración' : 'Settings'
+  const settingsAlt = settingsText
+
+  const logoutText = locale === 'es' ? 'Cerrar sesión' : 'Log out'
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/')
+  }
+
   const wrapperClasses = `
     fixed inset-y-0 left-0 w-[85%] max-w-xs z-50 transform transition-transform duration-300 ease-in-out
     ${isOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -113,19 +130,94 @@ export default function SideMenu({
 
           {/* Main Content */}
           {user ? (
-            <div className="flex items-center gap-4 px-4 pt-2">
-              <Image
-                src={avatarUrl}
-                alt="User Avatar"
-                width={56}
-                height={56}
-                className="rounded-full"
-              />
-              <div>
-                <p className="font-semibold text-lg leading-tight">{userName}</p>
-                <p className="text-sm text-gray-500">{user.email}</p>
+            <>
+              <div className="flex items-center gap-4 px-4 pt-2">
+                <Image
+                  src={avatarUrl}
+                  alt="User Avatar"
+                  width={56}
+                  height={56}
+                  className="rounded-full"
+                />
+                <div>
+                  <p className="font-semibold text-lg leading-tight">{userName}</p>
+                  <p className="text-sm text-gray-500">{user.email}</p>
+                </div>
               </div>
-            </div>
+              {/* Mobile user actions */}
+              <ul className="md:hidden px-4 pt-6 flex flex-col gap-2">
+                <li>
+                  <Link
+                    href="/activity"
+                    onClick={onClose}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
+                  >
+                    <Image
+                      src="/images/user/user-activity.png"
+                      alt={activityAlt}
+                      width={20}
+                      height={20}
+                    />
+                    <span className="text-sm font-semibold">{activityText}</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/help"
+                    onClick={onClose}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
+                  >
+                    <Image
+                      src="/images/user/user-help.png"
+                      alt={helpAlt}
+                      width={20}
+                      height={20}
+                    />
+                    <span className="text-sm font-semibold">{helpText}</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/settings"
+                    onClick={onClose}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
+                  >
+                    <Image
+                      src="/images/user/user-settings.png"
+                      alt={settingsAlt}
+                      width={20}
+                      height={20}
+                    />
+                    <span className="text-sm font-semibold">{settingsText}</span>
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    onClick={async () => {
+                      await handleLogout()
+                      onClose()
+                    }}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 text-red-600 transition"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-5 h-5"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6A2.25 2.25 0 0 0 5.25 5.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
+                      />
+                    </svg>
+                    <span className="text-sm font-semibold">{logoutText}</span>
+                  </button>
+                </li>
+              </ul>
+            </>
           ) : (
             <>
               <button
@@ -150,7 +242,7 @@ export default function SideMenu({
           )}
 
           {/* Additional Options */}
-          <ul className="space-y-4 font-semibold mt-6">
+          <ul className="space-y-4 font-semibold mt-auto pt-6">
             <li>
               <button
                 onClick={() => {
