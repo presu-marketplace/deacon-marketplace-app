@@ -115,8 +115,8 @@ function StatusBadge({
 
 function SectionLabel({ icon: Icon, children }: { icon: React.ElementType; children: React.ReactNode }) {
   return (
-    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-neutral-50 px-3 py-1 text-base font-semibold text-neutral-800">
-      <Icon className="h-4 w-4" />
+    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-neutral-50 px-3 py-1 text-lg font-semibold text-neutral-800">
+      <Icon className="h-5 w-5" />
       {children}
     </div>
   );
@@ -135,7 +135,7 @@ function FieldRow({
 }) {
   if (!value) return null;
   const Content = (
-    <div className="ml-4 flex min-w-0 items-start gap-2 py-1 text-sm text-neutral-700">
+    <div className="ml-6 flex min-w-0 items-start gap-2 py-1 text-sm text-neutral-700">
       <Icon className="mt-0.5 h-4 w-4 flex-none text-neutral-400" />
       <div className="min-w-0">
         {label ? <div className="text-xs font-medium text-neutral-500">{label}</div> : null}
@@ -264,7 +264,7 @@ export default function ServiceRequestModal({
   const hasFiles = (request.request_invoice_urls?.length ?? 0) > 0;
   const overdue = request.service_deadline ? new Date(request.service_deadline) < new Date() : false;
   // Clients see provider details only when a request has been assigned
-  const showProvider = role === "client" && request.request_status === "assigned";
+  const showProvider = role !== "provider" && request.request_status === "assigned";
   const personName = showProvider ? request.provider_name : request.user_name;
   const personCity = showProvider ? request.provider_city : request.user_city;
   const personEmail = showProvider ? request.provider_email : request.user_email;
