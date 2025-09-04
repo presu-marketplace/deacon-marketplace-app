@@ -17,6 +17,7 @@ import {
   FiCopy,
   FiCheckCircle,
 } from "react-icons/fi";
+import Stepper from "@/components/ui/Stepper";
 import { AiFillFilePdf } from "react-icons/ai";
 
 export type RequestStatus = "open" | "assigned" | "closed";
