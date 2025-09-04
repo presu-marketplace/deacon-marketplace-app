@@ -33,7 +33,7 @@ export default function Stepper({
       aria-label="Progress"
       className={`w-full max-w-4xl mx-auto select-none ${className}`}
     >
-      <ol className="flex items-center justify-between gap-2 sm:gap-4">
+      <ol className="flex items-start justify-between gap-2 sm:gap-4">
         {steps.map((s, i) => {
           const { label, icon: Icon, subLabel } =
             typeof s === "string" ? { label: s } : s;
@@ -84,10 +84,10 @@ export default function Stepper({
               </button>
 
               {/* Label */}
-              <div className="ml-2 sm:ml-3 min-w-0">
+              <div className="ml-2 sm:ml-3 w-24 sm:w-32">
                 <span
                   className={[
-                    "block text-[11px] sm:text-xs truncate",
+                    "block text-[11px] sm:text-xs leading-tight",
                     isDone && "text-neutral-400 dark:text-neutral-400",
                     isCurrent && "text-blue-600 dark:text-blue-400 font-medium",
                     isFuture &&
