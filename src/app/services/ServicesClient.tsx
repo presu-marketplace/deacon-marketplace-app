@@ -52,14 +52,14 @@ export default function ServicesClient() {
       const fetched = (data ?? []) as Service[]
 
       const order = [
-        'seguridad',
-        'limpieza',
-        'fumigacion',
-        'mantenimiento-ascensores',
-        'escribania',
+        'security',
+        'cleaning',
+        'fumigation',
+        'elevator-maintenance',
+        'notary',
         'community-manager',
-        'traslados-ejecutivos',
-        'salones-infantiles'
+        'transfers',
+        'kids-party-venues'
       ]
       const orderMap: Record<string, number> = {}
       order.forEach((slug, index) => {
