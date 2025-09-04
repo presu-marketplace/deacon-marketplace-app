@@ -1,10 +1,19 @@
 import * as React from "react";
 
+type Step = {
+  /** Display label for the step */
+  label: string;
+  /** Optional icon component to render instead of the step number */
+  icon?: React.ElementType;
+  /** Optional secondary line displayed under the label */
+  subLabel?: string;
+};
+
 type StepperProps = {
   /** 1-based index of the active step */
   currentStep: number;
-  /** Step labels in order */
-  steps: string[];
+  /** Step definitions in order */
+  steps: Array<string | Step>;
   /** Optional click handler to allow navigation */
   onStepClick?: (index: number) => void;
   className?: string;
@@ -25,7 +34,9 @@ export default function Stepper({
       className={`w-full max-w-4xl mx-auto select-none ${className}`}
     >
       <ol className="flex items-center justify-between gap-2 sm:gap-4">
-        {steps.map((label, i) => {
+        {steps.map((s, i) => {
+          const { label, icon: Icon, subLabel } =
+            typeof s === "string" ? { label: s } : s;
           const index = i + 1;
           const isDone = index < active;
           const isCurrent = index === active;
@@ -64,6 +75,8 @@ export default function Stepper({
                   >
                     <path d="M20 6 9 17l-5-5" />
                   </svg>
+                ) : Icon ? (
+                  <Icon className="h-5 w-5" />
                 ) : (
                   <span className="text-sm font-semibold">{index}</span>
                 )}
@@ -82,6 +95,11 @@ export default function Stepper({
                 >
                   {label}
                 </span>
+                {subLabel && (
+                  <span className="block text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500">
+                    {subLabel}
+                  </span>
+                )}
               </div>
 
               {/* Connector */}
@@ -105,4 +123,3 @@ export default function Stepper({
     </nav>
   );
 }
-
