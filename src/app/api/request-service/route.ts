@@ -90,6 +90,21 @@ export async function POST(request: Request) {
     if (f.type !== 'application/pdf') return NextResponse.json({ error: 'Invalid file type' }, { status: 400 })
   }
 
+  // Ensure invoices bucket exists (private by default)
+  const invoicesBucket = 'invoices'
+  const { data: bucketInfo, error: bucketErr } = await supabase.storage.getBucket(invoicesBucket)
+  if (bucketErr) {
+    if (!isProd) console.error('Bucket fetch failed:', bucketErr)
+    return NextResponse.json({ error: 'Bucket check failed', details: bucketErr.message }, { status: 500 })
+  }
+  if (!bucketInfo) {
+    const { error: createErr } = await supabase.storage.createBucket(invoicesBucket)
+    if (createErr) {
+      if (!isProd) console.error('Bucket creation failed:', createErr)
+      return NextResponse.json({ error: 'Bucket creation failed', details: createErr.message }, { status: 500 })
+    }
+  }
+
   // 2) Upload PDFs
   const invoiceUrls: string[] = []
   const mailAttachments: Mail.Attachment[] = []
@@ -103,8 +118,14 @@ export async function POST(request: Request) {
       if (!isProd) console.error('Upload failed:', upErr)
       return NextResponse.json({ error: 'Upload failed', details: upErr.message }, { status: 500 })
     }
-    const { data: pub } = supabase.storage.from('invoices').getPublicUrl(filePath)
-    invoiceUrls.push(pub.publicUrl)
+    const { data: signed, error: signedErr } = await supabase.storage
+      .from('invoices')
+      .createSignedUrl(filePath, 60 * 60 * 24 * 365) // 1 year
+    if (signedErr) {
+      if (!isProd) console.error('Signed URL creation failed:', signedErr)
+      return NextResponse.json({ error: 'Signed URL failed', details: signedErr.message }, { status: 500 })
+    }
+    invoiceUrls.push(signed.signedUrl)
     mailAttachments.push({ filename: file.name, content: buffer })
   }
 
