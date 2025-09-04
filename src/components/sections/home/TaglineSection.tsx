@@ -1,6 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, type Variants } from "framer-motion";
+
 
 interface TaglineSectionProps {
   t: Record<string, string>
@@ -45,15 +46,18 @@ export default function TaglineSection({ t }: TaglineSectionProps) {
     },
   }
 
-  const rise = {
-    hidden: { opacity: 0, y: 10 },
+  const rise: Variants = {
+    hidden: { opacity: 0, y: 8 },
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+      transition: {
+        duration: 0.5,
+        ease: "easeOut", // or "easeInOut", "linear", etc.
+      },
     },
-  }
-
+  };
+  
   return (
     <section className="w-full bg-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl text-center">

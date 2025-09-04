@@ -31,9 +31,9 @@ export async function GET(request: Request) {
         phone: p.phone ?? null,
         address: p.address ?? null,
         city: p.city ?? null,
-        company_name: p.providers?.company_name ?? null,
-        tax_id: p.providers?.tax_id ?? null,
-      };
+        company_name: p.providers?.[0]?.company_name ?? null,
+        tax_id: p.providers?.[0]?.tax_id ?? null,
+            };
     })
   );
   return NextResponse.json(rows);

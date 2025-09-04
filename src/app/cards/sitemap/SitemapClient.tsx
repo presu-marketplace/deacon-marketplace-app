@@ -176,7 +176,7 @@ export default function SitemapClient() {
                       >
                         {link.label}
                       </Link>
-                      {link.description && (
+                      {"description" in link && (
                         <p className="text-sm text-gray-300">{link.description}</p>
                       )}
                     </li>
