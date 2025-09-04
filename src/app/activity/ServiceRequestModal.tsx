@@ -16,7 +16,7 @@ import {
   FiLayers,
 } from "react-icons/fi";
 
-export type RequestStatus = "open" | "assigned" | "pending" | "closed";
+export type RequestStatus = "open" | "assigned" | "closed";
 
 export interface ServiceRequest {
   id: string;
@@ -41,6 +41,7 @@ export interface ServiceRequest {
   user_telephone?: string | null;
   user_address?: string | null;
   user_city?: string | null;
+  provider_id?: string | null;
   provider_name?: string | null;
   provider_email?: string | null;
   provider_telephone?: string | null;
@@ -72,7 +73,8 @@ export interface ModalTranslations {
   cancel: string;
   selectProvider: string;
   unknown: string;
-  underEvaluation: string;
+  notAssignedYet: string;
+  noProviderAssigned: string;
   status: Record<RequestStatus, string>;
   more: string;
 }
@@ -104,7 +106,6 @@ function StatusBadge({
   const color: Record<RequestStatus, string> = {
     open: "bg-blue-600 text-white",
     assigned: "bg-amber-500 text-white",
-    pending: "bg-gray-600 text-white",
     closed: "bg-neutral-200 text-neutral-700",
   };
   return (
@@ -264,23 +265,34 @@ export default function ServiceRequestModal({
     : [];
   const hasFiles = (request.request_invoice_urls?.length ?? 0) > 0;
   const overdue = request.service_deadline ? new Date(request.service_deadline) < new Date() : false;
-  // Clients and admins always see the Provider section. Details are shown only when assigned.
+  // Clients and admins always see the Provider section. Details vary by status.
   const showProvider = role !== "provider";
-  const assigned = request.request_status === "assigned";
-  const personName = showProvider
-    ? assigned
-      ? request.provider_name || t.unknown
-      : t.underEvaluation
-    : request.user_name;
-  const personCity = showProvider ? (assigned ? request.provider_city : null) : request.user_city;
-  const personEmail = showProvider ? (assigned ? request.provider_email : null) : request.user_email;
-  const personPhone = showProvider ? (assigned ? request.provider_telephone : null) : request.user_telephone;
-  const addr =
-    showProvider && assigned
-      ? fullAddress(request, "provider")
-      : showProvider
-      ? undefined
-      : fullAddress(request, "user");
+  const providerAssigned = Boolean(request.provider_id);
+  let personName: string | null = null;
+  let personCity: string | null = null;
+  let personEmail: string | null = null;
+  let personPhone: string | null = null;
+  let addr: string | undefined;
+
+  if (showProvider) {
+    if (request.request_status === "assigned" || (request.request_status === "closed" && providerAssigned)) {
+      personName = request.provider_name || t.unknown;
+      personCity = request.provider_city || null;
+      personEmail = request.provider_email || null;
+      personPhone = request.provider_telephone || null;
+      addr = fullAddress(request, "provider");
+    } else if (request.request_status === "open") {
+      personName = t.notAssignedYet;
+    } else {
+      personName = t.noProviderAssigned;
+    }
+  } else {
+    personName = request.user_name || null;
+    personCity = request.user_city || null;
+    personEmail = request.user_email || null;
+    personPhone = request.user_telephone || null;
+    addr = fullAddress(request, "user");
+  }
 
   return (
     <AnimatePresence>

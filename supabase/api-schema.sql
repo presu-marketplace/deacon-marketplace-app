@@ -4,7 +4,7 @@ create schema if not exists api;
 -- Enum for service request workflow
 do $$
 begin
-  create type public.request_status as enum ('open','assigned','pending','closed');
+  create type public.request_status as enum ('open','assigned','closed');
 exception
   when duplicate_object then null;
 end $$;

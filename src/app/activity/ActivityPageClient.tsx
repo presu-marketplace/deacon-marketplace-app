@@ -90,7 +90,6 @@ interface PageTranslations {
   all: string;
   open: string;
   assigned: string;
-  pending: string;
   closed: string;
   noDescription: string;
   user: string;
@@ -108,13 +107,12 @@ export function normalizeStatus(status?: string | null) {
 export function filterItems(
   items: ActivityItem[],
   query: string,
-  statusFilter: "all" | "open" | "assigned" | "pending" | "closed"
+  statusFilter: "all" | "open" | "assigned" | "closed"
 ) {
   const q = (query || "").trim().toLowerCase();
   const equivalents: Record<Exclude<typeof statusFilter, "all">, string[]> = {
     open: ["open", "abierto"],
     assigned: ["assigned", "asignado"],
-    pending: ["pending", "pendiente"],
     closed: ["closed", "cerrado"],
   };
 
@@ -166,8 +164,8 @@ function Toolbar({
 }: {
   query: string;
   setQuery: (v: string) => void;
-  status: "all" | "open" | "assigned" | "pending" | "closed";
-  setStatus: (v: "all" | "open" | "assigned" | "pending" | "closed") => void;
+  status: "all" | "open" | "assigned" | "closed";
+  setStatus: (v: "all" | "open" | "assigned" | "closed") => void;
   count: number;
   pageT: PageTranslations;
   user?: string;
@@ -176,11 +174,10 @@ function Toolbar({
   setOrder?: (v: "asc" | "desc") => void;
   role?: "client" | "provider" | "admin";
 }) {
-  const pills: Array<{ key: "all" | "open" | "assigned" | "pending" | "closed"; label: string }> = [
+  const pills: Array<{ key: "all" | "open" | "assigned" | "closed"; label: string }> = [
     { key: "all", label: pageT.all },
     { key: "open", label: pageT.open },
     { key: "assigned", label: pageT.assigned },
-    { key: "pending", label: pageT.pending },
     { key: "closed", label: pageT.closed },
   ];
   const isAdmin = role === "admin";
@@ -296,7 +293,6 @@ export default function ActivityPage() {
     empty: locale === "es" ? "Sin actividad para mostrar" : "No activity to display",
     open: locale === "es" ? "Abierto" : "Open",
     closed: locale === "es" ? "Cerrado" : "Closed",
-    pending: locale === "es" ? "Pendiente" : "Pending",
     assigned: locale === "es" ? "Asignado" : "Assigned",
     noDescription: locale === "es" ? "Sin descripción" : "No description",
     results: locale === "es" ? "resultados" : "results",
@@ -313,7 +309,6 @@ export default function ActivityPage() {
     all: pageT.all,
     open: pageT.open,
     assigned: pageT.assigned,
-    pending: pageT.pending,
     closed: pageT.closed,
     noDescription: pageT.noDescription,
     user: pageT.user,
@@ -348,12 +343,12 @@ export default function ActivityPage() {
     cancel: locale === "es" ? "Cancelar" : "Cancel",
     selectProvider: locale === "es" ? "Seleccionar proveedor" : "Select provider",
     unknown: locale === "es" ? "Desconocido" : "Unknown",
-    underEvaluation: locale === "es" ? "En evaluación" : "Under Evaluation",
+    notAssignedYet: locale === "es" ? "Sin asignar aún" : "Not Assigned Yet",
+    noProviderAssigned: locale === "es" ? "Sin proveedor asignado" : "No Provider Assigned",
     more: locale === "es" ? "más" : "more",
     status: {
       open: pageT.open,
       assigned: pageT.assigned,
-      pending: pageT.pending,
       closed: pageT.closed,
     },
   };
@@ -366,7 +361,7 @@ export default function ActivityPage() {
   const [providersByService, setProvidersByService] = useState<Record<string, { id: string; name: string }[]>>({});
 
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "open" | "assigned" | "pending" | "closed">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "open" | "assigned" | "closed">("all");
   const [userQuery, setUserQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [activeItem, setActiveItem] = useState<ActivityItem | null>(null);
@@ -458,13 +453,6 @@ export default function ActivityPage() {
         rail: "bg-yellow-500",
         pill: "bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200",
         accent: "border-yellow-500",
-      };
-    if (s === "pending" || s === "pendiente")
-      return {
-        label: pageT.pending,
-        rail: "bg-orange-500",
-        pill: "bg-orange-50 text-orange-700 ring-1 ring-orange-200",
-        accent: "border-orange-500",
       };
     return {
       label: pageT.closed,
@@ -750,6 +738,7 @@ export default function ActivityPage() {
             user_telephone: activeItem.userTelephone,
             user_address: activeItem.userAddress,
             user_city: activeItem.userCity,
+            provider_id: activeItem.providerId,
             provider_name: activeItem.providerName,
             provider_email: activeItem.providerEmail,
             provider_telephone: activeItem.providerPhone,
