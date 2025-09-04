@@ -483,33 +483,61 @@ export default function ActivityPage() {
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
       const userRole = (profile?.role as "client" | "provider" | "admin" | null) ?? "client";
       setRole(userRole);
+      const selectBase =
+        "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at";
+
+      async function fetchAndEnrich(params: URLSearchParams) {
+        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
+        const providerIds = Array.from(
+          new Set(rows.map((r) => r.provider_id).filter(Boolean))
+        ) as string[];
+        if (providerIds.length) {
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("id, full_name, email, phone, address, city")
+            .in("id", providerIds);
+          const map = Object.fromEntries(
+            (profiles || []).map((p) => [p.id, p])
+          ) as Record<
+            string,
+            {
+              full_name: string | null;
+              email: string | null;
+              phone: string | null;
+              address: string | null;
+              city: string | null;
+            }
+          >;
+          rows.forEach((r) => {
+            if (r.provider_id && map[r.provider_id]) {
+              r.provider = map[r.provider_id];
+            }
+          });
+        }
+        setRequests(rows);
+      }
+
       if (userRole === "client") {
         const params = new URLSearchParams({
-          select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at, provider:profiles!service_requests_provider_id_fkey(full_name, email, phone, address, city)",
+          select: selectBase,
           user_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
-        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
-        setRequests(rows);
+        await fetchAndEnrich(params);
       } else if (userRole === "provider") {
         const params = new URLSearchParams({
-          select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at, provider:profiles!service_requests_provider_id_fkey(full_name, email, phone, address, city)",
+          select: selectBase,
           provider_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
-        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
-        setRequests(rows);
+        await fetchAndEnrich(params);
       } else if (userRole === "admin") {
         const params = new URLSearchParams({
-          select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at, provider:profiles!service_requests_provider_id_fkey(full_name, email, phone, address, city)",
+          select: selectBase,
           order: "request_created_at.desc",
           limit: "1000",
         });
-        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
-        setRequests(rows);
+        await fetchAndEnrich(params);
       }
       setLoading(false);
     };
