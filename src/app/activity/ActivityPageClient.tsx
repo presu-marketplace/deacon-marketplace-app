@@ -348,6 +348,7 @@ export default function ActivityPage() {
     cancel: locale === "es" ? "Cancelar" : "Cancel",
     selectProvider: locale === "es" ? "Seleccionar proveedor" : "Select provider",
     unknown: locale === "es" ? "Desconocido" : "Unknown",
+    underEvaluation: locale === "es" ? "En evaluación" : "Under Evaluation",
     more: locale === "es" ? "más" : "more",
     status: {
       open: pageT.open,
@@ -488,31 +489,18 @@ export default function ActivityPage() {
 
       async function fetchAndEnrich(params: URLSearchParams) {
         const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
-        const providerIds = Array.from(
-          new Set(rows.map((r) => r.provider_id).filter(Boolean))
-        ) as string[];
+        const providerIds = Array.from(new Set(rows.map((r) => r.provider_id).filter(Boolean))) as string[];
         if (providerIds.length) {
-          const { data: profiles } = await supabase
-            .from("profiles")
-            .select("id, full_name, email, phone, address, city")
-            .in("id", providerIds);
-          const map = Object.fromEntries(
-            (profiles || []).map((p) => [p.id, p])
-          ) as Record<
-            string,
-            {
-              full_name: string | null;
-              email: string | null;
-              phone: string | null;
-              address: string | null;
-              city: string | null;
-            }
-          >;
-          rows.forEach((r) => {
-            if (r.provider_id && map[r.provider_id]) {
-              r.provider = map[r.provider_id];
-            }
-          });
+          const res = await fetch(`/api/provider-profiles?ids=${providerIds.join(',')}`);
+          if (res.ok) {
+            const profiles: Array<{ id: string; full_name: string | null; email: string | null; phone: string | null; address: string | null; city: string | null }> = await res.json();
+            const map = Object.fromEntries(profiles.map((p) => [p.id, p]));
+            rows.forEach((r) => {
+              if (r.provider_id && map[r.provider_id]) {
+                r.provider = map[r.provider_id];
+              }
+            });
+          }
         }
         setRequests(rows);
       }

@@ -72,6 +72,7 @@ export interface ModalTranslations {
   cancel: string;
   selectProvider: string;
   unknown: string;
+  underEvaluation: string;
   status: Record<RequestStatus, string>;
   more: string;
 }
@@ -263,13 +264,23 @@ export default function ServiceRequestModal({
     : [];
   const hasFiles = (request.request_invoice_urls?.length ?? 0) > 0;
   const overdue = request.service_deadline ? new Date(request.service_deadline) < new Date() : false;
-  // Clients see provider details only when a request has been assigned
-  const showProvider = role !== "provider" && request.request_status === "assigned";
-  const personName = showProvider ? request.provider_name : request.user_name;
-  const personCity = showProvider ? request.provider_city : request.user_city;
-  const personEmail = showProvider ? request.provider_email : request.user_email;
-  const personPhone = showProvider ? request.provider_telephone : request.user_telephone;
-  const addr = fullAddress(request, showProvider ? "provider" : "user");
+  // Clients and admins always see the Provider section. Details are shown only when assigned.
+  const showProvider = role !== "provider";
+  const assigned = request.request_status === "assigned";
+  const personName = showProvider
+    ? assigned
+      ? request.provider_name || t.unknown
+      : t.underEvaluation
+    : request.user_name;
+  const personCity = showProvider ? (assigned ? request.provider_city : null) : request.user_city;
+  const personEmail = showProvider ? (assigned ? request.provider_email : null) : request.user_email;
+  const personPhone = showProvider ? (assigned ? request.provider_telephone : null) : request.user_telephone;
+  const addr =
+    showProvider && assigned
+      ? fullAddress(request, "provider")
+      : showProvider
+      ? undefined
+      : fullAddress(request, "user");
 
   return (
     <AnimatePresence>
