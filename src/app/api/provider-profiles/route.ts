@@ -12,23 +12,23 @@ export async function GET(request: Request) {
   const ids = idsParam.split(",").filter(Boolean);
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
-    .from("profiles")
+    .from("providers")
     .select(
-      "id, full_name, email, phone, address, city, providers(company_name, tax_id)"
+      "user_id, company_name, tax_id, profiles(full_name, email, phone, address, city)"
     )
-    .in("id", ids);
+    .in("user_id", ids);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
   const rows = (data || []).map((p) => ({
-    id: p.id,
-    full_name: p.full_name ?? null,
-    email: p.email ?? null,
-    phone: p.phone ?? null,
-    address: p.address ?? null,
-    city: p.city ?? null,
-    company_name: p.providers?.company_name ?? null,
-    tax_id: p.providers?.tax_id ?? null,
+    id: p.user_id,
+    full_name: p.profiles?.full_name ?? null,
+    email: p.profiles?.email ?? null,
+    phone: p.profiles?.phone ?? null,
+    address: p.profiles?.address ?? null,
+    city: p.profiles?.city ?? null,
+    company_name: p.company_name ?? null,
+    tax_id: p.tax_id ?? null,
   }));
   return NextResponse.json(rows);
 }
