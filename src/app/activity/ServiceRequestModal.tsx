@@ -437,14 +437,12 @@ export default function ServiceRequestModal({
               </div>
             </div>
 
-            {!showProvider && (
-              <FieldRow
-                icon={FiMail}
-                label={t.email}
-                value={personEmail}
-                href={personEmail ? `mailto:${personEmail}` : undefined}
-              />
-            )}
+            <FieldRow
+              icon={FiMail}
+              label={t.email}
+              value={personEmail}
+              href={personEmail ? `mailto:${personEmail}` : undefined}
+            />
             {showProvider && <FieldRow icon={FiFileText} label={t.taxId} value={taxId} />}
             <FieldRow icon={FiPhone} label={t.phone} value={personPhone} href={personPhone ? `tel:${personPhone}` : undefined} />
             <FieldRow icon={FiMapPin} label={t.address} value={addr} href={mapsHref(addr)} />
