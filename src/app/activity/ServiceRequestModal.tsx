@@ -263,7 +263,10 @@ export default function ServiceRequestModal({
 
   if (showProvider) {
     if (request.request_status === "assigned" || (request.request_status === "closed" && providerAssigned)) {
-      personName = request.provider_company_name || t.unknown;
+      personName =
+        request.provider_company_name ||
+        request.provider_name ||
+        t.unknown;
       personCity = request.provider_city || null;
       personEmail = request.provider_email || null;
       personPhone = request.provider_telephone || null;
