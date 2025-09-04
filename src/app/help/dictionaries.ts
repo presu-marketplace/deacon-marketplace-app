@@ -30,6 +30,7 @@ export const HELP_DICT = {
     contactHeading: 'Contact',
     contactDescription: 'Send us an email at',
     contactMailSubject: 'Presu support',
+    contactWhatsApp: 'Message us on WhatsApp',
     faqHeading: 'Frequently Asked Questions',
     faqs: [
       {
@@ -57,6 +58,7 @@ export const HELP_DICT = {
     contactHeading: 'Contacto',
     contactDescription: 'Envíanos un correo a',
     contactMailSubject: 'Soporte Presu',
+    contactWhatsApp: 'Escribinos por WhatsApp',
     faqHeading: 'Preguntas frecuentes',
     faqs: [
       {
