@@ -54,11 +54,12 @@ export default function Stepper({
                 className={[
                   "relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all",
                   "ring-2 ring-offset-0",
-                  isDone && "bg-green-500 ring-green-500 text-white",
+                  isDone &&
+                    "bg-neutral-200 ring-neutral-300 text-neutral-500 dark:bg-neutral-700 dark:ring-neutral-600 dark:text-neutral-300",
                   isCurrent &&
-                    "bg-blue-900 ring-blue-900 text-white shadow-lg shadow-blue-900/40",
+                    "h-10 w-10 bg-blue-600 ring-blue-600 text-white shadow-lg shadow-blue-600/40",
                   isFuture &&
-                    "bg-transparent ring-slate-400/50 text-slate-400 dark:ring-slate-600 dark:text-slate-500",
+                    "bg-transparent ring-neutral-300 text-neutral-400 dark:ring-neutral-600 dark:text-neutral-600",
                   onStepClick ? "hover:scale-105" : "cursor-default",
                 ].join(" ")}
               >
@@ -76,7 +77,7 @@ export default function Stepper({
                     <path d="M20 6 9 17l-5-5" />
                   </svg>
                 ) : Icon ? (
-                  <Icon className="h-5 w-5" />
+                  <Icon className={isCurrent ? "h-6 w-6" : "h-5 w-5"} />
                 ) : (
                   <span className="text-sm font-semibold">{index}</span>
                 )}
@@ -87,10 +88,10 @@ export default function Stepper({
                 <span
                   className={[
                     "block text-[11px] sm:text-xs truncate",
-                    isDone && "text-green-600 dark:text-green-400",
-                    isCurrent && "text-slate-100 dark:text-white font-medium",
+                    isDone && "text-neutral-400 dark:text-neutral-400",
+                    isCurrent && "text-blue-600 dark:text-blue-400 font-medium",
                     isFuture &&
-                      "text-slate-400 dark:text-slate-500 font-normal",
+                      "text-neutral-400/80 dark:text-neutral-600 font-normal",
                   ].join(" ")}
                 >
                   {label}
@@ -104,17 +105,32 @@ export default function Stepper({
 
               {/* Connector */}
               {index !== steps.length && (
-                <div
-                  aria-hidden
-                  className={[
-                    "mx-2 sm:mx-4 h-px flex-1",
-                    isDone
-                      ? "bg-gradient-to-r from-green-500 to-green-500/60"
-                      : isCurrent
-                      ? "bg-gradient-to-r from-blue-900/90 to-slate-500/40"
-                      : "bg-slate-400/40 dark:bg-slate-600/40",
-                  ].join(" ")}
-                />
+                <div aria-hidden className="relative mx-2 sm:mx-4 flex-1">
+                  <div
+                    className={[
+                      "h-px w-full",
+                      isDone
+                        ? "bg-neutral-300 dark:bg-neutral-600"
+                        : isCurrent
+                        ? "bg-gradient-to-r from-blue-600 to-neutral-300 dark:from-blue-500 dark:to-neutral-600"
+                        : "bg-neutral-300 dark:bg-neutral-700",
+                    ].join(" ")}
+                  />
+                  <svg
+                    viewBox="0 0 4 4"
+                    className={[
+                      "absolute -right-1 top-1/2 h-2 w-2 -translate-y-1/2",
+                      isDone
+                        ? "text-neutral-300 dark:text-neutral-600"
+                        : isCurrent
+                        ? "text-blue-600 dark:text-blue-500"
+                        : "text-neutral-300 dark:text-neutral-700",
+                    ].join(" ")}
+                    fill="currentColor"
+                  >
+                    <path d="M0 0 L4 2 L0 4 z" />
+                  </svg>
+                </div>
               )}
             </li>
           );
