@@ -7,6 +7,7 @@ import HeroSection from '../components/sections/home/HeroSection'
 import CardSection from '../components/sections/home/CardSection'
 import Footer from '../components/layout/Footer'
 import LocationPrompt from '../components/sections/home/LocationPrompt'
+import TaglineSection from '../components/sections/home/TaglineSection'
 
 export default function HomeClient() {
   const searchParams = useSearchParams()
@@ -50,6 +51,11 @@ export default function HomeClient() {
       footerNote: 'Do Not Sell or Share My Personal Information',
       copyright: 'All rights reserved.',
       heroHeadline: 'Choose smarter, save more.',
+      tagline:
+        'At Presu we connect companies with suppliers, offering multiple quotes in one place: easy, fast and transparent.',
+      easy: 'Easy',
+      fast: 'Fast',
+      transparent: 'Transparent',
       joinAsPro: 'Join as a Pro',
       location: 'Location',
       searchHere: 'Search here',
@@ -74,6 +80,11 @@ export default function HomeClient() {
       footerNote: 'No vender ni compartir mi información personal',
       copyright: 'Todos los derechos reservados.',
       heroHeadline: 'Elegí mejor, ahorrá más.',
+      tagline:
+        'En Presu conectamos empresas con proveedores, ofreciendo múltiples presupuestos en un solo lugar: fácil, rápido y transparente.',
+      easy: 'Fácil',
+      fast: 'Rápido',
+      transparent: 'Transparente',
       joinAsPro: 'Unirse como profesional',
       location: 'Ubicación',
       searchHere: 'Buscar',
@@ -90,11 +101,10 @@ export default function HomeClient() {
   return (
     <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
       <Navbar locale={locale} toggleLocale={toggleLocale} t={t} />
-      <div className="w-full">
+      <div className="w-full space-y-24 bg-white">
         <LocationPrompt t={t} setUserAddress={setUserAddress} />
         <HeroSection locale={locale} t={t} userAddress={userAddress} />
-      </div>
-      <div className="w-full">
+        <TaglineSection t={t} />
         <CardSection locale={locale} t={t} />
         <Footer t={t} locale={locale} />
       </div>
