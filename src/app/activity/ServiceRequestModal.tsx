@@ -265,10 +265,9 @@ export default function ServiceRequestModal({
 
   if (showProvider) {
     if (request.request_status === "assigned" || (request.request_status === "closed" && providerAssigned)) {
-      // Prefer the provider's company name when a provider is assigned.
-      // We intentionally avoid falling back to the username to keep the
-      // focus on the company identity.
-      personName = request.provider_company_name || t.unknown;
+      // Prefer the provider's company name when a provider is assigned,
+      // but fall back to their name if the company name is missing.
+      personName = request.provider_company_name || request.provider_name || t.unknown;
       personCity = request.provider_city || null;
       personEmail = request.provider_email || null;
       personPhone = request.provider_telephone || null;
