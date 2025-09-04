@@ -43,6 +43,8 @@ export interface ServiceRequest {
   user_city?: string | null;
   provider_id?: string | null;
   provider_name?: string | null;
+  provider_company_name?: string | null;
+  provider_tax_id?: string | null;
   provider_email?: string | null;
   provider_telephone?: string | null;
   provider_address?: string | null;
@@ -61,6 +63,7 @@ export interface ModalTranslations {
   property: string;
   location: string;
   email: string;
+  taxId: string;
   phone: string;
   address: string;
   requestedOn: string;
@@ -272,14 +275,16 @@ export default function ServiceRequestModal({
   let personCity: string | null = null;
   let personEmail: string | null = null;
   let personPhone: string | null = null;
+  let taxId: string | null = null;
   let addr: string | undefined;
 
   if (showProvider) {
     if (request.request_status === "assigned" || (request.request_status === "closed" && providerAssigned)) {
-      personName = request.provider_name || t.unknown;
+      personName = request.provider_company_name || t.unknown;
       personCity = request.provider_city || null;
       personEmail = request.provider_email || null;
       personPhone = request.provider_telephone || null;
+      taxId = request.provider_tax_id || null;
       addr = fullAddress(request, "provider");
     } else if (request.request_status === "open") {
       personName = t.notAssignedYet;
@@ -394,7 +399,15 @@ export default function ServiceRequestModal({
               </div>
             </div>
 
-            <FieldRow icon={FiMail} label={t.email} value={personEmail} href={personEmail ? `mailto:${personEmail}` : undefined} />
+            {!showProvider && (
+              <FieldRow
+                icon={FiMail}
+                label={t.email}
+                value={personEmail}
+                href={personEmail ? `mailto:${personEmail}` : undefined}
+              />
+            )}
+            {showProvider && <FieldRow icon={FiFileText} label={t.taxId} value={taxId} />}
             <FieldRow icon={FiPhone} label={t.phone} value={personPhone} href={personPhone ? `tel:${personPhone}` : undefined} />
             <FieldRow icon={FiMapPin} label={t.address} value={addr} href={mapsHref(addr)} />
 
