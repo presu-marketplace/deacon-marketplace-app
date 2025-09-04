@@ -101,7 +101,7 @@ export default function HomeClient() {
   return (
     <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
       <Navbar locale={locale} toggleLocale={toggleLocale} t={t} />
-      <div className="w-full space-y-24">
+      <div className="w-full space-y-24 bg-white">
         <LocationPrompt t={t} setUserAddress={setUserAddress} />
         <HeroSection locale={locale} t={t} userAddress={userAddress} />
         <TaglineSection t={t} />
