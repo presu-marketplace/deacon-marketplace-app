@@ -14,7 +14,10 @@ import {
   FiHome,
   FiRepeat,
   FiLayers,
+  FiCopy,
+  FiCheckCircle,
 } from "react-icons/fi";
+import Stepper from "@/components/ui/Stepper";
 
 export type RequestStatus = "open" | "assigned" | "closed";
 
@@ -163,28 +166,6 @@ function Note({ children }: { children?: React.ReactNode }) {
   return <div className="mt-2 rounded-xl border border-neutral-200 bg-neutral-50/70 p-3 text-sm text-neutral-700">{children}</div>;
 }
 
-function TimelineItem({
-  icon: Icon,
-  title,
-  when,
-  danger,
-}: {
-  icon: React.ElementType;
-  title: string;
-  when?: string | null;
-  danger?: boolean;
-}) {
-  if (!when) return null;
-  return (
-    <div className="relative pl-8">
-      <div className="absolute left-0 top-1.5 h-4 w-px bg-neutral-200" />
-      <Icon className={classNames("absolute left-[-10px] top-0 h-5 w-5", danger ? "text-red-500" : "text-neutral-400")} />
-      <div className={classNames("text-sm", danger ? "text-red-600" : "text-neutral-800")}>{title}</div>
-      <div className={classNames("text-xs", danger ? "text-red-500" : "text-neutral-500")}>{when}</div>
-    </div>
-  );
-}
-
 function AttachmentList({ urls }: { urls: string[] }) {
   const [sizes, setSizes] = useState<Record<string, number>>({});
 
@@ -264,7 +245,9 @@ export default function ServiceRequestModal({
     ? (request.request_systems as unknown[])
     : [];
   const hasFiles = (request.request_invoice_urls?.length ?? 0) > 0;
-  const overdue = request.service_deadline ? new Date(request.service_deadline) < new Date() : false;
+  const dueDate = request.request_created_at
+    ? new Date(new Date(request.request_created_at).getTime() + 3 * 24 * 60 * 60 * 1000).toISOString()
+    : null;
   // Clients and admins always see the Provider section. Details vary by status.
   const showProvider = role !== "provider";
   const providerAssigned = Boolean(request.provider_id);
@@ -292,6 +275,56 @@ export default function ServiceRequestModal({
     personEmail = request.user_email || null;
     personPhone = request.user_telephone || null;
     addr = fullAddress(request, "user");
+  }
+
+  const timelineRaw = [
+    {
+      key: "requested",
+      label: t.requestedOn,
+      icon: FiClock,
+      subLabel: fmtDate(request.request_created_at, locale) || undefined,
+    },
+    ...(request.provider_assigned_at
+      ? [
+          {
+            key: "assigned",
+            label: t.assignedAt,
+            icon: FiUser,
+            subLabel: fmtDate(request.provider_assigned_at, locale) || undefined,
+          },
+        ]
+      : []),
+    ...(request.request_closed_at
+      ? [
+          {
+            key: "resolved",
+            label: t.closedAt,
+            icon: FiCheckCircle,
+            subLabel: fmtDate(request.request_closed_at, locale) || undefined,
+          },
+        ]
+      : []),
+    {
+      key: "due",
+      label: t.dueBy,
+      icon: FiCalendar,
+      subLabel: fmtDateOnly(dueDate, locale) || undefined,
+    },
+  ];
+
+  const timelineSteps = timelineRaw.map(({ label, icon, subLabel }) => ({
+    label,
+    icon,
+    subLabel,
+  }));
+  const stepKeys = timelineRaw.map((s) => s.key);
+  let currentStep = 1;
+  const assignedIdx = stepKeys.indexOf("assigned");
+  const resolvedIdx = stepKeys.indexOf("resolved");
+  if (request.request_status === "assigned" && assignedIdx !== -1) {
+    currentStep = assignedIdx + 1;
+  } else if (request.request_status === "closed" && resolvedIdx !== -1) {
+    currentStep = resolvedIdx + 1;
   }
 
   return (
@@ -334,7 +367,7 @@ export default function ServiceRequestModal({
           </div>
         </div>
 
-        <div className="grid gap-8 px-6 py-5 sm:grid-cols-2">
+        <div className="grid gap-12 px-6 py-5 sm:grid-cols-2">
           <section>
             <SectionLabel icon={FiFileText}>{t.serviceDetails}</SectionLabel>
 
@@ -398,20 +431,21 @@ export default function ServiceRequestModal({
             <FieldRow icon={FiPhone} label={t.phone} value={personPhone} href={personPhone ? `tel:${personPhone}` : undefined} />
             <FieldRow icon={FiMapPin} label={t.address} value={addr} href={mapsHref(addr)} />
 
-            <div className="mt-4">
+            <div className="mt-8">
               <SectionLabel icon={FiCalendar}>{t.timeline}</SectionLabel>
-              <div className="ml-6 space-y-3">
-                <TimelineItem icon={FiClock} title={t.requestedOn} when={fmtDate(request.request_created_at, locale)} />
-                <TimelineItem icon={FiCalendar} title={t.dueBy} when={fmtDateOnly(request.service_deadline, locale)} danger={overdue} />
-                <TimelineItem icon={FiUser} title={t.assignedAt} when={fmtDate(request.provider_assigned_at, locale)} />
-                <TimelineItem icon={FiCalendar} title={t.closedAt} when={fmtDate(request.request_closed_at, locale)} />
-              </div>
+              <Stepper steps={timelineSteps} currentStep={currentStep} className="ml-6 mt-4 mx-0" />
             </div>
           </section>
         </div>
 
         <div className="flex items-center justify-between gap-3 border-t border-neutral-200 px-6 py-4">
-          <div className="text-xs text-neutral-500">ID: {request.id}</div>
+          <button
+            onClick={() => navigator.clipboard.writeText(request.id)}
+            className="flex items-center gap-1 text-xs text-neutral-400 hover:text-neutral-600"
+          >
+            <FiCopy className="h-4 w-4" />
+            <span>Request ID</span>
+          </button>
           <div className="flex items-center gap-2">
             {request.request_status !== "closed" && role !== "provider" && (
               <button
