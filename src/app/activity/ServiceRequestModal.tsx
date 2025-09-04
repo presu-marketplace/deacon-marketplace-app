@@ -273,7 +273,6 @@ export default function ServiceRequestModal({
       personEmail = request.provider_email || null;
       personPhone = request.provider_telephone || null;
       taxId = request.provider_tax_id || null;
-      addr = fullAddress(request, "provider");
     } else if (request.request_status === "open") {
       personName = t.notAssignedYet;
     } else {
@@ -437,17 +436,17 @@ export default function ServiceRequestModal({
               </div>
             </div>
 
-            {!showProvider && (
-              <FieldRow
-                icon={FiMail}
-                label={t.email}
-                value={personEmail}
-                href={personEmail ? `mailto:${personEmail}` : undefined}
-              />
-            )}
             {showProvider && <FieldRow icon={FiFileText} label={t.taxId} value={taxId} />}
+            <FieldRow
+              icon={FiMail}
+              label={t.email}
+              value={personEmail}
+              href={personEmail ? `mailto:${personEmail}` : undefined}
+            />
             <FieldRow icon={FiPhone} label={t.phone} value={personPhone} href={personPhone ? `tel:${personPhone}` : undefined} />
-            <FieldRow icon={FiMapPin} label={t.address} value={addr} href={mapsHref(addr)} />
+            {!showProvider && (
+              <FieldRow icon={FiMapPin} label={t.address} value={addr} href={mapsHref(addr)} />
+            )}
 
             <div className="mt-8">
               <SectionLabel icon={FiCalendar}>{t.timeline}</SectionLabel>
