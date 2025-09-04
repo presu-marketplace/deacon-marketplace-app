@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export function CallbackBody() {
+export default function CallbackBody() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -36,9 +36,7 @@ export function CallbackBody() {
         window.history.replaceState(
           {},
           document.title,
-          `${window.location.pathname}${
-            params.toString() ? `?${params.toString()}` : ''
-          }`
+          `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`
         )
 
         if (/^https?:\/\//.test(next)) {
@@ -54,7 +52,7 @@ export function CallbackBody() {
 
     recover()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]) // don't include searchParams, it’s a new object each render
+  }, [router])
 
-  return <div className="p-6 text-center text-gray-200">Restaurando sesión...</div>
+  return <div className="p-6 text-center text-gray-500">Restaurando sesión...</div>
 }
