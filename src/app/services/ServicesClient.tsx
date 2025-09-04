@@ -50,7 +50,27 @@ export default function ServicesClient() {
       }
 
       const fetched = (data ?? []) as Service[]
-      setServices(fetched)
+
+      const order = [
+        'seguridad',
+        'limpieza',
+        'fumigacion',
+        'mantenimiento-ascensores',
+        'escribania',
+        'community-manager',
+        'traslados-ejecutivos',
+        'salones-infantiles'
+      ]
+      const orderMap: Record<string, number> = {}
+      order.forEach((slug, index) => {
+        orderMap[slug] = index
+      })
+
+      const sorted = [...fetched].sort(
+        (a, b) => (orderMap[a.slug] ?? Infinity) - (orderMap[b.slug] ?? Infinity)
+      )
+
+      setServices(sorted)
     }
     fetchServices()
   }, [])
