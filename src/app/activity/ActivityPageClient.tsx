@@ -37,6 +37,13 @@ interface ServiceRequest {
   user_city?: string | null;
   provider_assigned_at?: string | null;
   request_closed_at?: string | null;
+  provider?: {
+    full_name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+    city?: string | null;
+  } | null;
 }
 
 interface ProviderServiceRow {
@@ -67,6 +74,11 @@ type ActivityItem = {
   userTelephone?: string | null;
   userAddress?: string | null;
   userCity?: string | null;
+  providerName?: string | null;
+  providerPhone?: string | null;
+  providerAddress?: string | null;
+  providerCity?: string | null;
+  providerEmail?: string | null;
   providerAssignedAt?: string | null;
   requestClosedAt?: string | null;
   serviceSlug?: string | null;
@@ -315,6 +327,7 @@ export default function ActivityPage() {
     subtitle: locale === "es" ? "Solicitud de servicio" : "Service Request",
     serviceDetails: locale === "es" ? "Detalles del servicio" : "Service Details",
     requester: locale === "es" ? "Solicitante" : "Requester",
+    provider: locale === "es" ? "Proveedor" : "Provider",
     timeline: locale === "es" ? "Cronograma" : "Timeline",
     attachments: locale === "es" ? "Adjuntos" : "Attachments",
     systems: locale === "es" ? "Sistemas" : "Systems",
@@ -470,33 +483,61 @@ export default function ActivityPage() {
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
       const userRole = (profile?.role as "client" | "provider" | "admin" | null) ?? "client";
       setRole(userRole);
+      const selectBase =
+        "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at";
+
+      async function fetchAndEnrich(params: URLSearchParams) {
+        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
+        const providerIds = Array.from(
+          new Set(rows.map((r) => r.provider_id).filter(Boolean))
+        ) as string[];
+        if (providerIds.length) {
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("id, full_name, email, phone, address, city")
+            .in("id", providerIds);
+          const map = Object.fromEntries(
+            (profiles || []).map((p) => [p.id, p])
+          ) as Record<
+            string,
+            {
+              full_name: string | null;
+              email: string | null;
+              phone: string | null;
+              address: string | null;
+              city: string | null;
+            }
+          >;
+          rows.forEach((r) => {
+            if (r.provider_id && map[r.provider_id]) {
+              r.provider = map[r.provider_id];
+            }
+          });
+        }
+        setRequests(rows);
+      }
+
       if (userRole === "client") {
         const params = new URLSearchParams({
-          select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at",
+          select: selectBase,
           user_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
-        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
-        setRequests(rows);
+        await fetchAndEnrich(params);
       } else if (userRole === "provider") {
         const params = new URLSearchParams({
-          select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at",
+          select: selectBase,
           provider_id: `eq.${user.id}`,
           order: "request_created_at.desc",
         });
-        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
-        setRequests(rows);
+        await fetchAndEnrich(params);
       } else if (userRole === "admin") {
         const params = new URLSearchParams({
-          select:
-            "id, service_id, provider_id, service_description, request_created_at, request_status, user_name, service_deadline, request_invoice_urls, service_location, request_message, request_property_type, request_cleaning_type, request_cleaning_frequency, user_email, user_telephone, user_address, user_city, provider_assigned_at, request_closed_at",
+          select: selectBase,
           order: "request_created_at.desc",
           limit: "1000",
         });
-        const rows = (await fetchFromApi<ServiceRequest[]>("service_requests", params)) || [];
-        setRequests(rows);
+        await fetchAndEnrich(params);
       }
       setLoading(false);
     };
@@ -528,6 +569,11 @@ export default function ActivityPage() {
       userTelephone: r.user_telephone,
       userAddress: r.user_address,
       userCity: r.user_city,
+      providerName: r.provider?.full_name || null,
+      providerPhone: r.provider?.phone || null,
+      providerAddress: r.provider?.address || null,
+      providerCity: r.provider?.city || null,
+      providerEmail: r.provider?.email || null,
       providerAssignedAt: r.provider_assigned_at,
       requestClosedAt: r.request_closed_at,
       serviceSlug: r.service_id ? serviceNames[r.service_id]?.slug || null : null,
@@ -671,6 +717,11 @@ export default function ActivityPage() {
                         userTelephone={it.userTelephone}
                         userAddress={it.userAddress}
                         userCity={it.userCity}
+                        providerName={it.providerName}
+                        providerPhone={it.providerPhone}
+                        providerAddress={it.providerAddress}
+                        providerCity={it.providerCity}
+                        providerEmail={it.providerEmail}
                         providerAssignedAt={it.providerAssignedAt}
                         requestClosedAt={it.requestClosedAt}
                         serviceSlug={it.serviceSlug}
@@ -711,6 +762,11 @@ export default function ActivityPage() {
             user_telephone: activeItem.userTelephone,
             user_address: activeItem.userAddress,
             user_city: activeItem.userCity,
+            provider_name: activeItem.providerName,
+            provider_email: activeItem.providerEmail,
+            provider_telephone: activeItem.providerPhone,
+            provider_address: activeItem.providerAddress,
+            provider_city: activeItem.providerCity,
           }}
           role={role}
           providers={activeItem.serviceId ? providersByService[activeItem.serviceId] || [] : []}
@@ -745,6 +801,11 @@ export default function ActivityPage() {
     userTelephone?: string | null;
     userAddress?: string | null;
     userCity?: string | null;
+    providerName?: string | null;
+    providerPhone?: string | null;
+    providerAddress?: string | null;
+    providerCity?: string | null;
+    providerEmail?: string | null;
     providerAssignedAt?: string | null;
     requestClosedAt?: string | null;
     serviceSlug?: string | null;
