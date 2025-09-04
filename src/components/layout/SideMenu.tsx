@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import useUser from '@/features/auth/useUser'
@@ -76,6 +77,22 @@ export default function SideMenu({
   const providerLabel =
     locale === 'es' ? 'Quiero ser proveedor' : 'Join as a provider'
 
+  const activityText = locale === 'es' ? 'Actividad' : 'Activity'
+  const activityAlt = activityText
+
+  const helpText = locale === 'es' ? 'Ayuda' : 'Help'
+  const helpAlt = helpText
+
+  const settingsText = locale === 'es' ? 'Configuración' : 'Settings'
+  const settingsAlt = settingsText
+
+  const logoutText = locale === 'es' ? 'Cerrar sesión' : 'Log out'
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/')
+  }
+
   const wrapperClasses = `
     fixed inset-y-0 left-0 w-[85%] max-w-xs z-50 transform transition-transform duration-300 ease-in-out
     ${isOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -113,19 +130,63 @@ export default function SideMenu({
 
           {/* Main Content */}
           {user ? (
-            <div className="flex items-center gap-4 px-4 pt-2">
-              <Image
-                src={avatarUrl}
-                alt="User Avatar"
-                width={56}
-                height={56}
-                className="rounded-full"
-              />
-              <div>
-                <p className="font-semibold text-lg leading-tight">{userName}</p>
-                <p className="text-sm text-gray-500">{user.email}</p>
+            <>
+              <div className="flex items-center gap-4 px-4 pt-2">
+                <Image
+                  src={avatarUrl}
+                  alt="User Avatar"
+                  width={56}
+                  height={56}
+                  className="rounded-full"
+                />
+                <div>
+                  <p className="font-semibold text-lg leading-tight">{userName}</p>
+                  <p className="text-sm text-gray-500">{user.email}</p>
+                </div>
               </div>
-            </div>
+
+              <div className="grid grid-cols-2 px-4 pt-6 gap-4">
+                <Link
+                  href="/activity"
+                  onClick={onClose}
+                  className="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-100 hover:bg-gray-200 transition transform hover:scale-105"
+                >
+                  <Image src="/images/user/user-activity.png" alt={activityAlt} width={28} height={28} />
+                  <span className="text-sm mt-1 font-semibold">{activityText}</span>
+                </Link>
+                <Link
+                  href="/help"
+                  onClick={onClose}
+                  className="flex flex-col items-center justify-center p-4 rounded-xl bg-gray-100 hover:bg-gray-200 transition transform hover:scale-105"
+                >
+                  <Image src="/images/user/user-help.png" alt={helpAlt} width={28} height={28} />
+                  <span className="text-sm mt-1 font-semibold">{helpText}</span>
+                </Link>
+              </div>
+
+              <div className="px-4 pt-3">
+                <Link
+                  href="/settings"
+                  onClick={onClose}
+                  className="flex flex-col items-center justify-center hover:bg-gray-100 rounded-xl transition transform hover:scale-105 py-4"
+                >
+                  <Image src="/images/user/user-settings.png" alt={settingsAlt} width={28} height={28} />
+                  <span className="text-sm font-semibold mt-1">{settingsText}</span>
+                </Link>
+              </div>
+
+              <div className="px-4 pt-6">
+                <button
+                  onClick={async () => {
+                    await handleLogout()
+                    onClose()
+                  }}
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-red-600 font-bold text-sm py-3 rounded-xl transition transform hover:scale-[1.02]"
+                >
+                  {logoutText}
+                </button>
+              </div>
+            </>
           ) : (
             <>
               <button
@@ -150,7 +211,7 @@ export default function SideMenu({
           )}
 
           {/* Additional Options */}
-          <ul className="space-y-4 font-semibold mt-6">
+          <ul className="space-y-4 font-semibold mt-auto pt-6">
             <li>
               <button
                 onClick={() => {
