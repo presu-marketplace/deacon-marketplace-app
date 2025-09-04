@@ -7,10 +7,10 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import Script from 'next/script'
 import { NAV_DICT, HELP_DICT, HelpLocale } from './dictionaries'
+import { FaWhatsapp } from 'react-icons/fa'
 
 type Locale = 'en' | 'es'
 const isLocale = (v: string | null): v is Locale => v === 'en' || v === 'es'
-
 export default function HelpClient() {
   const router = useRouter()
   const pathname = usePathname()
@@ -49,6 +49,10 @@ export default function HelpClient() {
   const lastUpdated = useMemo(
     () => new Intl.DateTimeFormat(locale, { dateStyle: 'long' }).format(new Date()),
     [locale]
+  )
+
+  const whatsappMessage = encodeURIComponent(
+    'Hola Presu, me gustaría obtener más información sobre sus servicios.'
   )
 
   const footerT = {
@@ -136,6 +140,15 @@ export default function HelpClient() {
                   info@presu.com.ar
                 </a>
               </p>
+              <a
+                href={`https://wa.me/5491168112344?text=${whatsappMessage}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center gap-2 rounded bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-400"
+              >
+                <FaWhatsapp size={20} />
+                {t.contactWhatsApp}
+              </a>
             </div>
 
             <div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
