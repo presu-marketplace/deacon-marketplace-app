@@ -263,6 +263,7 @@ export default function ServiceRequestModal({
     : [];
   const hasFiles = (request.request_invoice_urls?.length ?? 0) > 0;
   const overdue = request.service_deadline ? new Date(request.service_deadline) < new Date() : false;
+  // Clients see provider details only when a request has been assigned
   const showProvider = role === "client" && request.request_status === "assigned";
   const personName = showProvider ? request.provider_name : request.user_name;
   const personCity = showProvider ? request.provider_city : request.user_city;
