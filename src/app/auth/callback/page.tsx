@@ -9,7 +9,7 @@ export default function CallbackPage() {
 
   useEffect(() => {
     const recover = async () => {
-      const { data, error } = await supabase.auth.getSession()
+      const { data, error } = await supabase.auth.getSessionFromURL()
       if (data.session) {
         const role = searchParams.get('role') || undefined
         const nextParam = searchParams.get('next')
@@ -27,7 +27,26 @@ export default function CallbackPage() {
             fullName,
           }),
         })
-        router.push(next)
+
+        // Remove tokens and auth params from URL after session is stored
+        if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search)
+          params.delete('code')
+          params.delete('state')
+          window.history.replaceState(
+            {},
+            document.title,
+            `${window.location.pathname}${
+              params.toString() ? `?${params.toString()}` : ''
+            }`
+          )
+        }
+
+        if (/^https?:\/\//.test(next)) {
+          window.location.href = next
+        } else {
+          router.push(next)
+        }
       } else {
         console.error('Recovery failed:', error?.message)
         router.push('/auth/login')

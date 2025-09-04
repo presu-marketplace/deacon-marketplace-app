@@ -74,12 +74,19 @@ export default function LoginComponent({ locale = 'en', t = defaultT }: LoginCom
   const handleGoogleLogin = async () => {
     setGoogleLoading(true)
     // Always redirect OAuth to /auth/callback, with ?next for final destination
-    const oauthRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(postAuthRedirect)}${lang ? `&lang=${lang}` : ''}`
+    const isLocalhost = window.location.hostname === 'localhost'
+    const redirectBase = isLocalhost
+      ? 'https://presu.com.ar'
+      : window.location.origin
+    const nextTarget = isLocalhost
+      ? `${window.location.origin}${postAuthRedirect}`
+      : postAuthRedirect
+    const oauthRedirectTo = `${redirectBase}/auth/callback?next=${encodeURIComponent(nextTarget)}${lang ? `&lang=${lang}` : ''}`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: oauthRedirectTo
-      }
+        redirectTo: oauthRedirectTo,
+      },
     })
     if (error) {
       setError(error.message)
