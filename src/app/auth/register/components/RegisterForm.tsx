@@ -98,10 +98,13 @@ export default function RegisterComponent({ t = defaultT, role = 'client' }: Reg
   const handleGoogleSignup = async () => {
     setGoogleLoading(true)
     // Pass role so the callback/server can persist it
-    const oauthRedirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(postAuthRedirect)}${lang ? `&lang=${lang}` : ''}&role=${effectiveRole}`
+    const redirectBase = window.location.origin
+    const oauthRedirectTo = `${redirectBase}/auth/callback?next=${encodeURIComponent(
+      postAuthRedirect
+    )}${lang ? `&lang=${lang}` : ''}&role=${effectiveRole}`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: oauthRedirectTo }
+      options: { redirectTo: oauthRedirectTo },
     })
     if (error) {
       setError(error.message)
