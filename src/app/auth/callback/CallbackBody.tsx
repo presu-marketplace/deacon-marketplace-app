@@ -28,7 +28,24 @@ export function CallbackBody() {
             fullName,
           }),
         })
-        router.push(next)
+
+        // Remove tokens and auth params from URL after session is stored
+        const params = new URLSearchParams(searchParams.toString())
+        params.delete('code')
+        params.delete('state')
+        window.history.replaceState(
+          {},
+          document.title,
+          `${window.location.pathname}${
+            params.toString() ? `?${params.toString()}` : ''
+          }`
+        )
+
+        if (/^https?:\/\//.test(next)) {
+          window.location.href = next
+        } else {
+          router.push(next)
+        }
       } else {
         console.error('Recovery failed:', error?.message)
         router.push('/auth/login')
@@ -36,6 +53,7 @@ export function CallbackBody() {
     }
 
     recover()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]) // don't include searchParams, it’s a new object each render
 
   return <div className="p-6 text-center text-gray-200">Restaurando sesión...</div>
