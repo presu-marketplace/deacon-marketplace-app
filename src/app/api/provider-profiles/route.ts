@@ -12,29 +12,27 @@ export async function GET(request: Request) {
   const ids = idsParam.split(",").filter(Boolean);
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
-    .from("providers")
+    .from("profiles")
     .select(
-      "user_id, company_name, tax_id, profiles(full_name, phone, address, city)"
+      "id, full_name, phone, address, city, providers(company_name, tax_id)"
     )
-    .in("user_id", ids);
+    .in("id", ids);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
   const rows = await Promise.all(
     (data || []).map(async (p) => {
-      const { data: userData } = await supabase.auth.admin.getUserById(
-        p.user_id
-      );
+      const { data: userData } = await supabase.auth.admin.getUserById(p.id);
       return {
-        id: p.user_id,
-        full_name: p.profiles?.full_name ?? null,
+        id: p.id,
+        full_name: p.full_name ?? null,
         email: userData.user?.email ?? null,
-        phone: p.profiles?.phone ?? null,
-        address: p.profiles?.address ?? null,
-        city: p.profiles?.city ?? null,
-        company_name: p.company_name ?? null,
-        tax_id: p.tax_id ?? null,
+        phone: p.phone ?? null,
+        address: p.address ?? null,
+        city: p.city ?? null,
+        company_name: p.providers?.company_name ?? null,
+        tax_id: p.providers?.tax_id ?? null,
       };
     })
   );
