@@ -13,10 +13,22 @@ export async function GET(request: Request) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name, phone, address, city")
+    .select(
+      "id, full_name, email, phone, address, city, providers(company_name, tax_id)"
+    )
     .in("id", ids);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-  return NextResponse.json(data || []);
+  const rows = (data || []).map((p) => ({
+    id: p.id,
+    full_name: p.full_name ?? null,
+    email: p.email ?? null,
+    phone: p.phone ?? null,
+    address: p.address ?? null,
+    city: p.city ?? null,
+    company_name: p.providers?.company_name ?? null,
+    tax_id: p.providers?.tax_id ?? null,
+  }));
+  return NextResponse.json(rows);
 }
