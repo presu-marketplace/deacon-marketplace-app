@@ -388,7 +388,7 @@ export default function ServiceRequestModal({
 
             <div className="mt-4">
               <SectionLabel icon={FiCalendar}>{t.timeline}</SectionLabel>
-              <div className="space-y-3">
+              <div className="ml-6 space-y-3">
                 <TimelineItem icon={FiClock} title={t.requestedOn} when={fmtDate(request.request_created_at, locale)} />
                 <TimelineItem icon={FiCalendar} title={t.dueBy} when={fmtDateOnly(request.service_deadline, locale)} danger={overdue} />
                 <TimelineItem icon={FiUser} title={t.assignedAt} when={fmtDate(request.provider_assigned_at, locale)} />
