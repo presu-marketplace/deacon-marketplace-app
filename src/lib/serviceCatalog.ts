@@ -3,7 +3,7 @@ export type Service = {
   name_es: string;
   name_en: string;
   image_url: string;
-  rating?: number;
+  provider_count?: number;
   schedule?: string;
   disabled?: boolean;
 };
