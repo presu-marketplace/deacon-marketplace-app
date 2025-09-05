@@ -36,7 +36,7 @@ export default function ServicesClient() {
   const t = {
     availableTitle: locale === 'es' ? 'Servicios disponibles' : 'Available Services',
     upcomingTitle: locale === 'es' ? 'Servicios próximos' : 'Upcoming Services',
-    rating: locale === 'es' ? 'puntuación' : 'rating',
+    providers: locale === 'es' ? 'proveedores' : 'providers',
     schedule: locale === 'es' ? 'Horario estimado' : 'Estimated hours',
   }
 
@@ -101,10 +101,10 @@ export default function ServicesClient() {
 
         <div className="px-3 py-2">
           <h3 className="font-medium text-sm truncate">{name}</h3>
-          {(s.rating || s.schedule) && (
+          {(s.provider_count || s.schedule) && (
             <p className="text-xs text-gray-600">
-              {s.rating ? `⭐ ${s.rating}` : ''}
-              {s.rating && s.schedule ? ' • ' : ''}
+              {s.provider_count ? `${s.provider_count} ${t.providers}` : ''}
+              {s.provider_count && s.schedule ? ' • ' : ''}
               {s.schedule || ''}
             </p>
           )}

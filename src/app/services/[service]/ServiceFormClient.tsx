@@ -137,64 +137,56 @@ const serviceInfo = {
     enName: 'Private Security',
     esDesc: 'Protección integral para hogares y negocios.',
     enDesc: 'Comprehensive protection for homes and businesses.',
-    image: '/images/services/security.jpg',
-    rating: '4.8'
+    image: '/images/services/security.jpg'
   },
   cleaning: {
     esName: 'Limpieza Profesional',
     enName: 'Professional Cleaning',
     esDesc: 'Servicios de limpieza detallados para cualquier espacio.',
     enDesc: 'Detailed cleaning services for any space.',
-    image: '/images/services/cleaning.jpg',
-    rating: '4.7'
+    image: '/images/services/cleaning.jpg'
   },
   fumigation: {
     esName: 'Fumigación a domicilio',
     enName: 'Home Fumigation',
     esDesc: 'Eliminación de plagas con técnicas seguras.',
     enDesc: 'Pest removal with safe techniques.',
-    image: '/images/services/fumigation.jpg',
-    rating: '4.6'
+    image: '/images/services/fumigation.jpg'
   },
   'elevator-maintenance': {
     esName: 'Mantenimiento de ascensores',
     enName: 'Elevator Maintenance',
     esDesc: 'Mantenimiento preventivo y correctivo de ascensores.',
     enDesc: 'Preventive and corrective elevator maintenance.',
-    image: '/images/services/elevator_maintenance.jpg',
-    rating: '4.5'
+    image: '/images/services/elevator_maintenance.jpg'
   },
   notary: {
     esName: 'Escribanía',
     enName: 'Notary Services',
     esDesc: 'Gestiones notariales con profesionales matriculados.',
     enDesc: 'Notarial procedures by licensed professionals.',
-    image: '/images/services/notary.jpg',
-    rating: '4.7'
+    image: '/images/services/notary.jpg'
   },
   'community-manager': {
     esName: 'Community Manager',
     enName: 'Community Manager',
     esDesc: 'Gestión de redes sociales para tu marca.',
     enDesc: 'Social media management for your brand.',
-    image: '/images/services/community.jpg',
-    rating: '4.5'
+    image: '/images/services/community.jpg'
   },
   'transfers': {
     esName: 'Traslados Ejecutivos',
     enName: 'Executive Transfers',
     esDesc: 'Transporte ejecutivo cómodo y seguro.',
     enDesc: 'Comfortable and safe executive transport.',
-    image: '/images/services/transfer.jpg',
-    rating: '4.8'
+    image: '/images/services/transfer.jpg'
   },
   'kids-party-venues': {
     esName: 'Salones Infantiles',
     enName: 'Kids Party Venues',
     esDesc: 'Espacios ideales para fiestas infantiles.',
     enDesc: 'Ideal spaces for kids parties.',
-    image: '/images/services/kids-party.jpg',
-    rating: '4.6'
+    image: '/images/services/kids-party.jpg'
   }
 } as const
 
@@ -237,6 +229,7 @@ export default function ServiceFormClient({ service }: Props) {
   const [invoiceError, setInvoiceError] = useState('')
   const [error, setError] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [providerCount, setProviderCount] = useState(0)
   const user = useUser()
 
   const isSeguridad = service.toLowerCase() === 'security'
@@ -249,9 +242,20 @@ export default function ServiceFormClient({ service }: Props) {
       enName: service,
       esDesc: '',
       enDesc: '',
-      image: '',
-      rating: ''
+      image: ''
     }
+
+  useEffect(() => {
+    const fetchCount = async () => {
+      const { data } = await supabase
+        .from('services')
+        .select('provider_count')
+        .eq('slug', service)
+        .single()
+      setProviderCount(data?.provider_count || 0)
+    }
+    fetchCount()
+  }, [service])
 
   useEffect(() => {
     if (isSeguridad) {
@@ -413,8 +417,13 @@ export default function ServiceFormClient({ service }: Props) {
               <h1 className="text-2xl font-bold mb-4">
                 {locale === 'es' ? info.esName : info.enName}
               </h1>
-              {info.rating && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">⭐ {info.rating}</p>
+              {providerCount > 0 && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  {providerCount}{' '}
+                  {locale === 'es'
+                    ? 'proveedores en cartera'
+                    : 'providers in portfolio'}
+                </p>
               )}
               <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
                 {locale === 'es' ? info.esDesc : info.enDesc}
