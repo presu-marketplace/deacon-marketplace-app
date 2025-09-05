@@ -39,10 +39,10 @@ create or replace view api.services as
     s.name_en,
     s.name_es,
     s.rating,
-    s.base_providers + coalesce(count(ps.provider_id), 0) as provider_count,
     s.schedule,
-    s.image_url
-  from reference.services s
+    s.image_url,
+    s.base_providers + coalesce(count(ps.provider_id), 0) as provider_count
+from reference.services s
   left join api.provider_services ps on ps.service_id = s.id
   group by s.id, s.slug, s.name_en, s.name_es, s.rating, s.base_providers, s.schedule, s.image_url;
 
