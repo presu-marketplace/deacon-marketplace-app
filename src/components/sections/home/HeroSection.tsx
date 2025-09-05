@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
-import { Service, upcomingServices } from '@/lib/serviceCatalog'
+import { Service, upcomingServices, serviceOrder } from '@/lib/serviceCatalog'
 
 const heroImages = [
   '/images/hero-section/card-01.jpg',
@@ -44,7 +44,14 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
 
       if (data) {
         const enabled = data.map((s) => ({ ...s, image_url: '', disabled: false }))
-        setServices([...enabled, ...upcomingServices])
+        const orderMap: Record<string, number> = {}
+        serviceOrder.forEach((slug, index) => {
+          orderMap[slug] = index
+        })
+        const sorted = [...enabled].sort(
+          (a, b) => (orderMap[a.slug] ?? Infinity) - (orderMap[b.slug] ?? Infinity)
+        )
+        setServices([...sorted, ...upcomingServices])
       } else {
         setServices(upcomingServices)
       }

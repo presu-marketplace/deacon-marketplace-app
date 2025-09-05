@@ -7,7 +7,7 @@ import Footer from '@/components/layout/Footer'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import type { Service } from '@/lib/serviceCatalog'
-import { upcomingServices } from '@/lib/serviceCatalog'
+import { upcomingServices, serviceOrder } from '@/lib/serviceCatalog'
 import { getFooterTranslations } from '@/lib/footerTranslations'
 
 export default function ServicesClient() {
@@ -53,18 +53,8 @@ export default function ServicesClient() {
 
       const fetched = (data ?? []) as Service[]
 
-      const order = [
-        'security',
-        'cleaning',
-        'fumigation',
-        'elevator-maintenance',
-        'notary',
-        'community-manager',
-        'transfers',
-        'kids-party-venues'
-      ]
       const orderMap: Record<string, number> = {}
-      order.forEach((slug, index) => {
+      serviceOrder.forEach((slug, index) => {
         orderMap[slug] = index
       })
 
