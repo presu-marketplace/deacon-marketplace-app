@@ -218,6 +218,13 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                   setSearchTerm(e.target.value)
                   setShowSuggestions(true)
                 }}
+                onBlur={() => setShowSuggestions(false)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setShowSuggestions(false)
+                    searchInputRef.current?.blur()
+                  }
+                }}
               />
               <button className="ml-2 p-2 rounded-full hover:bg-gray-100 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500" viewBox="0 0 256 256" fill="currentColor">
@@ -260,6 +267,13 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                 onChange={(e) => {
                   setSearchTerm(e.target.value)
                   setShowSuggestions(true)
+                }}
+                onBlur={() => setShowSuggestions(false)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setShowSuggestions(false)
+                    searchInputRef.current?.blur()
+                  }
                 }}
               />
               {renderSuggestions()}
