@@ -8,6 +8,17 @@ export type Service = {
   disabled?: boolean;
 };
 
+export const serviceOrder = [
+  'security',
+  'cleaning',
+  'fumigation',
+  'elevator-maintenance',
+  'notary',
+  'community-manager',
+  'transfers',
+  'kids-party-venues',
+];
+
 export const upcomingServices: Service[] = [
   {
     slug: 'auditing',
