@@ -77,15 +77,6 @@ export default function Footer({ t, locale }: FooterProps) {
             </svg>
           </a>
           <a
-            href={`https://wa.me/5491168112344?text=${whatsappMessage}`}
-            className="hover:text-red-500"
-            aria-label="WhatsApp"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FaWhatsapp className="w-5 h-5" />
-          </a>
-          <a
             href="https://www.linkedin.com/company/presu"
             className="hover:text-red-500"
             aria-label="LinkedIn"
@@ -95,6 +86,15 @@ export default function Footer({ t, locale }: FooterProps) {
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 448 512">
               <path d="M100.28 448H7.4V148.9h92.88zm-46.44-340c-29.7 0-53.74-24.15-53.74-53.74C0 24.15 24.04 0 53.84 0s53.74 24.15 53.74 53.74c-.01 29.59-24.05 53.74-53.74 53.74zM447.9 448h-92.4V302.4c0-34.7-12.5-58.4-43.6-58.4-23.8 0-38.1 16-44.3 31.4-2.3 5.5-2.8 13.2-2.8 20.9V448h-92.6s1.2-270.4 0-298.1h92.6v42.3c-.2.3-.5.7-.7 1h.7v-1c12.3-18.9 34.4-45.8 83.7-45.8 61.2 0 107.1 39.9 107.1 125.5V448z"/>
             </svg>
+          </a>
+          <a
+            href={`https://wa.me/5491168112344?text=${whatsappMessage}`}
+            className="hover:text-red-500"
+            aria-label="WhatsApp"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <FaWhatsapp className="w-5 h-5" />
           </a>
         </div>
 
