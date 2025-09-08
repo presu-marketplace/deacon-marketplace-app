@@ -27,6 +27,7 @@ export default function SideMenu({
   isOpen,
   onClose,
   locale,
+  toggleLocale,
   t,
   forceWhite = false,
 }: SideMenuProps) {
@@ -165,13 +166,6 @@ export default function SideMenu({
                     onClick={onClose}
                     className="flex w-full items-center justify-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
                   >
-                    <Image
-                      src="/images/user/user-activity.png"
-                      alt={activityAlt}
-                      width={20}
-                      height={20}
-                      className="dark:invert"
-                    />
                     <span className="text-sm font-semibold">{activityText}</span>
                   </Link>
                 </li>
@@ -181,13 +175,6 @@ export default function SideMenu({
                     onClick={onClose}
                     className="flex w-full items-center justify-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
                   >
-                    <Image
-                      src="/images/user/user-help.png"
-                      alt={helpAlt}
-                      width={20}
-                      height={20}
-                      className="dark:invert"
-                    />
                     <span className="text-sm font-semibold">{helpText}</span>
                   </Link>
                 </li>
@@ -197,41 +184,39 @@ export default function SideMenu({
                     onClick={onClose}
                     className="flex w-full items-center justify-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
                   >
-                    <Image
-                      src="/images/user/user-settings.png"
-                      alt={settingsAlt}
-                      width={20}
-                      height={20}
-                      className="dark:invert"
-                    />
                     <span className="text-sm font-semibold">{settingsText}</span>
                   </Link>
                 </li>
                 <li className="w-full">
-                  <button
-                    onClick={async () => {
-                      await handleLogout()
-                      onClose()
-                    }}
-                    className="flex w-full items-center justify-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition text-red-600"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6A2.25 2.25 0 0 0 5.25 5.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
-                      />
-                    </svg>
-                    <span className="text-sm font-semibold">{logoutText}</span>
-                  </button>
-                </li>
+  <button
+    onClick={async () => {
+      await handleLogout()
+      onClose()
+    }}
+    className="relative w-full p-2 rounded-lg hover:bg-gray-100 transition"
+  >
+    {/* Left icon (doesn't affect layout) */}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+      className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-red-600"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6A2.25 2.25 0 0 0 5.25 5.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
+      />
+    </svg>
+
+    {/* Text centered like the other items */}
+    <span className="block w-full text-center text-sm font-semibold text-red-600">
+      {logoutText}
+    </span>
+  </button>
+</li>
               </ul>
             </>
           ) : (
