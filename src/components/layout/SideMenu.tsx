@@ -144,7 +144,7 @@ export default function SideMenu({
                   <p className="text-sm text-gray-500">{user.email}</p>
                 </div>
               </div>
-              <ul className="px-4 pt-6 font-semibold">
+              <ul className="px-4 pt-6 font-semibold list-none">
                 <li className="w-full">
                   <button
                     onClick={() => {
@@ -158,7 +158,7 @@ export default function SideMenu({
                 </li>
               </ul>
               {/* Mobile user actions */}
-              <ul className="md:hidden px-4 pt-6 flex flex-col gap-2 w-full">
+              <ul className="md:hidden px-4 pt-6 flex flex-col gap-2 w-full list-none">
                 <li className="w-full">
                   <Link
                     href="/activity"
@@ -170,6 +170,7 @@ export default function SideMenu({
                       alt={activityAlt}
                       width={20}
                       height={20}
+                      className="dark:invert"
                     />
                     <span className="text-sm font-semibold">{activityText}</span>
                   </Link>
@@ -185,6 +186,7 @@ export default function SideMenu({
                       alt={helpAlt}
                       width={20}
                       height={20}
+                      className="dark:invert"
                     />
                     <span className="text-sm font-semibold">{helpText}</span>
                   </Link>
@@ -200,6 +202,7 @@ export default function SideMenu({
                       alt={settingsAlt}
                       width={20}
                       height={20}
+                      className="dark:invert"
                     />
                     <span className="text-sm font-semibold">{settingsText}</span>
                   </Link>
@@ -210,7 +213,7 @@ export default function SideMenu({
                       await handleLogout()
                       onClose()
                     }}
-                    className="flex w-full items-center justify-center gap-3 p-2 rounded-lg hover:bg-gray-100 text-red-600 transition"
+                    className="flex w-full items-center justify-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition text-red-600"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
