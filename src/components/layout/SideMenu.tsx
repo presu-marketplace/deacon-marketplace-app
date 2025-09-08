@@ -79,14 +79,8 @@ export default function SideMenu({
     locale === 'es' ? 'Quiero ser proveedor' : 'Join as a provider'
 
   const activityText = locale === 'es' ? 'Actividad' : 'Activity'
-  const activityAlt = activityText
-
   const helpText = locale === 'es' ? 'Ayuda' : 'Help'
-  const helpAlt = helpText
-
   const settingsText = locale === 'es' ? 'Configuración' : 'Settings'
-  const settingsAlt = settingsText
-
   const logoutText = locale === 'es' ? 'Cerrar sesión' : 'Log out'
 
   const handleLogout = async () => {
