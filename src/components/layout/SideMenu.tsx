@@ -158,12 +158,12 @@ export default function SideMenu({
                 </li>
               </ul>
               {/* Mobile user actions */}
-              <ul className="md:hidden px-4 pt-6 flex flex-col gap-2">
-                <li>
+              <ul className="md:hidden px-4 pt-6 flex flex-col items-center gap-2">
+                <li className="w-full">
                   <Link
                     href="/activity"
                     onClick={onClose}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
+                    className="flex w-full items-center justify-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
                   >
                     <Image
                       src="/images/user/user-activity.png"
@@ -174,11 +174,11 @@ export default function SideMenu({
                     <span className="text-sm font-semibold">{activityText}</span>
                   </Link>
                 </li>
-                <li>
+                <li className="w-full">
                   <Link
                     href="/help"
                     onClick={onClose}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
+                    className="flex w-full items-center justify-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
                   >
                     <Image
                       src="/images/user/user-help.png"
@@ -189,11 +189,11 @@ export default function SideMenu({
                     <span className="text-sm font-semibold">{helpText}</span>
                   </Link>
                 </li>
-                <li>
+                <li className="w-full">
                   <Link
                     href="/settings"
                     onClick={onClose}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
+                    className="flex w-full items-center justify-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition"
                   >
                     <Image
                       src="/images/user/user-settings.png"
@@ -204,13 +204,13 @@ export default function SideMenu({
                     <span className="text-sm font-semibold">{settingsText}</span>
                   </Link>
                 </li>
-                <li>
+                <li className="w-full">
                   <button
                     onClick={async () => {
                       await handleLogout()
                       onClose()
                     }}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 text-red-600 transition"
+                    className="flex w-full items-center justify-center gap-3 p-2 rounded-lg hover:bg-gray-100 text-red-600 transition"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -266,6 +266,17 @@ export default function SideMenu({
               </ul>
             </>
           )}
+
+          {/* Language toggle */}
+          <div className="mt-auto flex justify-center">
+            <button
+              type="button"
+              onClick={toggleLocale}
+              className="text-sm font-semibold"
+            >
+              {locale === 'es' ? 'ES' : 'EN'}
+            </button>
+          </div>
         </div>
       </div>
     </>
