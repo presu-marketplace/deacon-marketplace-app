@@ -145,7 +145,7 @@ export default function SideMenu({
                 </div>
               </div>
               <ul className="px-4 pt-6 font-semibold">
-                <li>
+                <li className="w-full">
                   <button
                     onClick={() => {
                       router.push(`/auth/register?role=pro&lang=${locale}`)
@@ -158,7 +158,7 @@ export default function SideMenu({
                 </li>
               </ul>
               {/* Mobile user actions */}
-              <ul className="md:hidden px-4 pt-6 flex flex-col items-center gap-2">
+              <ul className="md:hidden px-4 pt-6 flex flex-col gap-2 w-full">
                 <li className="w-full">
                   <Link
                     href="/activity"
@@ -252,7 +252,7 @@ export default function SideMenu({
                 {t.login}
               </button>
               <ul className="px-4 pt-6 font-semibold">
-                <li>
+                <li className="w-full">
                   <button
                     onClick={() => {
                       router.push(`/auth/register?role=pro&lang=${locale}`)
@@ -268,7 +268,7 @@ export default function SideMenu({
           )}
 
           {/* Language toggle */}
-          <div className="mt-auto flex justify-center">
+          <div className="mt-auto mb-8 flex justify-center">
             <button
               type="button"
               onClick={toggleLocale}
