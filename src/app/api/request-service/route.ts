@@ -81,10 +81,20 @@ export async function POST(request: Request) {
 
     const { data, files } = await parseBody(request)
     const {
-      service, nombre, email, telefono,
-      tipoPropiedad, cleaningType, frequency = [], direccion, localidad, mensaje, custom_service_text,
-      sistemas = [], lang = 'es', userId = '', deadline,
+      service,
+      tipoPropiedad,
+      cleaningType,
+      frequency = [],
+      direccion,
+      localidad,
+      mensaje,
+      custom_service_text,
+      sistemas = [],
+      lang = 'es',
+      userId = '',
+      deadline,
     } = data
+    let { nombre, email, telefono } = data
 
   const sanitize = (s: string) => s.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
   let cleanMensaje = sanitize(mensaje || '').slice(0, 300)
@@ -177,6 +187,25 @@ export async function POST(request: Request) {
     }
   }
 
+  // 4b) Fetch profile details for authenticated users
+  if (user_id) {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, phone')
+        .eq('id', user_id)
+        .single()
+      if (!nombre && profile?.full_name) nombre = profile.full_name
+      if (!telefono && profile?.phone) telefono = profile.phone
+      if (!email) {
+        const { data: authUser } = await supabase.auth.admin.getUserById(user_id)
+        if (authUser?.user?.email) email = authUser.user.email
+      }
+    } catch (e) {
+      if (!isProd) console.error('Profile lookup error:', e)
+    }
+  }
+
   // 5) Build description + deadline
   const description =
     cleanMensaje ||
@@ -244,9 +273,25 @@ export async function POST(request: Request) {
     cid: 'presu-logo',
   })
 
-  const subject = lang === 'en' ? 'New service request' : 'Nueva solicitud de servicio'
-  const html = lang === 'en'
-    ? `
+  const isCustom = service === 'other'
+  const subject = isCustom
+    ? lang === 'en'
+      ? 'New service type request'
+      : 'Solicitud de nuevo tipo de servicio'
+    : lang === 'en'
+      ? 'New service request'
+      : 'Nueva solicitud de servicio'
+  const heading = isCustom
+    ? lang === 'en'
+      ? 'New Service Type Request'
+      : 'Solicitud de Nuevo Tipo de Servicio'
+    : lang === 'en'
+      ? 'New Service Request'
+      : 'Nueva Solicitud de Servicio'
+  const contactRows = nombre || email || telefono
+    ? `${nombre ? `<tr><td style="font-weight:bold;padding:4px 0;">${lang === 'en' ? 'Name:' : 'Nombre:'}</td><td>${nombre}</td></tr>` : ''}${email ? `<tr><td style="font-weight:bold;padding:4px 0;">Email:</td><td>${email}</td></tr>` : ''}${telefono ? `<tr><td style="font-weight:bold;padding:4px 0;">${lang === 'en' ? 'Phone:' : 'Teléfono:'}</td><td>${telefono}</td></tr>` : ''}`
+    : `<tr><td style="padding:4px 0;" colspan="2">${lang === 'en' ? 'Anonymous user' : 'Usuario anónimo'}</td></tr>`
+  const html = `
       <div style="background-color:#f9f9f9;padding:20px;font-family:Arial,sans-serif;color:#333;">
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:auto;background:#ffffff;border-radius:8px;overflow:hidden;">
           <tr>
@@ -256,42 +301,14 @@ export async function POST(request: Request) {
           </tr>
           <tr>
             <td style="padding:20px;text-align:center;">
-              <h2 style="margin:0;font-size:20px;">New Service Request</h2>
+              <h2 style="margin:0;font-size:20px;">${heading}</h2>
               <p style="margin:10px 0 0;">${description || ''}</p>
             </td>
           </tr>
           <tr>
             <td style="padding:0 20px 20px;">
               <table width="100%" cellpadding="0" cellspacing="0">
-                <tr><td style="font-weight:bold;padding:4px 0;">Name:</td><td>${nombre || ''}</td></tr>
-                <tr><td style="font-weight:bold;padding:4px 0;">Email:</td><td>${email || ''}</td></tr>
-                <tr><td style="font-weight:bold;padding:4px 0;">Phone:</td><td>${telefono || ''}</td></tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </div>
-    `
-    : `
-      <div style="background-color:#f9f9f9;padding:20px;font-family:Arial,sans-serif;color:#333;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:auto;background:#ffffff;border-radius:8px;overflow:hidden;">
-          <tr>
-            <td style="text-align:center;padding:20px 20px 0;">
-              <img src="cid:presu-logo" alt="PRESU" style="height:60px"/>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:20px;text-align:center;">
-              <h2 style="margin:0;font-size:20px;">Nueva Solicitud de Servicio</h2>
-              <p style="margin:10px 0 0;">${description || ''}</p>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:0 20px 20px;">
-              <table width="100%" cellpadding="0" cellspacing="0">
-                <tr><td style="font-weight:bold;padding:4px 0;">Nombre:</td><td>${nombre || ''}</td></tr>
-                <tr><td style="font-weight:bold;padding:4px 0;">Email:</td><td>${email || ''}</td></tr>
-                <tr><td style="font-weight:bold;padding:4px 0;">Teléfono:</td><td>${telefono || ''}</td></tr>
+                ${contactRows}
               </table>
             </td>
           </tr>

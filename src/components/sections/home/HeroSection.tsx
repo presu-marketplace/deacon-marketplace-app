@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { Service, upcomingServices, serviceOrder } from '@/lib/serviceCatalog'
+import useUser from '@/features/auth/useUser'
 
 const heroImages = [
   '/images/hero-section/card-01.jpg',
@@ -29,6 +30,10 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
   const [customError, setCustomError] = useState('')
   const [showCustomModal, setShowCustomModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { user } = useUser()
+  const [nombre, setNombre] = useState('')
+  const [email, setEmail] = useState('')
+  const [telefono, setTelefono] = useState('')
   const router = useRouter()
   const searchInputRef = useRef<HTMLInputElement>(null)
   const touchStartRef = useRef<number | null>(null)
@@ -40,6 +45,21 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
     }, 4000)
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    if (!user) return
+    if (user.email) setEmail(user.email)
+    const loadProfile = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('full_name, phone')
+        .eq('id', user.id)
+        .single()
+      if (data?.full_name) setNombre(data.full_name)
+      if (data?.phone) setTelefono(data.phone)
+    }
+    loadProfile()
+  }, [user])
 
   const loadServices = useCallback(async () => {
     if (services.length === 0) {
@@ -147,14 +167,19 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
     setCustomError('')
     setIsSubmitting(true)
     try {
+      const payload: Record<string, unknown> = {
+        service: 'other',
+        custom_service_text: text,
+        lang: locale,
+      }
+      if (user?.id) payload.userId = user.id
+      if (nombre) payload.nombre = nombre
+      if (email) payload.email = email
+      if (telefono) payload.telefono = telefono
       await fetch('/api/request-service', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          service: 'other',
-          custom_service_text: text,
-          lang: locale,
-        }),
+        body: JSON.stringify(payload),
       })
       setShowCustomModal(false)
       setCustomServiceText('')
