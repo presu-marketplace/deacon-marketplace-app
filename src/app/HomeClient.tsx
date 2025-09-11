@@ -52,7 +52,7 @@ export default function HomeClient() {
       copyright: 'All rights reserved.',
       heroHeadline: 'Choose smarter, save more.',
       tagline:
-        'At Presu we connect companies with suppliers, offering multiple quotes in one place: easy, fast and transparent.',
+        'At Presu we connect companies with suppliers, offering multiple quotes in one place: easy, fast, transparent, and free.',
       easy: 'Easy',
       fast: 'Fast',
       transparent: 'Transparent',
@@ -81,7 +81,7 @@ export default function HomeClient() {
       copyright: 'Todos los derechos reservados.',
       heroHeadline: 'Elegí mejor, ahorrá más.',
       tagline:
-        'En Presu conectamos empresas con proveedores, ofreciendo múltiples presupuestos en un solo lugar: fácil, rápido y transparente.',
+        'En Presu conectamos empresas con proveedores, ofreciendo múltiples presupuestos en un solo lugar: fácil, rápido, transparente y gratis.',
       easy: 'Fácil',
       fast: 'Rápido',
       transparent: 'Transparente',
