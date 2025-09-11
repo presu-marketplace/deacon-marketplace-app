@@ -326,14 +326,6 @@ export default function ServiceFormClient({ service }: Props) {
     if (invoiceError) return
     setError('')
     const sanitized = mensaje.replace(/<[^>]*>/g, '').trim().slice(0, 300)
-    if (service === 'other' && sanitized.length < 10) {
-      setError(
-        locale === 'es'
-          ? 'Contanos qué necesitás (mín. 10 caracteres)'
-          : 'Tell us what you need (min 10 chars)'
-      )
-      return
-    }
     const formData = new FormData()
     formData.append('service', service)
     formData.append('nombre', nombre)
@@ -345,9 +337,6 @@ export default function ServiceFormClient({ service }: Props) {
     formData.append('direccion', direccion)
     formData.append('localidad', localidad)
     formData.append('mensaje', sanitized)
-    if (service === 'other') {
-      formData.append('custom_service_text', sanitized)
-    }
     formData.append('sistemas', JSON.stringify(sistemas))
     formData.append('lang', locale)
     if (user?.id) {
