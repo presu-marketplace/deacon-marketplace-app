@@ -22,8 +22,11 @@ interface HeroProps {
 export default function HeroSection({ t, userAddress, locale }: HeroProps) {
   const [currentImage, setCurrentImage] = useState(0)
   const [searchTerm, setSearchTerm] = useState('')
-  const [services, setServices] = useState<Service[]>([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
+    const [services, setServices] = useState<Service[]>([])
+    const [showSuggestions, setShowSuggestions] = useState(false)
+    const [selectedServiceSlug, setSelectedServiceSlug] = useState<string | null>(null)
+    const [customServiceText, setCustomServiceText] = useState('')
+    const [customError, setCustomError] = useState('')
   const router = useRouter()
   const searchInputRef = useRef<HTMLInputElement>(null)
   const touchStartRef = useRef<number | null>(null)
@@ -63,6 +66,23 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
   }, [loadServices])
 
   const handleSearch = async () => {
+    if (selectedServiceSlug === 'other') {
+      const text = customServiceText.replace(/<[^>]*>/g, '').trim().slice(0, 300)
+      if (text.length < 10) {
+        setCustomError(
+          locale === 'es'
+            ? 'Contanos qué necesitás (mín. 10 caracteres)'
+            : 'Tell us what you need (min 10 chars)'
+        )
+        return
+      }
+      setCustomError('')
+      const params = new URLSearchParams()
+      params.set('lang', locale)
+      params.set('custom', text)
+      router.push(`/services/other?${params.toString()}`)
+      return
+    }
     await loadServices()
     setShowSuggestions(false)
     const match = services.find(
@@ -85,17 +105,37 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
     router.push(`/services?${params.toString()}`)
   }
 
-  const filteredServices = showSuggestions
-    ? services.filter((s) =>
-        (locale === 'es' ? s.name_es : s.name_en)
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-      )
-    : []
+    const filteredServices = showSuggestions
+      ? services.filter((s) =>
+          (locale === 'es' ? s.name_es : s.name_en)
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase())
+        )
+      : []
+
+    const suggestions = showSuggestions
+      ? [
+          ...filteredServices,
+          {
+            slug: 'other',
+            name_es: 'Otros servicios…',
+            name_en: 'Other services…',
+            image_url: '',
+            disabled: false,
+          } as Service,
+        ]
+      : []
 
   const handleSelect = (s: Service) => {
     const name = locale === 'es' ? s.name_es : s.name_en
+    if (s.slug === 'other') {
+      setSelectedServiceSlug('other')
+      setSearchTerm(name)
+      setShowSuggestions(false)
+      return
+    }
     setSearchTerm(name)
+    setSelectedServiceSlug(s.slug)
     setShowSuggestions(false)
     if (s.disabled) {
       router.push(`/services?lang=${locale}`)
@@ -129,12 +169,12 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
   }
 
   const renderSuggestions = () =>
-    filteredServices.length > 0 && (
+    suggestions.length > 0 && (
       <ul
         onMouseDown={(e) => e.preventDefault()}
         className="absolute top-full left-0 right-0 mt-1 max-h-[7.5rem] overflow-y-auto z-50 bg-white border border-gray-200 rounded-md shadow-lg divide-y divide-gray-100"
       >
-        {filteredServices.map((s) => {
+        {suggestions.map((s) => {
           const name = locale === 'es' ? s.name_es : s.name_en
           return (
             <li
@@ -189,8 +229,8 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
           </h1>
 
           {/* Mobile layout */}
-          <div className="w-full mt-8 flex flex-col sm:hidden items-center gap-3">
-            <div className="relative flex items-center bg-white rounded-full px-4 py-2 shadow w-full">
+            <div className="w-full mt-8 flex flex-col sm:hidden items-center gap-3">
+              <div className="relative flex items-center bg-white rounded-full px-4 py-2 shadow w-full">
               <button
                 type="button"
                 onClick={handleIconClick}
@@ -214,10 +254,11 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                 className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
                 value={searchTerm}
                 onFocus={() => setShowSuggestions(true)}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value)
-                  setShowSuggestions(true)
-                }}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value)
+                    setSelectedServiceSlug(null)
+                    setShowSuggestions(true)
+                  }}
                 onBlur={() => setShowSuggestions(false)}
                 onKeyDown={(e) => {
                   if (e.key === 'Escape') {
@@ -226,21 +267,38 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                   }
                 }}
               />
-              <button className="ml-2 p-2 rounded-full hover:bg-gray-100 transition">
+                <button className="ml-2 p-2 rounded-full hover:bg-gray-100 transition">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-500" viewBox="0 0 256 256" fill="currentColor">
                   <path d="M128 16A88.1 88.1 0 0 0 40 104c0 66.14 80.18 131.39 83.6 134a8 8 0 0 0 8.8 0C135.82 235.39 216 170.14 216 104A88.1 88.1 0 0 0 128 16Zm0 112a24 24 0 1 1 24-24 24 24 0 0 1-24 24Z" />
                 </svg>
               </button>
-              {renderSuggestions()}
+                {renderSuggestions()}
+              </div>
+              {selectedServiceSlug === 'other' && (
+                <div className="w-full">
+                  <input
+                    type="text"
+                    value={customServiceText}
+                    onChange={(e) => {
+                      setCustomServiceText(e.target.value)
+                      setCustomError('')
+                    }}
+                    placeholder={t.tellUs}
+                    className="w-full text-sm text-gray-800 bg-white rounded-full px-4 py-2 border border-gray-300 focus:outline-none"
+                  />
+                  {customError && (
+                    <p className="mt-1 text-xs text-red-500">{customError}</p>
+                  )}
+                </div>
+              )}
+              <button onClick={handleSearch} className="w-full bg-black text-white rounded-full px-6 py-2 text-sm font-medium shadow hover:bg-gray-900 transition">
+                {t.searchHere}
+              </button>
             </div>
-            <button onClick={handleSearch} className="w-full bg-black text-white rounded-full px-6 py-2 text-sm font-medium shadow hover:bg-gray-900 transition">
-              {t.searchHere}
-            </button>
-          </div>
 
           {/* Desktop layout */}
-          <div className="hidden sm:flex w-full flex-row justify-center cursor-pointer items-center gap-4 mt-8">
-            <div className="relative flex items-center bg-white rounded-full px-4 py-3 shadow w-full max-w-md">
+            <div className="hidden sm:flex w-full flex-row justify-center cursor-pointer items-center gap-4 mt-8">
+              <div className="relative flex items-center bg-white rounded-full px-4 py-3 shadow w-full max-w-md">
               <button
                 type="button"
                 onClick={handleIconClick}
@@ -264,10 +322,11 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                 className="flex-1 text-sm text-gray-800 bg-transparent focus:outline-none"
                 value={searchTerm}
                 onFocus={() => setShowSuggestions(true)}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value)
-                  setShowSuggestions(true)
-                }}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value)
+                    setSelectedServiceSlug(null)
+                    setShowSuggestions(true)
+                  }}
                 onBlur={() => setShowSuggestions(false)}
                 onKeyDown={(e) => {
                   if (e.key === 'Escape') {
@@ -276,18 +335,35 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                   }
                 }}
               />
-              {renderSuggestions()}
-            </div>
-            <button className="bg-white rounded-full px-5 py-3 shadow text-sm flex items-center gap-2">
+                {renderSuggestions()}
+              </div>
+              <button className="bg-white rounded-full px-5 py-3 shadow text-sm flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-500" viewBox="0 0 256 256" fill="currentColor">
                 <path d="M128 16A88.1 88.1 0 0 0 40 104c0 66.14 80.18 131.39 83.6 134a8 8 0 0 0 8.8 0C135.82 235.39 216 170.14 216 104A88.1 88.1 0 0 0 128 16Zm0 112a24 24 0 1 1 24-24 24 24 0 0 1-24 24Z" />
               </svg>
               <span className="text-gray-700 truncate max-w-[180px]">{userAddress ?? t.location}</span>
             </button>
-            <button onClick={handleSearch} className="flex-shrink-0 whitespace-nowrap bg-black text-white rounded-full px-6 py-3 text-sm font-medium shadow hover:bg-gray-900 transition">
-              {t.searchHere}
-            </button>
-          </div>
+              <button onClick={handleSearch} className="flex-shrink-0 whitespace-nowrap bg-black text-white rounded-full px-6 py-3 text-sm font-medium shadow hover:bg-gray-900 transition">
+                {t.searchHere}
+              </button>
+            </div>
+            {selectedServiceSlug === 'other' && (
+              <div className="hidden sm:block w-full max-w-md mx-auto mt-4">
+                <input
+                  type="text"
+                  value={customServiceText}
+                  onChange={(e) => {
+                    setCustomServiceText(e.target.value)
+                    setCustomError('')
+                  }}
+                  placeholder={t.tellUs}
+                  className="w-full text-sm text-gray-800 bg-white rounded-full px-4 py-2 border border-gray-300 focus:outline-none"
+                />
+                {customError && (
+                  <p className="mt-1 text-xs text-red-500">{customError}</p>
+                )}
+              </div>
+            )}
         </div>
       </div>
     </section>

@@ -199,6 +199,7 @@ export default function ServiceFormClient({ service }: Props) {
   const router = useRouter()
   const [locale, setLocale] = useState<'es' | 'en'>('es')
   const langParam = searchParams.get('lang')
+  const customParam = searchParams.get('custom')
 
   useEffect(() => {
     if (langParam === 'es' || langParam === 'en') {
@@ -223,7 +224,9 @@ export default function ServiceFormClient({ service }: Props) {
   const [frequency, setFrequency] = useState<string[]>([])
   const [direccion, setDireccion] = useState('')
   const [localidad, setLocalidad] = useState('')
-  const [mensaje, setMensaje] = useState('')
+  const [mensaje, setMensaje] = useState(
+    customParam ? customParam.replace(/<[^>]*>/g, '').slice(0, 300) : ''
+  )
   const [sistemas, setSistemas] = useState<string[]>([])
   const [invoices, setInvoices] = useState<File[]>([])
   const [invoiceError, setInvoiceError] = useState('')
@@ -322,6 +325,15 @@ export default function ServiceFormClient({ service }: Props) {
     e.preventDefault()
     if (invoiceError) return
     setError('')
+    const sanitized = mensaje.replace(/<[^>]*>/g, '').trim().slice(0, 300)
+    if (service === 'other' && sanitized.length < 10) {
+      setError(
+        locale === 'es'
+          ? 'Contanos qué necesitás (mín. 10 caracteres)'
+          : 'Tell us what you need (min 10 chars)'
+      )
+      return
+    }
     const formData = new FormData()
     formData.append('service', service)
     formData.append('nombre', nombre)
@@ -332,7 +344,10 @@ export default function ServiceFormClient({ service }: Props) {
     formData.append('frequency', JSON.stringify(frequency))
     formData.append('direccion', direccion)
     formData.append('localidad', localidad)
-    formData.append('mensaje', mensaje)
+    formData.append('mensaje', sanitized)
+    if (service === 'other') {
+      formData.append('custom_service_text', sanitized)
+    }
     formData.append('sistemas', JSON.stringify(sistemas))
     formData.append('lang', locale)
     if (user?.id) {
