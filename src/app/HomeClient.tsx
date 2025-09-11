@@ -68,6 +68,8 @@ export default function HomeClient() {
       changeLocation: 'Change',
       otherServices: 'Other services…',
       tellUs: 'Tell us what you need',
+      send: 'Send',
+      cancel: 'Cancel',
     },
     es: {
       howItWorks: 'Cómo funciona',
@@ -99,6 +101,8 @@ export default function HomeClient() {
       changeLocation: 'Cambiar',
       otherServices: 'Otros servicios…',
       tellUs: 'Contanos qué necesitás',
+      send: 'Enviar',
+      cancel: 'Cancelar',
     }
   }[locale]
 

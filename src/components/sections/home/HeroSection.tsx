@@ -22,11 +22,13 @@ interface HeroProps {
 export default function HeroSection({ t, userAddress, locale }: HeroProps) {
   const [currentImage, setCurrentImage] = useState(0)
   const [searchTerm, setSearchTerm] = useState('')
-    const [services, setServices] = useState<Service[]>([])
-    const [showSuggestions, setShowSuggestions] = useState(false)
-    const [selectedServiceSlug, setSelectedServiceSlug] = useState<string | null>(null)
-    const [customServiceText, setCustomServiceText] = useState('')
-    const [customError, setCustomError] = useState('')
+  const [services, setServices] = useState<Service[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [selectedServiceSlug, setSelectedServiceSlug] = useState<string | null>(null)
+  const [customServiceText, setCustomServiceText] = useState('')
+  const [customError, setCustomError] = useState('')
+  const [showCustomModal, setShowCustomModal] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
   const searchInputRef = useRef<HTMLInputElement>(null)
   const touchStartRef = useRef<number | null>(null)
@@ -67,20 +69,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
 
   const handleSearch = async () => {
     if (selectedServiceSlug === 'other') {
-      const text = customServiceText.replace(/<[^>]*>/g, '').trim().slice(0, 300)
-      if (text.length < 10) {
-        setCustomError(
-          locale === 'es'
-            ? 'Contanos qué necesitás (mín. 10 caracteres)'
-            : 'Tell us what you need (min 10 chars)'
-        )
-        return
-      }
-      setCustomError('')
-      const params = new URLSearchParams()
-      params.set('lang', locale)
-      params.set('custom', text)
-      router.push(`/services/other?${params.toString()}`)
+      setShowCustomModal(true)
       return
     }
     await loadServices()
@@ -132,6 +121,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
       setSelectedServiceSlug('other')
       setSearchTerm(name)
       setShowSuggestions(false)
+      setShowCustomModal(true)
       return
     }
     setSearchTerm(name)
@@ -141,6 +131,42 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
       router.push(`/services?lang=${locale}`)
     } else {
       router.push(`/services/${s.slug}?lang=${locale}`)
+    }
+  }
+
+  const handleCustomSubmit = async () => {
+    const text = customServiceText.replace(/<[^>]*>/g, '').trim().slice(0, 300)
+    if (text.length < 10) {
+      setCustomError(
+        locale === 'es'
+          ? 'Contanos qué necesitás (mín. 10 caracteres)'
+          : 'Tell us what you need (min 10 chars)'
+      )
+      return
+    }
+    setCustomError('')
+    setIsSubmitting(true)
+    try {
+      await fetch('/api/request-service', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service: 'other',
+          custom_service_text: text,
+          lang: locale,
+        }),
+      })
+      setShowCustomModal(false)
+      setCustomServiceText('')
+      setSelectedServiceSlug(null)
+    } catch {
+      setCustomError(
+        locale === 'es'
+          ? 'Ocurrió un error. Intentá nuevamente.'
+          : 'There was an error. Please try again.'
+      )
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -274,23 +300,6 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
               </button>
                 {renderSuggestions()}
               </div>
-              {selectedServiceSlug === 'other' && (
-                <div className="w-full">
-                  <input
-                    type="text"
-                    value={customServiceText}
-                    onChange={(e) => {
-                      setCustomServiceText(e.target.value)
-                      setCustomError('')
-                    }}
-                    placeholder={t.tellUs}
-                    className="w-full text-sm text-gray-800 bg-white rounded-full px-4 py-2 border border-gray-300 focus:outline-none"
-                  />
-                  {customError && (
-                    <p className="mt-1 text-xs text-red-500">{customError}</p>
-                  )}
-                </div>
-              )}
               <button onClick={handleSearch} className="w-full bg-black text-white rounded-full px-6 py-2 text-sm font-medium shadow hover:bg-gray-900 transition">
                 {t.searchHere}
               </button>
@@ -347,25 +356,45 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
                 {t.searchHere}
               </button>
             </div>
-            {selectedServiceSlug === 'other' && (
-              <div className="hidden sm:block w-full max-w-md mx-auto mt-4">
-                <input
-                  type="text"
-                  value={customServiceText}
-                  onChange={(e) => {
-                    setCustomServiceText(e.target.value)
-                    setCustomError('')
-                  }}
-                  placeholder={t.tellUs}
-                  className="w-full text-sm text-gray-800 bg-white rounded-full px-4 py-2 border border-gray-300 focus:outline-none"
-                />
-                {customError && (
-                  <p className="mt-1 text-xs text-red-500">{customError}</p>
-                )}
-              </div>
-            )}
         </div>
       </div>
+      {showCustomModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-sm shadow">
+            <input
+              type="text"
+              value={customServiceText}
+              onChange={(e) => {
+                setCustomServiceText(e.target.value)
+                setCustomError('')
+              }}
+              placeholder={t.tellUs}
+              className="w-full text-sm text-gray-800 bg-white rounded-md px-3 py-2 border border-gray-300 focus:outline-none"
+            />
+            {customError && (
+              <p className="mt-2 text-xs text-red-500">{customError}</p>
+            )}
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={() => {
+                  setShowCustomModal(false)
+                  setCustomError('')
+                }}
+                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded"
+              >
+                {t.cancel}
+              </button>
+              <button
+                onClick={handleCustomSubmit}
+                disabled={isSubmitting}
+                className="px-4 py-2 text-sm bg-black text-white rounded hover:bg-gray-900 disabled:opacity-50"
+              >
+                {t.send}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
