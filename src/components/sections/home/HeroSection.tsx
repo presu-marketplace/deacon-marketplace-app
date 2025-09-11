@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { Service, upcomingServices, serviceOrder } from '@/lib/serviceCatalog'
-import useUser from '@/features/auth/useUser'
+import useUser from "@/features/auth/useUser"
 
 const heroImages = [
   '/images/hero-section/card-01.jpg',
@@ -30,7 +30,7 @@ export default function HeroSection({ t, userAddress, locale }: HeroProps) {
   const [customError, setCustomError] = useState('')
   const [showCustomModal, setShowCustomModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { user } = useUser()
+  const user = useUser();
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [telefono, setTelefono] = useState('')
