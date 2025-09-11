@@ -10,19 +10,20 @@ export const maxDuration = 60
 
 const isProd = process.env.NODE_ENV === 'production'
 
-type JsonBody = {
-  service?: string
-  nombre?: string
-  email?: string
-  telefono?: string
+  type JsonBody = {
+    service?: string
+    nombre?: string
+    email?: string
+    telefono?: string
   tipoPropiedad?: string
   cleaningType?: string
   frequency?: string[]
   direccion?: string
   localidad?: string
-  mensaje?: string
-  sistemas?: unknown[]
-  lang?: 'es' | 'en'
+    mensaje?: string
+    sistemas?: unknown[]
+    custom_service_text?: string
+    lang?: 'es' | 'en'
   userId?: string
   deadline?: string // yyyy-mm-dd
 }
@@ -45,11 +46,12 @@ async function parseBody(req: Request) {
     frequency: JSON.parse(s(fd.get('frequency') || '[]')),
     direccion: s(fd.get('direccion')),
     localidad: s(fd.get('localidad')),
-    mensaje: s(fd.get('mensaje')),
-    sistemas: JSON.parse(s(fd.get('sistemas') || '[]')),
-    lang: (fd.get('lang') === 'en' ? 'en' : 'es') as 'es' | 'en',
-    userId: s(fd.get('userId')),
-    deadline: s(fd.get('deadline')),
+      mensaje: s(fd.get('mensaje')),
+      sistemas: JSON.parse(s(fd.get('sistemas') || '[]')),
+      custom_service_text: s(fd.get('custom_service_text')),
+      lang: (fd.get('lang') === 'en' ? 'en' : 'es') as 'es' | 'en',
+      userId: s(fd.get('userId')),
+      deadline: s(fd.get('deadline')),
   }
   const files = fd.getAll('invoices') as File[]
   return { data, files }
@@ -77,12 +79,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 })
   }
 
-  const { data, files } = await parseBody(request)
-  const {
-    service, nombre, email, telefono,
-    tipoPropiedad, cleaningType, frequency = [], direccion, localidad, mensaje,
-    sistemas = [], lang = 'es', userId = '', deadline,
-  } = data
+    const { data, files } = await parseBody(request)
+    const {
+      service, nombre, email, telefono,
+      tipoPropiedad, cleaningType, frequency = [], direccion, localidad, mensaje, custom_service_text,
+      sistemas = [], lang = 'es', userId = '', deadline,
+    } = data
+
+  const sanitize = (s: string) => s.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
+  let cleanMensaje = sanitize(mensaje || '').slice(0, 300)
+  const cleanCustom = sanitize(custom_service_text || '').slice(0, 300)
+  if (service === 'other') {
+    if (cleanCustom.length < 10) {
+      return NextResponse.json(
+        { error: 'custom_service_text too short' },
+        { status: 400 }
+      )
+    }
+    cleanMensaje = cleanCustom
+  }
 
   // 1) Validate files
   if (files.length > 3) return NextResponse.json({ error: 'Too many invoices' }, { status: 400 })
@@ -164,7 +179,7 @@ export async function POST(request: Request) {
 
   // 5) Build description + deadline
   const description =
-    (mensaje?.trim() || '') ||
+    cleanMensaje ||
     `[${service || 'Servicio'}] ${tipoPropiedad || ''} ${cleaningType || ''} ${Array.isArray(frequency) ? frequency.join('/') : ''} — ${direccion || ''} ${localidad || ''}`
       .replace(/\s+/g, ' ')
       .trim() || null
@@ -189,7 +204,7 @@ export async function POST(request: Request) {
     request_property_type: tipoPropiedad || null,
     request_cleaning_type: cleaningType || null,
     request_cleaning_frequency: Array.isArray(frequency) ? frequency.join('/') : null,
-    request_message: mensaje || null,
+    request_message: cleanMensaje || null,
     request_systems: sistemas,             // jsonb
     request_invoice_urls: invoiceUrls,     // text[]
   } as const

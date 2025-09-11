@@ -66,6 +66,8 @@ export default function HomeClient() {
       locationFallback: 'Your location',
       manualLocationPrompt: 'Enter your location:',
       changeLocation: 'Change',
+      otherServices: 'Other services…',
+      tellUs: 'Tell us what you need',
     },
     es: {
       howItWorks: 'Cómo funciona',
@@ -95,6 +97,8 @@ export default function HomeClient() {
       locationFallback: 'Tu ubicación',
       manualLocationPrompt: 'Ingresá tu ubicación:',
       changeLocation: 'Cambiar',
+      otherServices: 'Otros servicios…',
+      tellUs: 'Contanos qué necesitás',
     }
   }[locale]
 
