@@ -64,7 +64,7 @@ const translations = {
     message: 'Mensaje',
     messagePlaceholder: 'Escribe tu mensaje',
     invoices:
-      'Subí tu actual facturación',
+      'Subí tu actual facturación (Opcional)',
     invoicesHint: 'Archivos PDF',
     invoicesTooMany: 'Puedes subir hasta 3 facturas',
     invoicesTypeError: 'Solo se permiten archivos PDF',
@@ -123,7 +123,7 @@ const translations = {
     message: 'Message',
     messagePlaceholder: 'Write your message',
     invoices:
-      "Upload your current billing.",
+      "Upload your current billing (Optional)",
     invoicesHint: 'PDF files only',
     invoicesTooMany: 'You can upload up to 3 invoices',
     invoicesTypeError: 'Only PDF files are allowed',
