@@ -21,6 +21,8 @@ insert into reference.services (slug, name_es, name_en, rating, base_providers, 
   ('elevator-maintenance', 'Mantenimiento de ascensores', 'Elevator Maintenance', 4.5, 0, '/images/services/elevator_maintenance.jpg'),
   ('notary', 'Escribanía', 'Notary Services', 4.7, 0, '/images/services/notary.jpg'),
   ('community-manager', 'Community Manager', 'Community Manager', 4.5, 0, '/images/services/community.jpg'),
+  ('merchandising', 'Merchandising', 'Merchandising', 4.6, 0, '/images/services/merchandising.jpg'),
+  ('air', 'Aires acondicionados', 'Air Conditioning', 4.5, 0, '/images/services/air.jpg'),
   ('transfers', 'Traslados Ejecutivos', 'Executive Transfers', 4.8, 0, '/images/services/transfer.jpg'),
   ('kids-party-venues', 'Salones Infantiles', 'Kids Party Venues', 4.6, 0, '/images/services/kids-party.jpg')
 on conflict (slug) do update set
