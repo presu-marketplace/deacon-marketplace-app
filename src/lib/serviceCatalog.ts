@@ -16,6 +16,8 @@ export const serviceOrder = [
   'elevator-maintenance',
   'notary',
   'community-manager',
+  'merchandising',
+  'air',
   'transfers',
   'kids-party-venues',
 ];
@@ -26,13 +28,6 @@ export const upcomingServices: Service[] = [
     name_es: 'Auditoría',
     name_en: 'Auditing',
     image_url: '/images/services/auditing.jpg',
-    disabled: true,
-  },
-  {
-    slug: 'merchandising',
-    name_es: 'Merchandising',
-    name_en: 'Merchandising',
-    image_url: '/images/services/merchandising.jpg',
     disabled: true,
   },
   {
@@ -68,13 +63,6 @@ export const upcomingServices: Service[] = [
     name_es: 'Jardinería',
     name_en: 'Gardening',
     image_url: '/images/services/gardening.jpg',
-    disabled: true,
-  },
-  {
-    slug: 'air',
-    name_es: 'Aires acondicionados',
-    name_en: 'Air Conditioning',
-    image_url: '/images/services/air.jpg',
     disabled: true,
   },
   {

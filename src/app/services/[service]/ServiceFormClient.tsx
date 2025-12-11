@@ -174,6 +174,20 @@ const serviceInfo = {
     enDesc: 'Social media management for your brand.',
     image: '/images/services/community.jpg'
   },
+  merchandising: {
+    esName: 'Merchandising',
+    enName: 'Merchandising',
+    esDesc: 'Material POP y branding para potenciar tu marca.',
+    enDesc: 'Branded promotional materials to boost your brand.',
+    image: '/images/services/merchandising.jpg'
+  },
+  air: {
+    esName: 'Aires acondicionados',
+    enName: 'Air Conditioning',
+    esDesc: 'Instalación y mantenimiento de sistemas de climatización.',
+    enDesc: 'Installation and maintenance for air conditioning systems.',
+    image: '/images/services/air.jpg'
+  },
   'transfers': {
     esName: 'Traslados Ejecutivos',
     enName: 'Executive Transfers',
@@ -391,7 +405,7 @@ export default function ServiceFormClient({ service }: Props) {
       <Navbar locale={locale} toggleLocale={toggleLocale} t={navT} forceWhite />
       <main className="flex-grow pt-24 pb-24">
         {info.image && (
-          <div className="relative w-full h-48 md:h-64">
+          <div className="relative w-full h-48 sm:h-56 md:h-64 lg:h-72">
             <Image
               src={info.image}
               alt={locale === 'es' ? info.esName : info.enName}
