@@ -2,10 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: [
-      "lh3.googleusercontent.com",
-      "payeutapaokdwxqxesyz.supabase.co",
-    ], // 👈 Allow Google avatars and Supabase storage
+    remotePatterns: [
+      { hostname: "lh3.googleusercontent.com" },
+      { hostname: "payeutapaokdwxqxesyz.supabase.co" },
+    ],
+    qualities: [75, 100],
   },
 };
 
