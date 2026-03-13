@@ -68,6 +68,10 @@ export default function HelpClient() {
       locale === 'es'
         ? 'Todos los derechos reservados.'
         : 'All rights reserved.',
+    address:
+      locale === 'es'
+        ? 'Av. del Libertador 2442 4° Piso, B1636 Olivos, Provincia de Buenos Aires.'
+        : '2442 Del Libertador Ave., 4th Floor, B1636 Olivos, Buenos Aires Province.',
   }
 
   return (

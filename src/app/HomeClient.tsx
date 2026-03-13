@@ -50,6 +50,7 @@ export default function HomeClient() {
       accessibility: 'Accessibility Tools',
       footerNote: 'Do Not Sell or Share My Personal Information',
       copyright: 'All rights reserved.',
+      address: '2442 Del Libertador Ave., 4th Floor, B1636 Olivos, Buenos Aires Province.',
       heroHeadline: 'Choose smarter, save more.',
       tagline:
         'At Presu we connect companies with suppliers, offering multiple quotes in one place: easy, fast, transparent, and free.',
@@ -84,6 +85,7 @@ export default function HomeClient() {
       accessibility: 'Herramientas de accesibilidad',
       footerNote: 'No vender ni compartir mi información personal',
       copyright: 'Todos los derechos reservados.',
+      address: 'Av. del Libertador 2442 4° Piso, B1636 Olivos, Provincia de Buenos Aires.',
       heroHeadline: 'Elegí mejor, ahorrá más.',
       tagline:
         'En Presu conectamos empresas con proveedores, ofreciendo múltiples presupuestos en un solo lugar: fácil, rápido, transparente y gratis.',
