@@ -99,7 +99,7 @@ export default function Footer({ t, locale }: FooterProps) {
 
         {/* Address */}
         <a
-          href="https://maps.google.com/?q=Av.+del+Libertador+2442+4°+Piso,+Olivos,+Buenos+Aires"
+          href="https://www.google.com/maps/place/Presu/@-34.5079335,-58.4806396,19z/data=!3m1!4b1!4m6!3m5!1s0x95bcb1dff8530871:0xaab622d59e6d44f0!8m2!3d-34.5079335!4d-58.4799945!16s%2Fg%2F11n3nbx95p"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 mt-2"
